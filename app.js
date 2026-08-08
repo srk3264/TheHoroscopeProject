@@ -2,7 +2,7 @@
 // Replace these placeholders with your credentials from Phase 1 (Project Settings -> API)
 const SUPABASE_URL = 'https://omltsxprptctzmhvebla.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_raGNw8eXWxEANqBiwHjBXw_qG2DD8JT';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Sign Emoji Map
 const ZODIAC_EMOJIS = {
@@ -22,7 +22,7 @@ async function handleLogin() {
   const email = document.getElementById('email-input').value;
   if (!email) return alert('Please enter your email address.');
 
-  const { error } = await supabase.auth.signInWithOtp({ email });
+  const { error } = await supabaseClient.auth.signInWithOtp({ email });
   if (error) {
     alert('Error sending magic link: ' + error.message);
   } else {
@@ -31,7 +31,7 @@ async function handleLogin() {
 }
 
 async function handleLogout() {
-  await supabase.auth.signOut();
+  await supabaseClient.auth.signOut();
   showView('view-login');
 }
 
@@ -40,10 +40,10 @@ async function savePreferences() {
   const userSign = document.getElementById('user-sign').value;
   const partnerSign = document.getElementById('partner-sign').value;
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user } } = await supabaseClient.auth.getUser();
   if (!user) return alert('No active session found.');
 
-  const { error } = await supabase.from('profiles').update({
+  const { error } = await supabaseClient.from('profiles').update({
     user_sign: userSign,
     partner_sign: partnerSign
   }).eq('id', user.id);
@@ -113,13 +113,13 @@ function loadDashboard(userSign, partnerSign) {
 
 // 6. Application Initializer & Session Listener
 async function initApp() {
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { session } } = await supabaseClient.auth.getSession();
 
   if (!session) {
     showView('view-login');
   } else {
     // Fetch user profile
-    const { data: profile } = await supabase
+    const { data: profile } = await supabaseClient
       .from('profiles')
       .select('user_sign, partner_sign')
       .eq('id', session.user.id)
@@ -133,9 +133,9 @@ async function initApp() {
   }
 
   // Auth state change listener
-  supabase.auth.onAuthStateChange(async (event, session) => {
+  supabaseClient.auth.onAuthStateChange(async (event, session) => {
     if (event === 'SIGNED_IN' && session) {
-      const { data: profile } = await supabase
+      const { data: profile } = await supabaseClient
         .from('profiles')
         .select('user_sign, partner_sign')
         .eq('id', session.user.id)
