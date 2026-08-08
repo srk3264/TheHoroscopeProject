@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Astro Match</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Averia+Serif+Libre:wght@300;400&family=Inter:wght@400;500;600&family=Open+Sans:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Open Sans', sans-serif; background: #020202; color: white; display: flex; justify-content: center; min-height: 100vh; }
+    .view { display: none; width: 100%; max-width: 393px; }
+    .active { display: block; }
+
+    /* Auth & Onboarding Styling */
+    .auth-container { padding: 40px 22px; text-align: center; }
+    .auth-container input, .auth-container select { width: 100%; padding: 12px; margin: 12px 0; border-radius: 8px; border: none; font-size: 16px; }
+    .auth-container button { width: 100%; padding: 12px; border-radius: 999px; border: none; background: #1E87E8; color: white; font-weight: 600; font-size: 16px; cursor: pointer; }
+
+    /* Figma Layout Styles */
+    .figma-root { width: 100%; min-height: 100vh; position: relative; background: linear-gradient(180deg, #C7CED6 0%, #043963 50%, #020202 100%); overflow-x: hidden; }
+    .content-wrapper { padding: 52px 16px 100px 16px; display: flex; flex-direction: column; gap: 22px; }
+    .horizontal-scroll { display: flex; gap: 16px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; }
+    .horizontal-scroll::-webkit-scrollbar { display: none; }
+    .card-item { min-width: 200px; width: 200px; padding: 16px; background: rgba(255, 255, 255, 0.10); border-radius: 12px; display: flex; flex-direction: column; }
+    .action-card { padding: 24px 22px; border-radius: 12px; display: flex; flex-direction: column; gap: 32px; color: white; }
+    .bg-blue { background: linear-gradient(180deg, #1E87E8 0%, #1EE1E8 100%); }
+    .bg-orange { background: linear-gradient(180deg, #F26522 0%, #D63D00 100%); }
+    .pill-btn { padding: 12px; border-radius: 999px; border: 1px solid white; text-align: center; font-family: 'Inter', sans-serif; font-size: 13.3px; font-weight: 500; cursor: pointer; }
+    .chat-bar { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: calc(100% - 44px); max-width: 349px; padding: 16px 22px; background: #1C1C1C; border-radius: 100px; display: flex; justify-content: space-between; align-items: center; color: rgba(255, 255, 255, 0.60); font-size: 14px; }
+  </style>
+</head>
+<body>
+
+  <!-- 1. LOGIN VIEW -->
+  <div id="view-login" class="view active">
+    <div class="auth-container">
+      <h2 style="font-family: 'Averia Serif Libre', serif; font-size: 32px; margin-bottom: 24px;">Astro Match</h2>
+      <input type="email" id="email-input" placeholder="Enter your email" />
+      <button onclick="handleLogin()">Send Magic Link</button>
+    </div>
+  </div>
+
+  <!-- 2. ONBOARDING VIEW -->
+  <div id="view-onboarding" class="view">
+    <div class="auth-container">
+      <h2 style="font-family: 'Averia Serif Libre', serif; font-size: 28px; margin-bottom: 16px;">Select Signs</h2>
+      <label>Your Sign</label>
+      <select id="user-sign">
+        <option value="aries">Aries ♈</option>
+        <option value="taurus">Taurus ♉</option>
+        <option value="gemini">Gemini ♊</option>
+        <option value="cancer">Cancer ♋</option>
+        <option value="leo">Leo ♌</option>
+        <option value="virgo">Virgo ♍</option>
+        <option value="libra">Libra ♎</option>
+        <option value="scorpio">Scorpio ♏</option>
+        <option value="sagittarius">Sagittarius ♐</option>
+        <option value="capricorn">Capricorn ♑</option>
+        <option value="aquarius">Aquarius ♒</option>
+        <option value="pisces">Pisces ♓</option>
+      </select>
+      <label style="margin-top: 12px; display: block;">Partner's Sign</label>
+      <select id="partner-sign">
+        <option value="aries">Aries ♈</option>
+        <option value="taurus">Taurus ♉</option>
+        <option value="gemini">Gemini ♊</option>
+        <option value="cancer">Cancer ♋</option>
+        <option value="leo">Leo ♌</option>
+        <option value="virgo">Virgo ♍</option>
+        <option value="libra">Libra ♎</option>
+        <option value="scorpio">Scorpio ♏</option>
+        <option value="sagittarius">Sagittarius ♐</option>
+        <option value="capricorn">Capricorn ♑</option>
+        <option value="aquarius">Aquarius ♒</option>
+        <option value="pisces">Pisces ♓</option>
+      </select>
+      <button onclick="savePreferences()" style="margin-top: 24px;">Save & View Reading</button>
+    </div>
+  </div>
+
+  <!-- 3. DASHBOARD VIEW (FIGMA LAYOUT) -->
+  <div id="view-dashboard" class="view">
+    <div class="figma-root">
+      <div class="content-wrapper">
+        
+        <!-- Header -->
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div id="current-day" style="font-family: 'Averia Serif Libre', serif; font-size: 24px;">Today</div>
+          <img style="width: 40px; height: 40px; border-radius: 21px; cursor: pointer;" src="https://placehold.co/40x40" onclick="handleLogout()" title="Sign Out" />
+        </div>
+
+        <!-- Avatars -->
+        <div style="display: flex; justify-content: center; align-items: center; gap: 16px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span>You</span>
+            <div style="width: 80px; height: 80px; background: rgba(255, 255, 255, 0.2); border-radius: 100px; outline: 2px white solid; display: flex; justify-content: center; align-items: center;">
+              <span id="user-emoji" style="font-size: 40px; color: black;">♎</span>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="width: 80px; height: 80px; background: rgba(255, 255, 255, 0.2); border-radius: 100px; outline: 2px white solid; display: flex; justify-content: center; align-items: center;">
+              <span id="partner-emoji" style="font-size: 40px; color: black;">♌</span>
+            </div>
+            <span id="partner-label">Partner</span>
+          </div>
+        </div>
+
+        <!-- Horizontal Cards (Wear, Binge, Cook, Vibe) -->
+        <div id="quick-insights-container" class="horizontal-scroll">
+          <!-- Dynamically populated from JS -->
+        </div>
+
+        <!-- Action Items (#1/2, #2/2) -->
+        <div id="actions-container" style="display: flex; flex-direction: column; gap: 16px;">
+          <!-- Dynamically populated from JS -->
+        </div>
+
+      </div>
+
+      <!-- Bottom Query Bar -->
+      <div class="chat-bar">
+        <span>What’s happening today?</span>
+        <div style="width: 13px; height: 13px; border: 2px solid rgba(255, 255, 255, 0.60);"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
