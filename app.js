@@ -125,57 +125,9 @@ function getLocalDateString() {
   return `${year}-${month}-${day}`;
 }
 
-async function getHoroscope(sign) {
-  const today = getLocalDateString(); // e.g. "2026-08-09"
-  const normalizedSign = sign.toLowerCase().trim();
 
-  console.log(`[Cache Check] Querying Supabase for sign: "${normalizedSign}", date: "${today}"`);
 
-  // 1. Check Supabase cache
-  let { data, error } = await supabaseClient
-    .from('daily_horoscopes')
-    .select('*')
-    .eq('sign', normalizedSign)
-    .eq('date', today)
-    .maybeSingle();
 
-  if (error) {
-    console.error('[Cache Error] Supabase query failed:', error);
-  }
-
-  if (data) {
-    console.log('[Cache Hit] Found existing horoscope in database:', data);
-    return data.raw_data;
-  }
-
-  console.warn(`[Cache Miss] No record found for ${normalizedSign} on ${today}. Triggering sync function...`);
-
-  // 2. If missing, trigger Netlify function
-  const res = await fetch('/.netlify/functions/sync-horoscopes');
-  if (!res.ok) {
-    const errText = await res.text();
-    console.error('Failed to trigger sync function:', errText);
-    return null;
-  }
-
-  // 3. Re-query Supabase
-  const { data: syncedData } = await supabaseClient
-    .from('daily_horoscopes')
-    .select('raw_data')
-    .eq('sign', normalizedSign)
-    .eq('date', today)
-    .maybeSingle();
-
-  if (!syncedData) {
-    console.error(`[Sync Failed] Netlify function ran, but no row was inserted into daily_horoscopes for ${normalizedSign} on ${today}! Check your Netlify function code.`);
-  } else {
-    console.log('[Sync Success] Found freshly synced data in Supabase.');
-  }
-
-  return syncedData?.raw_data;
-}
-
-/*
 // Helper to fetch horoscope with on-demand fallback
 async function getHoroscope(sign) {
   const today = getLocalDateString();
@@ -211,7 +163,6 @@ async function getHoroscope(sign) {
 
   return data?.raw_data;
 }
-*/
 
 // Updated loadDashboard using cached/synced horoscope data
 async function loadDashboard(userSign, partnerSign) {
