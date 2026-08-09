@@ -116,9 +116,18 @@ if (currentDateEl) {
   }
 }
 
+// Helper to get local YYYY-MM-DD date string
+function getLocalDateString() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 // Helper to fetch horoscope with on-demand fallback
 async function getHoroscope(sign) {
-  const today = new Date().toISOString().split('T')[0];
+  const today = getLocalDateString();
 
   // 1. Check Supabase cache using .maybeSingle() instead of .single()
   let { data } = await supabaseClient
@@ -218,3 +227,33 @@ async function initApp() {
 
 // Boot application
 initApp();
+
+// Tracks the last date the dashboard was updated
+let lastFetchedDate = getLocalDateString();
+
+// Automatically refresh dashboard when returning to the tab on a new day
+document.addEventListener('visibilitychange', async () => {
+  // 1. Only run when the user brings the tab back into focus
+  if (document.visibilityState === 'visible') {
+    const currentDate = getLocalDateString();
+
+    // 2. Check if a new day has started since the last fetch
+    if (currentDate !== lastFetchedDate) {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+
+      if (session) {
+        const { data: profile } = await supabaseClient
+          .from('profiles')
+          .select('user_sign, partner_sign')
+          .eq('id', session.user.id)
+          .single();
+
+        if (profile?.user_sign && profile?.partner_sign) {
+          // 3. Update cached date and load new day's horoscopes
+          lastFetchedDate = currentDate;
+          loadDashboard(profile.user_sign, profile.partner_sign);
+        }
+      }
+    }
+  }
+});
