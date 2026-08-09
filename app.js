@@ -94,6 +94,11 @@ function renderDashboard(userSign, partnerSign, data) {
   `).join('');
 
   showView('view-dashboard');
+
+  // Parse and render all Lucide icons on the active screen
+  if (window.lucide) {
+    lucide.createIcons();
+  }
 }
 
 // Mock Data Load (Phase 2 Test Harness)
@@ -147,13 +152,8 @@ async function initApp() {
       if (profile && profile.user_sign && profile.partner_sign) {
         loadDashboard(profile.user_sign, profile.partner_sign);
       } else {
-       showView('view-dashboard');
-  
-  // Render Lucide icons dynamically
-  if (typeof lucide !== 'undefined') {
-    lucide.createIcons();
-  }
-}
+        showView('view-onboarding');
+      }
     } else if (event === 'SIGNED_OUT') {
       showView('view-login');
     }
