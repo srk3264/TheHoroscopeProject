@@ -64,8 +64,23 @@ function renderDashboard(userSign, partnerSign, data) {
   document.getElementById('user-emoji').innerText = ZODIAC_EMOJIS[uKey] || '⚖️';
   document.getElementById('partner-emoji').innerText = ZODIAC_EMOJIS[pKey] || '🦁';
   
-  const today = new Date();
-  document.getElementById('current-day').innerText = today.toLocaleDateString('en-US', { weekday: 'short' });
+  const now = new Date();
+
+// Updates top-left day (e.g., "Sat")
+const currentDayEl = document.getElementById('current-day');
+if (currentDayEl) {
+  currentDayEl.innerText = now.toLocaleDateString('en-US', { weekday: 'short' });
+}
+
+// Updates top-left full date heading (e.g., "Saturday, Aug 8")
+const currentDateEl = document.getElementById('current-date');
+if (currentDateEl) {
+  currentDateEl.innerText = now.toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'short',
+    day: 'numeric'
+  });
+}
 
 // Render Horizontal Cards (Wear, Binge, Cook, Vibe)
   const quickContainer = document.getElementById('quick-insights-container');
