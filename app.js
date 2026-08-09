@@ -150,7 +150,7 @@ async function initApp() {
        showView('view-dashboard');
   
   // Render Lucide icons dynamically
-  if (window.lucide) {
+  if (typeof lucide !== 'undefined') {
     lucide.createIcons();
   }
 }
