@@ -147,8 +147,13 @@ async function initApp() {
       if (profile && profile.user_sign && profile.partner_sign) {
         loadDashboard(profile.user_sign, profile.partner_sign);
       } else {
-        showView('view-onboarding');
-      }
+       showView('view-dashboard');
+  
+  // Render Lucide icons dynamically
+  if (window.lucide) {
+    lucide.createIcons();
+  }
+}
     } else if (event === 'SIGNED_OUT') {
       showView('view-login');
     }
