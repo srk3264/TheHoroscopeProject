@@ -118,27 +118,33 @@ if (currentDateEl) {
 
 // Helper to fetch horoscope with on-demand fallback
 async function getHoroscope(sign) {
-  const today = new Date().toISOString().split('T')[0]; // "YYYY-MM-DD"
+  const today = new Date().toISOString().split('T')[0];
 
-  // 1. Check Supabase cache
+  // 1. Check Supabase cache using .maybeSingle() instead of .single()
   let { data } = await supabaseClient
     .from('daily_horoscopes')
     .select('raw_data')
     .eq('sign', sign.toLowerCase())
     .eq('date', today)
-    .single();
+    .maybeSingle(); // Prevents 406 error on empty cache
 
-  // 2. If missing, trigger Netlify function on demand
+  // 2. If missing, trigger Netlify function
   if (!data) {
-    await fetch('/.netlify/functions/sync-horoscopes');
+    const res = await fetch('/.netlify/functions/sync-horoscopes');
+    
+    if (!res.ok) {
+      const errText = await res.text();
+      console.error('Failed to trigger sync function:', errText);
+      return null;
+    }
 
-    // 3. Re-query Supabase for synced data
+    // 3. Re-query Supabase
     const { data: syncedData } = await supabaseClient
       .from('daily_horoscopes')
       .select('raw_data')
       .eq('sign', sign.toLowerCase())
       .eq('date', today)
-      .single();
+      .maybeSingle();
 
     data = syncedData;
   }
