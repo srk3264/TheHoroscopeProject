@@ -93,26 +93,22 @@
         </div>
 
         <!-- Avatars -->
-        <div style="width: 100%; display: inline-flex; justify-content: center; align-items: center;">
-          <!-- You Section -->
-          <div style="display: flex; justify-content: center; align-items: center; gap: 8px;">
-            <div style="text-align: center; color: white; font-size: 16px; font-family: 'Open Sans', sans-serif; font-weight: 400; margin-right: -16px; z-index: 2;">You</div>
-            <div style="width: 80px; height: 80px; background: white; background-blend-mode: soft-light; border-radius: 100px; outline: 2px white solid; outline-offset: -2px; justify-content: center; align-items: center; display: flex; z-index: 1;">
-              <div style="padding-bottom: 1px; flex-direction: column; justify-content: flex-start; align-items: center; display: inline-flex;">
-                <div id="user-emoji" style="text-align: center; color: black; font-size: 40px; font-family: 'Inter', sans-serif; font-weight: 400;">⚖</div>
-              </div>
+        <div style="width: 100%; display: flex; justify-content: center; align-items: center; gap: 12px; margin: 10px 0;">
+          <span style="color: white; font-size: 16px; font-family: 'Open Sans', sans-serif; font-weight: 400;">You</span>
+          
+          <div style="display: flex; align-items: center;">
+            <!-- Left Circle (User) -->
+            <div style="width: 80px; height: 80px; background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(8px); border-radius: 50%; border: 2px solid white; display: flex; justify-content: center; align-items: center; z-index: 2;">
+              <span id="user-emoji" style="font-size: 38px; line-height: 1;">⚖️</span>
+            </div>
+            
+            <!-- Right Circle (Partner) with Overlap & Dashed Border -->
+            <div style="width: 80px; height: 80px; background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(8px); border-radius: 50%; border: 2px dashed rgba(255, 255, 255, 0.7); display: flex; justify-content: center; align-items: center; margin-left: -24px; z-index: 1;">
+              <span id="partner-emoji" style="font-size: 38px; line-height: 1;">🦁</span>
             </div>
           </div>
 
-          <!-- Partner Section -->
-          <div style="display: flex; justify-content: center; align-items: center; gap: 8px;">
-            <div style="width: 80px; height: 80px; background: white; background-blend-mode: soft-light; border-radius: 100px; outline: 2px white solid; outline-offset: -2px; justify-content: center; align-items: center; display: flex; z-index: 1;">
-              <div style="padding-bottom: 1px; flex-direction: column; justify-content: flex-start; align-items: center; display: inline-flex;">
-                <div id="partner-emoji" style="text-align: center; color: black; font-size: 40px; font-family: 'Inter', sans-serif; font-weight: 400;">🦁</div>
-              </div>
-            </div>
-            <div id="partner-label" style="text-align: center; color: white; font-size: 16px; font-family: 'Open Sans', sans-serif; font-weight: 400; margin-left: -16px; z-index: 2;">Emma</div>
-          </div>
+          <span id="partner-label" style="color: white; font-size: 16px; font-family: 'Open Sans', sans-serif; font-weight: 400;">Emma</span>
         </div>
 
         <!-- Horizontal Cards (Wear, Binge, Cook, Vibe) -->
