@@ -116,9 +116,44 @@ if (currentDateEl) {
   }
 }
 
-// Mock Data Load (Phase 2 Test Harness)
-function loadDashboard(userSign, partnerSign) {
-  const mockInsight = {
+// Helper to fetch horoscope with on-demand fallback
+async function getHoroscope(sign) {
+  const today = new Date().toISOString().split('T')[0]; // "YYYY-MM-DD"
+
+  // 1. Check Supabase cache
+  let { data } = await supabaseClient
+    .from('daily_horoscopes')
+    .select('raw_data')
+    .eq('sign', sign.toLowerCase())
+    .eq('date', today)
+    .single();
+
+  // 2. If missing, trigger Netlify function on demand
+  if (!data) {
+    await fetch('/.netlify/functions/sync-horoscopes');
+
+    // 3. Re-query Supabase for synced data
+    const { data: syncedData } = await supabaseClient
+      .from('daily_horoscopes')
+      .select('raw_data')
+      .eq('sign', sign.toLowerCase())
+      .eq('date', today)
+      .single();
+
+    data = syncedData;
+  }
+
+  return data?.raw_data;
+}
+
+// Updated loadDashboard using cached/synced horoscope data
+async function loadDashboard(userSign, partnerSign) {
+  // Fetch real horoscope data for both signs
+  const userHoroscope = await getHoroscope(userSign);
+  const partnerHoroscope = await getHoroscope(partnerSign);
+
+  // Construct UI data from stored horoscopes (falling back to default structured objects)
+  const dashboardData = {
     quick: [
       { title: 'Wear', emoji: '👕', headline: 'Sapphire blue + crisp white', reason: `Aligns ${partnerSign}'s and ${userSign}'s daily energies.` },
       { title: 'Binge', emoji: '📺', headline: 'The Secret Life of Walter Mitty', reason: 'Inspires creative drive while satisfying a reflective mood.' },
@@ -131,7 +166,7 @@ function loadDashboard(userSign, partnerSign) {
     ]
   };
 
-  renderDashboard(userSign, partnerSign, mockInsight);
+  renderDashboard(userSign, partnerSign, dashboardData);
 }
 
 // 6. Application Initializer & Session Listener
