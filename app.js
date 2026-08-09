@@ -4,11 +4,11 @@ const SUPABASE_URL = 'https://omltsxprptctzmhvebla.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_raGNw8eXWxEANqBiwHjBXw_qG2DD8JT';
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Sign Emoji Map
+// Sign Emoji Map (Updated to match animal/object representations)
 const ZODIAC_EMOJIS = {
-  aries: '♈', taurus: '♉', gemini: '♊', cancer: '♋',
-  leo: '♌', virgo: '♍', libra: '♎', scorpio: '♏',
-  sagittarius: '♐', capricorn: '♑', aquarius: '♒', pisces: '♓'
+  aries: '🐏', taurus: '🐂', gemini: '♊', cancer: '🦀',
+  leo: '🦁', virgo: '♍', libra: '⚖️', scorpio: '🦂',
+  sagittarius: '🏹', capricorn: '🐐', aquarius: '🏺', pisces: '🐟'
 };
 
 // 2. State & View Navigation Helpers
@@ -57,19 +57,22 @@ async function savePreferences() {
 
 // 5. Render Mock Insights to Figma Cards
 function renderDashboard(userSign, partnerSign, data) {
-  // Update icons and date
-  document.getElementById('user-emoji').innerText = ZODIAC_EMOJIS[userSign] || '✨';
-  document.getElementById('partner-emoji').innerText = ZODIAC_EMOJIS[partnerSign] || '✨';
+  // Safely normalize sign keys and set emojis
+  const uKey = userSign ? userSign.toLowerCase() : '';
+  const pKey = partnerSign ? partnerSign.toLowerCase() : '';
+
+  document.getElementById('user-emoji').innerText = ZODIAC_EMOJIS[uKey] || '⚖️';
+  document.getElementById('partner-emoji').innerText = ZODIAC_EMOJIS[pKey] || '🦁';
   
   const today = new Date();
   document.getElementById('current-day').innerText = today.toLocaleDateString('en-US', { weekday: 'short' });
 
-  // Render Horizontal Cards (Wear, Binge, Cook, Vibe)
+// Render Horizontal Cards (Wear, Binge, Cook, Vibe)
   const quickContainer = document.getElementById('quick-insights-container');
   quickContainer.innerHTML = data.quick.map(item => `
     <div class="card-item">
-      <div style="text-align: center; color: white; font-size: 40px; font-family: 'Averia Serif Libre', serif;">${item.title}</div>
-      <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 12px;">
+      <div style="text-align: center; color: white; font-size: 40px; font-family: 'Averia Serif Libre', serif; position: relative; z-index: 1;">${item.title}</div>
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: -16px; position: relative; z-index: 2;">
         <div style="font-size: 48px;">${item.emoji}</div>
         <div style="text-align: center; color: white; font-size: 16px; font-weight: 600;">${item.headline}</div>
         <div style="text-align: center; color: rgba(255, 255, 255, 0.60); font-size: 13px; font-style: italic;">${item.reason}</div>
