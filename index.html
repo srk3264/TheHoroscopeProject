@@ -17,12 +17,12 @@
     .active { display: block; }
 
     /* Auth & Onboarding Styling */
-    .auth-container { padding: 40px 22px; text-align: center; }
+    .auth-container { padding: 40px 22px; text-align: center; z-index: 1; position: relative; }
     .auth-container input, .auth-container select { width: 100%; padding: 12px; margin: 12px 0; border-radius: 8px; border: none; font-size: 16px; }
     .auth-container button { width: 100%; padding: 12px; border-radius: 999px; border: none; background: #1E87E8; color: white; font-weight: 600; font-size: 16px; cursor: pointer; }
 
     /* Figma Layout Styles */
-    .figma-root { width: 100%; min-height: 100vh; position: relative; background: linear-gradient(180deg, #C7CED6 0%, #043963 50%, #020202 100%); overflow-x: hidden; }
+    .figma-root { width: 100%; min-height: 100vh; position: relative; background: linear-gradient(180deg, #C7CED6 0%, #043963 50%, #020202 100%); overflow-x: hidden; z-index: 1; }
     .content-wrapper { padding: 52px 16px 100px 16px; display: flex; flex-direction: column; gap: 22px; }
     .horizontal-scroll { display: flex; gap: 16px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; }
     .horizontal-scroll::-webkit-scrollbar { display: none; }
@@ -35,7 +35,10 @@
   </style>
 </head>
 <body>
-
+<!-- Cosmic Background Canvas -->
+  <div style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; pointer-events: none; overflow: hidden;">
+    <canvas id="cosmic-canvas"></canvas>
+  </div>
   <!-- 1. LOGIN VIEW -->
   <div id="view-login" class="view active">
     <div class="auth-container">
@@ -135,5 +138,107 @@
   </div>
 
   <script src="app.js"></script>
+
+<script>
+(function() {
+  const canvas = document.getElementById('cosmic-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  let width, height;
+  let mouse = { x: 0, y: 0, targetX: 0, targetY: 0 };
+  const particles = [];
+  const PARTICLE_COUNT = 100;
+
+  const LAYERS = [
+    { count: Math.floor(PARTICLE_COUNT * 0.5), minSize: 0.5, maxSize: 1.2, speed: 0.02, alpha: 0.4 },
+    { count: Math.floor(PARTICLE_COUNT * 0.35), minSize: 1.2, maxSize: 2.2, speed: 0.05, alpha: 0.7 },
+    { count: Math.floor(PARTICLE_COUNT * 0.15), minSize: 3.0, maxSize: 4.5, speed: 0.09, alpha: 0.3 }
+  ];
+
+  function resize() {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+  }
+
+  function initParticles() {
+    particles.length = 0;
+    const colors = ['#ffffff', '#a78bfa', '#1ee1e8', '#f472b6'];
+
+    LAYERS.forEach(layer => {
+      for (let i = 0; i < layer.count; i++) {
+        particles.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          size: Math.random() * (layer.maxSize - layer.minSize) + layer.minSize,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          layerSpeed: layer.speed,
+          baseAlpha: layer.alpha,
+          pulseSpeed: 0.01 + Math.random() * 0.02,
+          pulseVal: Math.random() * Math.PI
+        });
+      }
+    });
+  }
+
+  function animate() {
+    mouse.x += (mouse.targetX - mouse.x) * 0.05;
+    mouse.y += (mouse.targetY - mouse.y) * 0.05;
+
+    ctx.clearRect(0, 0, width, height);
+
+    particles.forEach(p => {
+      let drawX = p.x + (mouse.x * p.layerSpeed);
+      let drawY = p.y + (mouse.y * p.layerSpeed);
+
+      if (drawX < 0) drawX += width;
+      if (drawX > width) drawX -= width;
+      if (drawY < 0) drawY += height;
+      if (drawY > height) drawY -= height;
+
+      p.pulseVal += p.pulseSpeed;
+      const currentAlpha = p.baseAlpha + Math.sin(p.pulseVal) * 0.2;
+
+      ctx.beginPath();
+      ctx.arc(drawX, drawY, p.size, 0, Math.PI * 2);
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = Math.max(0, Math.min(1, currentAlpha));
+
+      if (p.size > 2) {
+        ctx.shadowBlur = 6;
+        ctx.shadowColor = p.color;
+      } else {
+        ctx.shadowBlur = 0;
+      }
+
+      ctx.fill();
+    });
+
+    requestAnimationFrame(animate);
+  }
+
+  window.addEventListener('mousemove', (e) => {
+    mouse.targetX = (e.clientX - width / 2);
+    mouse.targetY = (e.clientY - height / 2);
+  });
+
+  window.addEventListener('deviceorientation', (e) => {
+    if (e.gamma !== null && e.beta !== null) {
+      mouse.targetX = e.gamma * 8;
+      mouse.targetY = e.beta * 8;
+    }
+  });
+
+  window.addEventListener('resize', () => {
+    resize();
+    initParticles();
+  });
+
+  resize();
+  initParticles();
+  animate();
+})();
+</script>
+
 </body>
 </html>
