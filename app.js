@@ -164,24 +164,66 @@ async function getHoroscope(sign) {
   return data?.raw_data;
 }
 
-// Updated loadDashboard using cached/synced horoscope data
-async function loadDashboard(userSign, partnerSign) {
-  // Fetch real horoscope data for both signs
-  const userHoroscope = await getHoroscope(userSign);
-  const partnerHoroscope = await getHoroscope(partnerSign);
+// Helper to fetch pair insights with Netlify/Supabase integration
+async function getPairInsights(userSign, partnerSign) {
+  const today = getLocalDateString();
+  const sortedSigns = [userSign.toLowerCase(), partnerSign.toLowerCase()].sort();
+  const pairKey = `${sortedSigns[0]}_${sortedSigns[1]}`;
 
-  // Construct UI data from stored horoscopes (falling back to default structured objects)
+  // 1. Check Supabase cache for today's generated insights
+  let { data } = await supabaseClient
+    .from('daily_pair_insights')
+    .select('content')
+    .eq('pair_key', pairKey)
+    .eq('date', today)
+    .maybeSingle();
+
+  // 2. If missing, trigger Netlify sync-insights AI function
+  if (!data) {
+    const res = await fetch('/.netlify/functions/sync-insights', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pairKey, date: today })
+    });
+
+    if (!res.ok) {
+      console.error('Failed to trigger sync-insights:', await res.text());
+      return null;
+    }
+
+    const result = await res.json();
+    data = { content: result.data?.content };
+  }
+
+  return data?.content;
+}
+
+// Updated loadDashboard to display dynamic OpenRouter AI insights
+async function loadDashboard(userSign, partnerSign) {
+  // Ensure individual daily horoscopes are cached first
+  await getHoroscope(userSign);
+  await getHoroscope(partnerSign);
+
+  // Fetch or trigger generated AI insights
+  const aiContent = await getPairInsights(userSign, partnerSign);
+
+  if (!aiContent) {
+    alert('Unable to load daily insights. Please try refreshing.');
+    return;
+  }
+
+  // Map AI response schema directly to your dashboard renderer format
   const dashboardData = {
     quick: [
-      { title: 'Wear', emoji: '👕', headline: 'Sapphire blue + crisp white', reason: `Aligns ${partnerSign}'s and ${userSign}'s daily energies.` },
-      { title: 'Binge', emoji: '📺', headline: 'The Secret Life of Walter Mitty', reason: 'Inspires creative drive while satisfying a reflective mood.' },
-      { title: 'Cook', emoji: '🔪', headline: 'Lemon herb salmon with roasted veggies', reason: 'Creative, fresh, and perfectly balanced for both.' },
-      { title: 'Vibe', emoji: '🎵', headline: 'Indie Folk / Ambient Acoustic', reason: 'Keeps high energy without disrupting calm, harmonious focus.' }
+      { title: 'Wear', emoji: '👕', headline: aiContent.quick_insights.wear.title, reason: aiContent.quick_insights.wear.reason },
+      { title: 'Binge', emoji: '📺', headline: aiContent.quick_insights.binge.title, reason: aiContent.quick_insights.binge.reason },
+      { title: 'Cook', emoji: '🍳', headline: aiContent.quick_insights.cook.title, reason: aiContent.quick_insights.cook.reason },
+      { title: 'Vibe', emoji: '🎵', headline: aiContent.quick_insights.vibe.title, reason: aiContent.quick_insights.vibe.reason }
     ],
-    actions: [
-      { title: 'Invite into a workout, walk, or active plan instead of a passive date.', subtitle: `${userSign} energy: high movement + ${partnerSign} energy: release mental clutter.` },
-      { title: 'Plan something around blue/sapphire tones or an elegant setting.', subtitle: 'Matches both your shared aesthetic profile for today.' }
-    ]
+    actions: aiContent.actions.map(act => ({
+      title: act.title,
+      subtitle: act.reason
+    }))
   };
 
   renderDashboard(userSign, partnerSign, dashboardData);
