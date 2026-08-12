@@ -91,7 +91,8 @@ Rules:
       },
       body: JSON.stringify({
         model: 'openrouter/free',
-        messages: [{ role: 'user', content: prompt }]
+        messages: [{ role: 'user', content: prompt }],
+        response_format: { type: 'json_object' }
       })
     });
 
@@ -103,9 +104,13 @@ Rules:
     const aiJson = await aiRes.json();
     const rawChoice = aiJson.choices?.[0]?.message?.content || '';
     
-    // Strip code block backticks if present
-    const cleanedJson = rawChoice.replace(/```json|```/g, '').trim();
-    const insightsContent = JSON.parse(cleanedJson);
+    // Extract valid JSON string starting from '{' to '}'
+    const jsonMatch = rawChoice.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      throw new Error(`Model output did not contain valid JSON: ${rawChoice}`);
+    }
+
+    const insightsContent = JSON.parse(jsonMatch[0]);
 
     const { data, error: dbErr } = await supabase
       .from('daily_pair_insights')
