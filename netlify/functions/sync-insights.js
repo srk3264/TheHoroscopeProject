@@ -25,10 +25,25 @@ exports.handler = async function (event, context) {
     };
   }
 
-  const supabase = createClient(supabaseUrl, supabaseKey);
-  const [sign1, sign2] = pairKey.split('_');
+ const supabase = createClient(supabaseUrl, supabaseKey);
 
   try {
+    // 1. Inline cache verification before hitting OpenRouter
+    const { data: existing } = await supabase
+      .from('daily_pair_insights')
+      .select('content')
+      .eq('pair_key', pairKey)
+      .eq('date', date)
+      .maybeSingle();
+
+    if (existing && existing.content) {
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ success: true, data: existing })
+      };
+    }
+
+    const [sign1, sign2] = pairKey.split('_');
     const { data: horoscopes, error: fetchErr } = await supabase
       .from('daily_horoscopes')
       .select('sign, raw_data')
@@ -37,51 +52,10 @@ exports.handler = async function (event, context) {
 
     if (fetchErr) throw fetchErr;
 
-    const sign1Data = horoscopes.find((h) => h.sign === sign1)?.raw_data || {};
-    const sign2Data = horoscopes.find((h) => h.sign === sign2)?.raw_data || {};
+    const sign1Data = horoscopes?.find((h) => h.sign === sign1)?.raw_data || {};
+    const sign2Data = horoscopes?.find((h) => h.sign === sign2)?.raw_data || {};
 
-    const prompt = `
-You are an expert astrologer synthesizing daily couple insights for ${sign1} and ${sign2}.
-
-CRITICAL CONSTRAINT: You must generate your entire response using ONLY the exact astrological details, themes, and traits provided in the horoscopes below. Do NOT use outside general knowledge or make up external astrological facts.
-
-${sign1} Horoscope: ${JSON.stringify(sign1Data)}
-${sign2} Horoscope: ${JSON.stringify(sign2Data)}
-
-Generate daily pair insights strictly in this JSON format:
-{
-  "quick_insights": {
-    "wear": {
-      "title": "Short outfit advice (max 6 words)",
-      "reason": "Reason based strictly on the provided horoscope data (max 10 words)"
-    },
-    "binge": {
-      "title": "Movie/show title or genre (max 5 words)",
-      "reason": "Reason based strictly on the provided horoscope data (max 10 words)"
-    },
-    "cook": {
-      "title": "Meal or cuisine idea (max 5 words)",
-      "reason": "Reason based strictly on the provided horoscope data (max 10 words)"
-    },
-    "vibe": {
-      "title": "Relationship energy status (max 4 words)",
-      "reason": "Reason based strictly on the provided horoscope data (max 10 words)"
-    }
-  },
-  "actions": [
-    {
-      "title": "Clear action advice (max 12 words)",
-      "reason": "Reason based strictly on the provided horoscope data (max 15 words)"
-    }
-  ]
-}
-
-Rules:
-1. Provide EXACTLY 2 to 3 action items inside the "actions" array.
-2. Do not repeat advice between quick_insights and actions.
-3. Base all outputs exclusively on the provided horoscope JSON above.
-4. Respond strictly with raw JSON.
-`;
+    const prompt = `...`;
 
     const aiRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
@@ -91,8 +65,7 @@ Rules:
       },
       body: JSON.stringify({
         model: 'openrouter/free',
-        messages: [{ role: 'user', content: prompt }],
-        response_format: { type: 'json_object' }
+        messages: [{ role: 'user', content: prompt }]
       })
     });
 

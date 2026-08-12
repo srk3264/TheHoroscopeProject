@@ -165,37 +165,52 @@ async function getHoroscope(sign) {
 }
 
 // Helper to fetch pair insights with Netlify/Supabase integration
+let pairInsightPromise = null;
+
+// Helper to fetch pair insights with Netlify/Supabase integration & in-flight request lock
 async function getPairInsights(userSign, partnerSign) {
   const today = getLocalDateString();
   const sortedSigns = [userSign.toLowerCase(), partnerSign.toLowerCase()].sort();
   const pairKey = `${sortedSigns[0]}_${sortedSigns[1]}`;
 
   // 1. Check Supabase cache for today's generated insights
-  let { data } = await supabaseClient
+  const { data } = await supabaseClient
     .from('daily_pair_insights')
     .select('content')
     .eq('pair_key', pairKey)
     .eq('date', today)
     .maybeSingle();
 
-  // 2. If missing, trigger Netlify sync-insights AI function
-  if (!data) {
-    const res = await fetch('/.netlify/functions/sync-insights', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pairKey, date: today })
-    });
-
-    if (!res.ok) {
-      console.error('Failed to trigger sync-insights:', await res.text());
-      return null;
-    }
-
-    const result = await res.json();
-    data = { content: result.data?.content };
+  if (data && data.content) {
+    return data.content;
   }
 
-  return data?.content;
+  // 2. Prevent concurrent execution from tab switches or rapid focus events
+  if (pairInsightPromise) {
+    return pairInsightPromise;
+  }
+
+  pairInsightPromise = (async () => {
+    try {
+      const res = await fetch('/.netlify/functions/sync-insights', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pairKey, date: today })
+      });
+
+      if (!res.ok) {
+        console.error('Failed to trigger sync-insights:', await res.text());
+        return null;
+      }
+
+      const result = await res.json();
+      return result.data?.content || null;
+    } finally {
+      pairInsightPromise = null;
+    }
+  })();
+
+  return pairInsightPromise;
 }
 
 // Updated loadDashboard to display dynamic OpenRouter AI insights
@@ -250,8 +265,13 @@ async function initApp() {
     }
   }
 
-  // Auth state change listener
+  // Auth state change listener restricted strictly to explicit auth events
   supabaseClient.auth.onAuthStateChange(async (event, session) => {
+    // Ignore routine token refreshes triggered on window focus/tab switch
+    if (event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED') {
+      return;
+    }
+
     if (event === 'SIGNED_IN' && session) {
       const { data: profile } = await supabaseClient
         .from('profiles')
