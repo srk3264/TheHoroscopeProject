@@ -90,19 +90,22 @@ Rules:
         Authorization: `Bearer ${openrouterApiKey}`
       },
       body: JSON.stringify({
-        model: 'meta-llama/llama-3.3-70b-instruct:free',
-        messages: [{ role: 'user', content: prompt }],
-        response_format: { type: 'json_object' },
-        temperature: 0.0
+        model: 'openrouter/free',
+        messages: [{ role: 'user', content: prompt }]
       })
     });
 
     if (!aiRes.ok) {
-      throw new Error(`OpenRouter API error: ${aiRes.statusText}`);
+      const errorText = await aiRes.text();
+      throw new Error(`OpenRouter API error (${aiRes.status}): ${errorText}`);
     }
 
     const aiJson = await aiRes.json();
-    const insightsContent = JSON.parse(aiJson.choices[0].message.content);
+    const rawChoice = aiJson.choices?.[0]?.message?.content || '';
+    
+    // Strip code block backticks if present
+    const cleanedJson = rawChoice.replace(/```json|```/g, '').trim();
+    const insightsContent = JSON.parse(cleanedJson);
 
     const { data, error: dbErr } = await supabase
       .from('daily_pair_insights')
