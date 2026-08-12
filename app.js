@@ -213,13 +213,20 @@ async function getPairInsights(userSign, partnerSign) {
   return pairInsightPromise;
 }
 
-// Updated loadDashboard to display dynamic OpenRouter AI insights
+// Updated loadDashboard with loading UI state
 async function loadDashboard(userSign, partnerSign) {
-  // Ensure individual daily horoscopes are cached first
+  showView('view-dashboard'); // Render active container immediately
+  
+  const quickContainer = document.getElementById('quick-insights-container');
+  const actionContainer = document.getElementById('actions-container');
+  
+  // Show loading skeleton while waiting for API response
+  if (quickContainer) quickContainer.innerHTML = '<div style="color: white; text-align: center; padding: 20px;">Generating daily insights...</div>';
+  if (actionContainer) actionContainer.innerHTML = '';
+
   await getHoroscope(userSign);
   await getHoroscope(partnerSign);
 
-  // Fetch or trigger generated AI insights
   const aiContent = await getPairInsights(userSign, partnerSign);
 
   if (!aiContent) {
@@ -227,7 +234,6 @@ async function loadDashboard(userSign, partnerSign) {
     return;
   }
 
-  // Map AI response schema directly to your dashboard renderer format
   const dashboardData = {
     quick: [
       { title: 'Wear', emoji: '👕', headline: aiContent.quick_insights.wear.title, reason: aiContent.quick_insights.wear.reason },
@@ -244,14 +250,12 @@ async function loadDashboard(userSign, partnerSign) {
   renderDashboard(userSign, partnerSign, dashboardData);
 }
 
-// 6. Application Initializer & Session Listener
 async function initApp() {
   const { data: { session } } = await supabaseClient.auth.getSession();
 
   if (!session) {
     showView('view-login');
   } else {
-    // Fetch user profile
     const { data: profile } = await supabaseClient
       .from('profiles')
       .select('user_sign, partner_sign')
@@ -265,9 +269,7 @@ async function initApp() {
     }
   }
 
-  // Auth state change listener restricted strictly to explicit auth events
   supabaseClient.auth.onAuthStateChange(async (event, session) => {
-    // Ignore routine token refreshes triggered on window focus/tab switch
     if (event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED') {
       return;
     }
