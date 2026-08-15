@@ -14,11 +14,34 @@ exports.handler = async function (event, context) {
   }
 
   const supabase = createClient(supabaseUrl, supabaseKey);
-  const now = new Date();
-  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  const userTimeZone = event.queryStringParameters?.timeZone || 'America/Los_Angeles';
 
+  const now = new Date();
+  const today = new Intl.DateTimeFormat('en-CA', { timeZone: userTimeZone }).format(now);
+
+  // NEW CODE
   try {
-    const promises = SIGNS.map(async (sign) => {
+    // Check cache first
+    const { data: existing, error: fetchErr } = await supabase
+      .from('daily_horoscopes')
+      .select('sign')
+      .eq('date', today);
+
+    if (fetchErr) throw fetchErr;
+
+    // If all 12 signs exist for today, exit early
+    if (existing && existing.length === SIGNS.length) {
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ message: `Horoscopes for ${today} are already cached. No API calls made.` })
+      };
+    }
+
+    // Only fetch signs that are missing from today's cache
+    const existingSigns = new Set(existing ? existing.map(item => item.sign) : []);
+    const missingSigns = SIGNS.filter(sign => !existingSigns.has(sign));
+
+    const promises = missingSigns.map(async (sign) => {
       const response = await fetch(`https://api.astrojson.com/v1/horoscopes?sign=${sign}&lang=en&date=${today}&period=daily`, {
         headers: { 'X-API-KEY': process.env.ASTRO_JSON_API_KEY || '' }
       });

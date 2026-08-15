@@ -140,9 +140,12 @@ async function getHoroscope(sign) {
     .eq('date', today)
     .maybeSingle(); // Prevents 406 error on empty cache
 
-  // 2. If missing, trigger Netlify function
+  
+
+  // 2. If missing, trigger Netlify function with client timezone
   if (!data) {
-    const res = await fetch('/.netlify/functions/sync-horoscopes');
+    const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const res = await fetch(`/.netlify/functions/sync-horoscopes?timeZone=${encodeURIComponent(userTimeZone)}`);
     
     if (!res.ok) {
       const errText = await res.text();
@@ -192,10 +195,11 @@ async function getPairInsights(userSign, partnerSign) {
 
   pairInsightPromise = (async () => {
     try {
+      const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
       const res = await fetch('/.netlify/functions/sync-insights', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pairKey, date: today })
+        body: JSON.stringify({ pairKey, date: today, timeZone: userTimeZone })
       });
 
       if (!res.ok) {
