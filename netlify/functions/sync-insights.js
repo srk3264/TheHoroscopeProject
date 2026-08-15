@@ -96,6 +96,7 @@ Rules:
         },
         body: JSON.stringify({
           model: 'openrouter/free',
+          response_format: { type: 'json_object' },
           messages: [
             { role: 'system', content: systemPrompt },
             { role: 'user', content: userPrompt }
