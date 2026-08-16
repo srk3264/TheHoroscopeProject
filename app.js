@@ -327,3 +327,41 @@ document.addEventListener('visibilitychange', async () => {
     }
   }
 });
+
+// Populates current sign values when opening settings screen
+function openSettingsView() {
+  if (currentUserSign) document.getElementById('settings-user-sign').value = currentUserSign.toLowerCase();
+  if (currentPartnerSign) document.getElementById('settings-partner-sign').value = currentPartnerSign.toLowerCase();
+  showView('view-settings');
+}
+
+// Updates signs in Supabase profiles table and refreshes state
+async function handleUpdateSigns(event) {
+  event.preventDefault();
+
+  const newUserSign = document.getElementById('settings-user-sign').value;
+  const newPartnerSign = document.getElementById('settings-partner-sign').value;
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({
+      user_sign: newUserSign,
+      partner_sign: newPartnerSign
+    })
+    .eq('id', user.id);
+
+  if (error) {
+    alert('Failed to update signs: ' + error.message);
+    return;
+  }
+
+  currentUserSign = newUserSign;
+  currentPartnerSign = newPartnerSign;
+
+  alert('Signs updated successfully!');
+  showView('view-dashboard');
+  if (typeof loadDashboard === 'function') loadDashboard();
+}
