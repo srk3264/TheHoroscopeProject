@@ -337,10 +337,6 @@ document.addEventListener('visibilitychange', async () => {
 });
 
 // Populates current sign values when opening settings screen
-// Ensure state variables exist globally at the top of app.js (or reuse your existing user/partner state variables)
-let currentUserSign = '';
-let currentPartnerSign = '';
-
 function openSettingsView() {
   const userSelect = document.getElementById('settings-user-sign');
   const partnerSelect = document.getElementById('settings-partner-sign');
