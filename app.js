@@ -4,6 +4,10 @@ const SUPABASE_URL = 'https://omltsxprptctzmhvebla.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_raGNw8eXWxEANqBiwHjBXw_qG2DD8JT';
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// Global state variables for settings
+let currentUserSign = '';
+let currentPartnerSign = '';
+
 // Sign Emoji Map (Updated to match animal/object representations)
 const ZODIAC_EMOJIS = {
   aries: '🐏', taurus: '🐂', gemini: '♊', cancer: '🦀',
@@ -218,6 +222,10 @@ async function getPairInsights(userSign, partnerSign) {
 
 // Updated loadDashboard with loading UI state
 async function loadDashboard(userSign, partnerSign) {
+  // Store signs in global variables so settings modal can read them
+  currentUserSign = userSign || '';
+  currentPartnerSign = partnerSign || '';
+
   showView('view-dashboard'); // Render active container immediately
   
   const quickContainer = document.getElementById('quick-insights-container');
@@ -329,9 +337,21 @@ document.addEventListener('visibilitychange', async () => {
 });
 
 // Populates current sign values when opening settings screen
+// Ensure state variables exist globally at the top of app.js (or reuse your existing user/partner state variables)
+let currentUserSign = '';
+let currentPartnerSign = '';
+
 function openSettingsView() {
-  if (currentUserSign) document.getElementById('settings-user-sign').value = currentUserSign.toLowerCase();
-  if (currentPartnerSign) document.getElementById('settings-partner-sign').value = currentPartnerSign.toLowerCase();
+  const userSelect = document.getElementById('settings-user-sign');
+  const partnerSelect = document.getElementById('settings-partner-sign');
+
+  if (userSelect && currentUserSign) {
+    userSelect.value = currentUserSign.toLowerCase();
+  }
+  if (partnerSelect && currentPartnerSign) {
+    partnerSelect.value = currentPartnerSign.toLowerCase();
+  }
+
   showView('view-settings');
 }
 
@@ -342,10 +362,10 @@ async function handleUpdateSigns(event) {
   const newUserSign = document.getElementById('settings-user-sign').value;
   const newPartnerSign = document.getElementById('settings-partner-sign').value;
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user } } = await supabaseClient.auth.getUser();
   if (!user) return;
 
-  const { error } = await supabase
+  const { error } = await supabaseClient
     .from('profiles')
     .update({
       user_sign: newUserSign,
@@ -362,6 +382,5 @@ async function handleUpdateSigns(event) {
   currentPartnerSign = newPartnerSign;
 
   alert('Signs updated successfully!');
-  showView('view-dashboard');
-  if (typeof loadDashboard === 'function') loadDashboard();
+  loadDashboard(currentUserSign, currentPartnerSign);
 }
