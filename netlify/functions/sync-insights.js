@@ -58,7 +58,7 @@ exports.handler = async function (event, context) {
     const systemPrompt = "You are a JSON-only API. You output raw, valid JSON objects. Never output conversation, greetings, or explanations.";
     
     const userPrompt = `
-Synthesize daily couple insights for ${sign1} and ${sign2}.
+Synthesize daily couple insights specifically tailored for ${sign1} (User) to engage with, relate to, and impress ${sign2} (Partner).
 
 ${sign1} Horoscope: ${JSON.stringify(sign1Data)}
 ${sign2} Horoscope: ${JSON.stringify(sign2Data)}

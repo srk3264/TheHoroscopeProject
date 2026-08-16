@@ -173,8 +173,7 @@ let pairInsightPromise = null;
 // Helper to fetch pair insights with Netlify/Supabase integration & in-flight request lock
 async function getPairInsights(userSign, partnerSign) {
   const today = getLocalDateString();
-  const sortedSigns = [userSign.toLowerCase(), partnerSign.toLowerCase()].sort();
-  const pairKey = `${sortedSigns[0]}_${sortedSigns[1]}`;
+ const pairKey = `${userSign.toLowerCase()}_${partnerSign.toLowerCase()}`;
 
   // 1. Check Supabase cache for today's generated insights
   const { data } = await supabaseClient
