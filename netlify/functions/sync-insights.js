@@ -67,17 +67,17 @@ Generate daily pair insights strictly in this JSON format:
 {
   "quick_insights": {
     "wear": { "title": "Short outfit advice (max 6 words)", "reason": "Reason (max 10 words)" },
-    "binge": { "title": "Movie/show title or genre (max 5 words)", "reason": "Reason (max 10 words)" },
+    "binge": { "title": "Exact Movie/show title (max 5 words)", "reason": "Reason (max 10 words)" },
     "cook": { "title": "Meal idea (max 5 words)", "reason": "Reason (max 10 words)" },
-    "vibe": { "title": "Status (max 4 words)", "reason": "Reason (max 10 words)" }
+    "vibe": { "title": "Exact song/artist (max 4 words)", "reason": "Reason (max 10 words)" }
   },
   "actions": [
-    { "title": "Clear action advice (max 12 words)", "reason": "Reason (max 15 words)" }
+    { "title": "oddly specific advices that are non obvious relationship tips (max 12 words)", "reason": "Reason (max 15 words)" }
   ]
 }
 
 Rules:
-1. Provide EXACTLY 2 to 3 action items in the "actions" array.
+1. Provide EXACTLY 5 to 6 action items in the "actions" array.
 2. Output valid JSON only without markdown formatting.
 `;
 
@@ -95,7 +95,7 @@ Rules:
           Authorization: `Bearer ${openrouterApiKey}`
         },
         body: JSON.stringify({
-          model: 'openrouter/free',
+          model: 'nvidia/nemotron-3.5-lightning:free',
           response_format: { type: 'json_object' },
           messages: [
             { role: 'system', content: systemPrompt },
