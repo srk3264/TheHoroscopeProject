@@ -72,12 +72,12 @@ Generate daily pair insights strictly in this JSON format:
     "vibe": { "title": "Exact song/artist (max 4 words)", "reason": "Reason (max 10 words)" }
   },
   "actions": [
-    { "title": "oddly specific advices that are non obvious relationship tips (max 12 words)", "reason": "Reason (max 15 words)" }
+    { "title": "oddly specific actionable advices that are non obvious relationship tips (max 12 words)", "reason": "Reason (max 15 words)" }
   ]
 }
 
 Rules:
-1. Provide EXACTLY 5 to 6 action items in the "actions" array.
+1. Provide EXACTLY 8 action items in the "actions" array.
 2. Output valid JSON only without markdown formatting.
 `;
 
