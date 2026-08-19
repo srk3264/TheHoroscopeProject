@@ -235,8 +235,11 @@ async function loadDashboard(userSign, partnerSign) {
   if (quickContainer) quickContainer.innerHTML = '<div style="color: white; text-align: center; padding: 20px;">Generating daily insights...</div>';
   if (actionContainer) actionContainer.innerHTML = '';
 
-  await getHoroscope(userSign);
-  await getHoroscope(partnerSign);
+  // Wait for both horoscopes to be completely fetched/synced first
+  await Promise.all([
+    getHoroscope(userSign),
+    getHoroscope(partnerSign)
+  ]);
 
   const aiContent = await getPairInsights(userSign, partnerSign);
 

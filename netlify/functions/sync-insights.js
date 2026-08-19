@@ -16,7 +16,7 @@ exports.handler = async function (event, context) {
     };
   }
 
-  const { pairKey, date } = JSON.parse(event.body || '{}');
+  const { pairKey, date, timeZone } = JSON.parse(event.body || '{}');
 
   if (!pairKey || !date) {
     return {
@@ -25,7 +25,7 @@ exports.handler = async function (event, context) {
     };
   }
 
- const supabase = createClient(supabaseUrl, supabaseKey);
+  const supabase = createClient(supabaseUrl, supabaseKey);
 
   try {
     // 1. Inline cache verification before hitting OpenRouter
@@ -44,6 +44,13 @@ exports.handler = async function (event, context) {
     }
 
     const [sign1, sign2] = pairKey.split('_');
+
+    // Sync missing horoscopes using timeZone before fetching
+    const tzParam = encodeURIComponent(timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone);
+    const origin = event.headers.origin || `https://${event.headers.host}`;
+    
+    await fetch(`${origin}/.netlify/functions/sync-horoscopes?timeZone=${tzParam}`);
+
     const { data: horoscopes, error: fetchErr } = await supabase
       .from('daily_horoscopes')
       .select('sign, raw_data')
