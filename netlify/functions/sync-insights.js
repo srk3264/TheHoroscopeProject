@@ -58,7 +58,7 @@ exports.handler = async function (event, context) {
     const systemPrompt = "You are a JSON-only API. You output raw, valid JSON objects. Never output conversation, greetings, or explanations.";
     
     const userPrompt = `
-Synthesize daily couple insights specifically tailored for ${sign1} (User) to engage with, relate to, and impress ${sign2} (Partner).
+    Refer to ${sign1} as 'You' & ${sign2} as 'Your Partner'
 
 ${sign1} Horoscope: ${JSON.stringify(sign1Data)}
 ${sign2} Horoscope: ${JSON.stringify(sign2Data)}
@@ -72,7 +72,7 @@ Generate daily pair insights strictly in this JSON format:
     "vibe": { "title": "Exact song/artist (max 4 words)", "reason": "Reason (max 10 words)" }
   },
   "actions": [
-    { "title": "oddly specific actionable advices that are non obvious relationship tips (max 24 words)", "reason": "Reason (max 15 words)" }
+    { "title": "oddly specific actionable relationship advices for ${sign1} to impress ${sign2} (max 24 words)", "reason": "Reason (max 15 words)" }
   ]
 }
 
