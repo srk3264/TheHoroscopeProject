@@ -72,7 +72,7 @@ Generate daily pair insights strictly in this JSON format:
     "vibe": { "title": "Exact song/artist (max 4 words)", "reason": "Reason (max 10 words)" }
   },
   "actions": [
-    { "title": "oddly specific actionable advices that are non obvious relationship tips (max 12 words)", "reason": "Reason (max 15 words)" }
+    { "title": "oddly specific actionable advices that are non obvious relationship tips (max 24 words)", "reason": "Reason (max 15 words)" }
   ]
 }
 
