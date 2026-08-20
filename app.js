@@ -306,6 +306,58 @@ async function initApp() {
   });
 }
 
+// Chat Message Handler (with Rate Limiting & UI Lock)
+async function handleSendMessage() {
+  const input = document.getElementById('chat-input') || document.getElementById('chat-prompt');
+  const sendBtn = document.getElementById('chat-send-btn') || document.getElementById('send-btn');
+  const messagesContainer = document.getElementById('chat-messages');
+
+  if (!input) return;
+  const prompt = input.value.trim();
+  if (!prompt) return;
+
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (!session) return alert('Please sign in to chat.');
+
+  const userId = session.user.id;
+  const pairId = `${currentUserSign.toLowerCase()}_${currentPartnerSign.toLowerCase()}`;
+  const userLocalDate = getLocalDateString();
+
+  // Lock UI to prevent spam
+  input.disabled = true;
+  if (sendBtn) sendBtn.disabled = true;
+
+  // Append user message immediately to chat UI
+  if (messagesContainer) {
+    messagesContainer.innerHTML += `<div class="chat-msg user-msg"><strong>You:</strong> ${prompt}</div>`;
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  }
+  input.value = '';
+
+  try {
+    const res = await fetch('/.netlify/functions/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, pairId, userLocalDate, prompt })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.error || 'Failed to send message.');
+    } else if (messagesContainer) {
+      messagesContainer.innerHTML += `<div class="chat-msg assistant-msg"><strong>AI:</strong> ${data.reply}</div>`;
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+  } catch (err) {
+    alert('Network error. Please try again.');
+  } finally {
+    input.disabled = false;
+    if (sendBtn) sendBtn.disabled = false;
+    input.focus();
+  }
+}
+
 // Boot application
 initApp();
 
