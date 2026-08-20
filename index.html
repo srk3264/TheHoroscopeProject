@@ -137,9 +137,11 @@
       </div>
 
       <!-- Bottom Query Bar -->
-      <div class="chat-bar">
-  <span>What’s happening today?</span>
-  <i data-lucide="send" style="width: 18px; height: 18px; color: rgba(255, 255, 255, 0.7); cursor: pointer;"></i>
+      <div class="chat-bar" style="display: flex; align-items: center; gap: 8px;">
+  <input type="text" id="chat-input" placeholder="What’s happening today?" onkeydown="if(event.key === 'Enter') handleSendMessage()" style="flex: 1; background: transparent; border: none; color: white; outline: none; font-size: 14px;" />
+  <button type="button" id="chat-send-btn" onclick="handleSendMessage()" style="background: none; border: none; padding: 0; cursor: pointer; display: flex; align-items: center;">
+    <i data-lucide="send" style="width: 18px; height: 18px; color: rgba(255, 255, 255, 0.7);"></i>
+  </button>
 </div>
 
     </div>
