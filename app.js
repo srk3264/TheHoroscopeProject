@@ -306,9 +306,8 @@ async function initApp() {
   });
 }
 
-// Chat Message Handler (with Rate Limiting & UI Lock)
-async function handleSendMessage() {
-  const input = document.getElementById('chat-input') || document.getElementById('chat-prompt');
+async function handleSendMessage(inputId = null) {
+  const input = (inputId && document.getElementById(inputId)) || document.getElementById('chat-input') || document.getElementById('chat-prompt');
   const sendBtn = document.getElementById('chat-send-btn') || document.getElementById('send-btn');
   const messagesContainer = document.getElementById('chat-messages');
 
@@ -322,6 +321,9 @@ async function handleSendMessage() {
   const userId = session.user.id;
   const pairId = `${currentUserSign.toLowerCase()}_${currentPartnerSign.toLowerCase()}`;
   const userLocalDate = getLocalDateString();
+
+  // Switch to dedicated chat view
+  showView('view-chat');
 
   // Lock UI to prevent spam
   input.disabled = true;

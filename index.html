@@ -147,7 +147,31 @@
     </div>
   </div>
 
-<!-- 4. SETTINGS VIEW -->
+  <!-- 4. DEDICATED CHAT VIEW -->
+<div id="view-chat" class="view">
+  <div class="figma-root" style="display: flex; flex-direction: column; height: 100vh; padding: 20px 16px;">
+    <!-- Chat Header -->
+    <div style="display: flex; align-items: center; gap: 12px; padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+      <button onclick="showView('view-dashboard')" style="background: none; border: none; cursor: pointer; color: white; padding: 4px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+      </button>
+      <h2 style="font-family: 'Averia Serif Libre', serif; font-size: 22px; margin: 0;">Cosmic Chat</h2>
+    </div>
+
+    <!-- Scrollable Messages Container -->
+    <div id="chat-messages" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 16px 0;"></div>
+
+    <!-- Dedicated Screen Input Bar -->
+    <div class="chat-bar" style="position: relative; transform: none; left: auto; bottom: auto; width: 100%; max-width: 100%; display: flex; align-items: center; gap: 8px; margin-top: auto;">
+      <input type="text" id="chat-page-input" placeholder="Ask anything..." onkeydown="if(event.key === 'Enter') handleSendMessage('chat-page-input')" style="flex: 1; background: transparent; border: none; color: white; outline: none; font-size: 14px;" />
+      <button type="button" onclick="handleSendMessage('chat-page-input')" style="background: none; border: none; padding: 0; cursor: pointer; display: flex; align-items: center;">
+        <i data-lucide="send" style="width: 18px; height: 18px; color: rgba(255, 255, 255, 0.7);"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- 5. SETTINGS VIEW -->
   <div id="view-settings" class="view">
     <div class="auth-container">
       <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px;">
