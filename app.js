@@ -393,7 +393,6 @@ document.addEventListener('visibilitychange', async () => {
   }
 });
 
-// Fetch and render existing chat messages from Supabase
 async function loadChatHistory() {
   const messagesContainer = document.getElementById('chat-messages');
   if (!messagesContainer) return;
@@ -405,7 +404,7 @@ async function loadChatHistory() {
 
   const { data: messages, error } = await supabaseClient
     .from('chat_messages')
-    .select('role, content')
+    .select('sender, message')
     .eq('user_id', session.user.id)
     .eq('pair_id', pairId)
     .order('created_at', { ascending: true });
@@ -415,11 +414,11 @@ async function loadChatHistory() {
     return;
   }
 
-  // Render fetched history
+  // Render fetched history using exact column names: sender & message
   messagesContainer.innerHTML = (messages || []).map(msg => {
-    const isUser = msg.role === 'user';
+    const isUser = msg.sender === 'user';
     return `<div class="chat-msg ${isUser ? 'user-msg' : 'assistant-msg'}">
-      <strong>${isUser ? 'You' : 'AI'}:</strong> ${msg.content}
+      <strong>${isUser ? 'You' : 'AI'}:</strong> ${msg.message}
     </div>`;
   }).join('');
 
