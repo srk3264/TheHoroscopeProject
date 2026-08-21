@@ -393,6 +393,10 @@ document.addEventListener('visibilitychange', async () => {
   }
 });
 
+function openChatView() {
+  showView('view-chat');
+}
+
 // Populates current sign values when opening settings screen
 function openSettingsView() {
   const userSelect = document.getElementById('settings-user-sign');
@@ -407,6 +411,8 @@ function openSettingsView() {
 
   showView('view-settings');
 }
+
+
 
 // Updates signs in Supabase profiles table and refreshes state
 async function handleUpdateSigns(event) {
