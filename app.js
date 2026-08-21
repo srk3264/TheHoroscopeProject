@@ -393,8 +393,42 @@ document.addEventListener('visibilitychange', async () => {
   }
 });
 
+// Fetch and render existing chat messages from Supabase
+async function loadChatHistory() {
+  const messagesContainer = document.getElementById('chat-messages');
+  if (!messagesContainer) return;
+
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (!session) return;
+
+  const pairId = `${currentUserSign.toLowerCase()}_${currentPartnerSign.toLowerCase()}`;
+
+  const { data: messages, error } = await supabaseClient
+    .from('chat_messages')
+    .select('role, content')
+    .eq('user_id', session.user.id)
+    .eq('pair_id', pairId)
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    console.error('Error fetching chat history:', error);
+    return;
+  }
+
+  // Render fetched history
+  messagesContainer.innerHTML = (messages || []).map(msg => {
+    const isUser = msg.role === 'user';
+    return `<div class="chat-msg ${isUser ? 'user-msg' : 'assistant-msg'}">
+      <strong>${isUser ? 'You' : 'AI'}:</strong> ${msg.content}
+    </div>`;
+  }).join('');
+
+  messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
 function openChatView() {
   showView('view-chat');
+  loadChatHistory();
 }
 
 // Populates current sign values when opening settings screen
