@@ -102,7 +102,7 @@ Rules:
           Authorization: `Bearer ${openrouterApiKey}`
         },
         body: JSON.stringify({
-          model: 'nvidia/nemotron-3.5-lightning:free',
+          model: 'openai/gpt-4o-mini',
           response_format: { type: 'json_object' },
           messages: [
             { role: 'system', content: systemPrompt },
