@@ -8,12 +8,7 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_
 let currentUserSign = '';
 let currentPartnerSign = '';
 
-// Sign Emoji Map (Updated to match animal/object representations)
-const ZODIAC_EMOJIS = {
-  aries: '🐏', taurus: '🐂', gemini: '♊', cancer: '🦀',
-  leo: '🦁', virgo: '♍', libra: '⚖️', scorpio: '🦂',
-  sagittarius: '🏹', capricorn: '🐐', aquarius: '🏺', pisces: '🐟'
-};
+
 
 // 2. State & View Navigation Helpers
 function showView(viewId) {
@@ -65,8 +60,13 @@ function renderDashboard(userSign, partnerSign, data) {
   const uKey = userSign ? userSign.toLowerCase() : '';
   const pKey = partnerSign ? partnerSign.toLowerCase() : '';
 
-  document.getElementById('user-emoji').innerText = ZODIAC_EMOJIS[uKey] || '⚖️';
-  document.getElementById('partner-emoji').innerText = ZODIAC_EMOJIS[pKey] || '🦁';
+  // NEW
+const zodiacHeaderHTML = `
+  <div class="zodiac-card-header" style="display: flex; justify-content: center; align-items: center; gap: 12px; margin-bottom: 24px;">
+    <img src="assets/${uKey}.svg" alt="${uKey}" style="width: 48px; height: 48px;" />
+    <img src="assets/${pKey}.svg" alt="${pKey}" style="width: 48px; height: 48px;" />
+  </div>
+`;
   
   const now = new Date();
 
@@ -86,12 +86,13 @@ if (currentDateEl) {
   });
 }
 
-// Render Horizontal Cards (Wear, Binge, Cook, Vibe)
+// Render Quick Cards with embedded SVG Header
   const quickContainer = document.getElementById('quick-insights-container');
   quickContainer.innerHTML = data.quick.map(item => `
-    <div class="card-item">
-      <div style="text-align: center; color: white; font-size: 40px; font-family: 'Averia Serif Libre', serif; position: relative; z-index: 1;">${item.title}</div>
-      <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: -16px; position: relative; z-index: 2;">
+    <div class="card-item" style="height: 100vh; width: 100vw; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; background: transparent;">
+      ${zodiacHeaderHTML}
+      <div style="text-align: center; color: white; font-size: 40px; font-family: 'Averia Serif Libre', serif;">${item.title}</div>
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 16px;">
         <div style="font-size: 48px;">${item.emoji}</div>
         <div style="text-align: center; color: white; font-size: 16px; font-weight: 600;">${item.headline}</div>
         <div style="text-align: center; color: rgba(255, 255, 255, 0.60); font-size: 13px; font-style: italic;">${item.reason}</div>
@@ -99,16 +100,16 @@ if (currentDateEl) {
     </div>
   `).join('');
 
-  // Render Action Cards (#1/2, #2/2)
+  // Render Action Cards with embedded SVG Header
   const actionContainer = document.getElementById('actions-container');
   actionContainer.innerHTML = data.actions.map((act, idx) => `
-    <div class="action-card ${idx % 2 === 0 ? 'bg-blue' : 'bg-orange'}">
-      <div style="font-size: 28px; font-family: 'Averia Serif Libre', serif;">#${idx + 1}/${data.actions.length}</div>
-      <div style="display: flex; flex-direction: column; gap: 12px;">
+    <div class="action-card" style="height: 100vh; width: 100vw; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; background: transparent;">
+      ${zodiacHeaderHTML}
+      <div style="font-size: 28px; font-family: 'Averia Serif Libre', serif; color: white; margin-bottom: 12px;">#${idx + 1}/${data.actions.length}</div>
+      <div style="display: flex; flex-direction: column; gap: 12px; text-align: center; color: white;">
         <div style="font-size: 22px; font-family: 'Averia Serif Libre', serif; font-weight: 300;">${act.title}</div>
         <div style="font-size: 15px; opacity: 0.9;">${act.subtitle}</div>
       </div>
-      <div class="pill-btn">⏰ Remind me later</div>
     </div>
   `).join('');
 
