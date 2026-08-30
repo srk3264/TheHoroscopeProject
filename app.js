@@ -63,8 +63,8 @@ function renderDashboard(userSign, partnerSign, data) {
   // NEW
 const zodiacHeaderHTML = `
   <div class="zodiac-card-header" style="display: flex; justify-content: center; align-items: center; gap: 12px; margin-bottom: 24px;">
-    <img src="assets/${uKey}.svg" alt="${uKey}" style="width: 48px; height: 48px;" />
-    <img src="assets/${pKey}.svg" alt="${pKey}" style="width: 48px; height: 48px;" />
+    <img src="assets/${uKey}.svg" alt="${uKey}" style="width: 48px; height: 48px; filter: brightness(0) invert(1);" />
+    <img src="assets/${pKey}.svg" alt="${pKey}" style="width: 48px; height: 48px; filter: brightness(0) invert(1);" />
   </div>
 `;
   
