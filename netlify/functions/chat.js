@@ -85,6 +85,7 @@ exports.handler = async (event) => {
     const { data: history, error: historyErr } = await supabase
       .from('chat_messages')
       .select('sender, message, created_at')
+      .eq('user_id', userId)
       .eq('pair_id', pairId)
       .gte('created_at', localMidnightISO)
       .order('created_at', { ascending: true });
