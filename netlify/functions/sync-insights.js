@@ -70,17 +70,15 @@ exports.handler = async function (event, context) {
 ${sign1} Horoscope: ${JSON.stringify(sign1Data)}
 ${sign2} Horoscope: ${JSON.stringify(sign2Data)}
 
-For each theme t in ["general", "career", "finance", "health", "romance"]:
-- Let A_t = ${sign1}'s horoscopeScore[t].
-- Let B_t = ${sign2}'s horoscopeScore[t].
-- Calculate Δ_t = A_t - B_t.
-- Use |Δ_t| to measure the intensity of the relationship dynamic and the sign of Δ_t to determine whose needs should lead.
-- If Δ_t >= 2, ${sign1} has significantly more energy in theme t; make ${sign1} redirect that energy into a surprising action that supports ${sign2}.
-- If Δ_t <= -2, ${sign2} has significantly more energy in theme t; make ${sign1} follow, protect, or amplify ${sign2}'s momentum.
-- If Δ_t = 0 and A_t >= 4, treat theme t as a shared opportunity and escalate it into a memorable joint action.
-- If A_t <= 2 and B_t <= 2, treat theme t as fragile and make the action unusually gentle, low-pressure, or restorative.
+For themes ["general","career","finance","health","romance"], compare horoscopeScore values:
+A = ${sign1}'s score, B = ${sign2}'s score, Δ = A - B.
 
-Use the exact text in ${sign1}'s horoscope[t] and ${sign2}'s horoscope[t] as the evidence for the action. To make actions unhinged but logically grounded, combine the strongest score relationship (largest |Δ_t| or strongest shared score) with a vivid phrase, image, or situation from both horoscope texts, then add one playful constraint, unexpected setting, theatrical gesture, or oddly precise object. The result must be surprising and specific, but still safe, consensual, practical, and relevant to theme t. Never produce generic advice or an action unrelated to the compared horoscope text and scores.
+Interpretation:
+- Δ >= 2: ${sign1} has more energy; direct that energy toward ${sign2}.
+- Δ <= -2: ${sign2} has more energy; ${sign1} should follow, protect, or amplify it.
+- Δ = 0 and A >= 4: shared opportunity; create a memorable joint experience.
+- A <= 2 and B <= 2: fragile theme; make the action gentle and low-pressure.
+
 
 Generate daily pair insights strictly in this JSON format:
 {
@@ -91,15 +89,21 @@ Generate daily pair insights strictly in this JSON format:
     "vibe": { "title": "Exact song/artist (max 4 words)", "reason": "Reason (max 10 words)" }
   },
   "actions": [
-    { "title": "oddly specific actionable relationship advices for ${sign1} to impress ${sign2} presented as to dos and to not dos (max 24 words)", "reason": "Reason (max 15 words)" }
+    { "title": "
+    - Be something a real couple could actually do today.
+    - Tell ${sign1} exactly what to do, not what to feel.
+    - Include specific physical details: what, where, when, or how.
+    - Use recognizable details from BOTH horoscopes.
+    - Feel oddly precise and personally tailored.
+    - Be surprising without becoming unrealistic.
+    - Avoid generic advice such as "communicate," "support them," "spend quality time," "show appreciation," or "be vulnerable." 
+    (max 24 words)", 
+     "reason": "How it fits both (max 15 words)" }
   ]
 }
 
 Rules:
-1. Provide EXACTLY 8 action items in the "actions" array.
-2. Distribute the 8 actions across the themes, prioritizing the largest |Δ_t| values and strongest shared or fragile scores.
-3. Every action must reflect both horoscope texts, both matching scores, and the calculated direction or intensity of Δ_t.
-4. Output valid JSON only without markdown formatting.
+- Maximum of 8 actions
 `;
 
     let insightsContent = null;
