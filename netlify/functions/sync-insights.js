@@ -91,9 +91,9 @@ Generate daily pair insights strictly in this JSON format:
   "actions": [
     { "title": "
     - Be something a real couple could actually do today.
-    - Tell ${sign1} exactly what to do, not what to feel.
+    - Tell Only ${sign1} exactly what to do, not what to feel.
     - Include specific physical details: what, where, when, or how.
-    - Use recognizable details from BOTH horoscopes.
+    - Use recognizable details from the horoscopes.
     - Feel oddly precise and personally tailored.
     - Be surprising without becoming unrealistic.
     - Avoid generic advice such as "communicate," "support them," "spend quality time," "show appreciation," or "be vulnerable." 
@@ -121,7 +121,44 @@ Rules:
         },
         body: JSON.stringify({
           model: 'openai/gpt-4o-mini',
-          response_format: { type: 'json_object' },
+          response_format: { 
+              type: 'json_schema',
+              json_schema: {
+                name: 'daily_pair_insights',
+                strict: true,
+                schema: {
+                  type: 'object',
+                  properties: {
+                    quick_insights: {
+                      type: 'object',
+                      properties: {
+                        wear: { type: 'object', properties: { title: { type: 'string' }, reason: { type: 'string' } }, required: ['title', 'reason'], additionalProperties: false },
+                        binge: { type: 'object', properties: { title: { type: 'string' }, reason: { type: 'string' } }, required: ['title', 'reason'], additionalProperties: false },
+                        cook: { type: 'object', properties: { title: { type: 'string' }, reason: { type: 'string' } }, required: ['title', 'reason'], additionalProperties: false },
+                        vibe: { type: 'object', properties: { title: { type: 'string' }, reason: { type: 'string' } }, required: ['title', 'reason'], additionalProperties: false }
+                      },
+                      required: ['wear', 'binge', 'cook', 'vibe'],
+                      additionalProperties: false
+                    },
+                    actions: {
+                      type: 'array',
+                      maxItems: 8,
+                      items: {
+                        type: 'object',
+                        properties: {
+                          title: { type: 'string' },
+                          reason: { type: 'string' }
+                        },
+                        required: ['title', 'reason'],
+                        additionalProperties: false
+                      }
+                    }
+                  },
+                  required: ['quick_insights', 'actions'],
+                  additionalProperties: false
+                }
+              }
+          },
           messages: [
             { role: 'system', content: systemPrompt },
             { role: 'user', content: userPrompt }
