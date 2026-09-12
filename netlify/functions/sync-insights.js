@@ -84,9 +84,9 @@ Generate daily pair insights strictly in this JSON format:
 {
   "quick_insights": {
     "wear": { "title": "Short outfit advice (max 6 words)", "reason": "Reason (max 10 words)" },
-    "binge": { "title": "Exact Movie/show title (max 5 words)", "reason": "Reason (max 10 words)" },
-    "cook": { "title": "Meal idea (max 5 words)", "reason": "Reason (max 10 words)" },
-    "vibe": { "title": "Exact song/artist (max 4 words)", "reason": "Reason (max 10 words)" }
+    "binge": { "title": "Name Movie/show title (max 5 words)", "reason": "Reason (max 10 words)" },
+    "cook": { "title": "Name a Meal (max 5 words)", "reason": "Reason (max 10 words)" },
+    "vibe": { "title": "Name a song/artist (max 4 words)", "reason": "Reason (max 10 words)" }
   },
   "actions": [
     { "title": "
