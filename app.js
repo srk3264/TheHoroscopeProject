@@ -113,8 +113,7 @@ if (currentDateEl) {
     </div>
   `).join('');
 
-  setupTapCards(quickContainer);
-  setupTapCards(actionContainer);
+  setupUnifiedTapCards(quickContainer, actionContainer);
 
   showView('view-dashboard');
 
@@ -133,8 +132,8 @@ function getLocalDateString() {
   return `${year}-${month}-${day}`;
 }
 
-function setupTapCards(container) {
-  const cards = Array.from(container.children);
+function setupUnifiedTapCards(...containers) {
+  const cards = containers.flatMap(container => Array.from(container.children));
   if (!cards.length) return;
 
   let activeIndex = 0;
@@ -147,10 +146,11 @@ function setupTapCards(container) {
   };
 
   showCard(activeIndex);
-  container.onpointerup = (event) => {
+  const deck = containers[0].parentElement;
+  deck.onpointerup = (event) => {
     if (event.target.closest('button, input, a')) return;
     event.preventDefault();
-    const bounds = container.getBoundingClientRect();
+    const bounds = deck.getBoundingClientRect();
     const direction = event.clientX < bounds.left + bounds.width / 2 ? -1 : 1;
     showCard(activeIndex + direction);
   };
