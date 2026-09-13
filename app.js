@@ -89,7 +89,7 @@ if (currentDateEl) {
 // Render Quick Cards with embedded SVG Header
   const quickContainer = document.getElementById('quick-insights-container');
   quickContainer.innerHTML = data.quick.map(item => `
-    <div class="card-item" style="height: 100vh; width: 100vw; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; background: transparent;">
+    <div class="card-item" onclick="advanceTapCards(this.parentElement)" style="height: 100vh; width: 100vw; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; background: transparent; cursor: pointer;">
       ${zodiacHeaderHTML}
       <div style="text-align: center; color: white; font-size: 40px; font-family: 'Averia Serif Libre', serif;">${item.title}</div>
       <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 16px;">
@@ -103,7 +103,7 @@ if (currentDateEl) {
   // Render Action Cards with embedded SVG Header
   const actionContainer = document.getElementById('actions-container');
   actionContainer.innerHTML = data.actions.map((act, idx) => `
-    <div class="action-card" style="height: 100vh; width: 100vw; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; background: transparent;">
+    <div class="action-card" onclick="advanceTapCards(this.parentElement)" style="height: 100vh; width: 100vw; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; background: transparent; cursor: pointer;">
       ${zodiacHeaderHTML}
       <div style="font-size: 28px; font-family: 'Averia Serif Libre', serif; color: white; margin-bottom: 12px;">#${idx + 1}/${data.actions.length}</div>
       <div style="display: flex; flex-direction: column; gap: 12px; text-align: center; color: white;">
@@ -142,14 +142,12 @@ function setupTapCards(container) {
     });
   };
 
-  cards.forEach((card) => {
-    card.addEventListener('click', (event) => {
-      event.stopPropagation();
-      showCard((activeIndex + 1) % cards.length);
-    });
-  });
-
   showCard(activeIndex);
+  container._showNextCard = () => showCard((activeIndex + 1) % cards.length);
+}
+
+function advanceTapCards(container) {
+  if (container?._showNextCard) container._showNextCard();
 }
 
 
