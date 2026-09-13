@@ -107,10 +107,10 @@ if (currentDateEl) {
 // Render Quick Cards with embedded SVG Header
   const quickContainer = document.getElementById('quick-insights-container');
   quickContainer.innerHTML = data.quick.map(item => `
-    <div class="card-item" style="height: 100vh; width: 100vw; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; ${getRandomCardGradient()} cursor: pointer;">
+    <div class="card-item" style="height: 100vh; width: 100vw; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 24px; padding: 20px; box-sizing: border-box; ${getRandomCardGradient()} cursor: pointer;">
       ${zodiacHeaderHTML}
       <div style="text-align: center; color: white; font-size: 40px; font-family: 'Averia Serif Libre', serif;">${item.title}</div>
-      <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 16px;">
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 24px; margin-top: 0;">
         <div style="text-align: center; color: white; font-size: 16px; font-weight: 600;">${item.headline}</div>
         <div style="text-align: center; color: rgba(255, 255, 255, 0.60); font-size: 13px; font-style: italic;">${item.reason}</div>
       </div>
@@ -157,7 +157,9 @@ function setupUnifiedTapCards(...containers) {
   const showCard = (index) => {
     activeIndex = (index + cards.length) % cards.length;
     cards.forEach((card, cardIndex) => {
-      card.style.display = cardIndex === activeIndex ? 'flex' : 'none';
+      card.style.display = 'flex';
+      card.style.opacity = cardIndex === activeIndex ? '1' : '0';
+      card.style.pointerEvents = cardIndex === activeIndex ? 'auto' : 'none';
       card.setAttribute('aria-hidden', cardIndex === activeIndex ? 'false' : 'true');
     });
   };
