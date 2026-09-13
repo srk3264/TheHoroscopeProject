@@ -26,7 +26,7 @@
     .content-wrapper { padding: 52px 16px 100px 16px; display: flex; flex-direction: column; gap: 22px; }
     .horizontal-scroll { display: flex; gap: 16px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; }
     .horizontal-scroll::-webkit-scrollbar { display: none; }
-    .card-item, .action-card { flex: 0 0 100%; width: 100% !important; min-width: 100% !important; height: 100dvh !important; min-height: 100dvh; scroll-snap-align: start; }
+    .card-item, .action-card { flex: 0 0 100%; width: 100% !important; min-width: 100% !important; height: 100dvh !important; min-height: 100dvh; }
     .card-item { padding: 16px; background: rgba(255, 255, 255, 0.10); border-radius: 12px; display: flex; flex-direction: column; }
     .action-card { padding: 24px 22px; border-radius: 12px; display: flex; flex-direction: column; gap: 32px; color: white; }
     .bg-blue { background: linear-gradient(180deg, #1E87E8 0%, #1EE1E8 100%); }
@@ -114,12 +114,12 @@
        
 
         <!-- Horizontal Cards (Wear, Binge, Cook, Vibe) -->
-        <div id="quick-insights-container" style="display: flex; flex-direction: column; overflow-y: auto; scroll-snap-type: y mandatory; height: 100vh;">
+        <div id="quick-insights-container" style="display: flex; flex-direction: column; overflow: hidden; height: 100vh;">
           <!-- Dynamically populated from JS -->
         </div>
 
         <!-- Action Items (#1/2, #2/2) -->
-        <div id="actions-container" style="display: flex; flex-direction: column; gap: 16px; overflow-y: auto; scroll-snap-type: y mandatory; height: 100vh;">
+        <div id="actions-container" style="display: flex; flex-direction: column; gap: 16px; overflow: hidden; height: 100vh;">
           <!-- Dynamically populated from JS -->
         </div>
 

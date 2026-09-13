@@ -130,6 +130,22 @@ function getLocalDateString() {
   return `${year}-${month}-${day}`;
 }
 
+function setupTapCards(container) {
+  const cards = Array.from(container.children);
+  if (!cards.length) return;
+
+  let activeIndex = 0;
+  const showCard = (index) => {
+    activeIndex = index;
+    cards.forEach((card, cardIndex) => {
+      card.style.display = cardIndex === activeIndex ? 'flex' : 'none';
+    });
+  };
+
+  showCard(activeIndex);
+  container.onclick = () => showCard((activeIndex + 1) % cards.length);
+}
+
 
 
 
@@ -422,6 +438,9 @@ async function loadChatHistory() {
       <strong>${isUser ? 'You' : 'AI'}:</strong> ${msg.message}
     </div>`;
   }).join('');
+
+  setupTapCards(quickContainer);
+  setupTapCards(actionContainer);
 
   messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
