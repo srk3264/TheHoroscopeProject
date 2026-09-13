@@ -22,11 +22,11 @@
     .auth-container button { width: 100%; padding: 12px; border-radius: 999px; border: none; background: #1E87E8; color: white; font-weight: 600; font-size: 16px; cursor: pointer; }
 
     /* Figma Layout Styles */
-    .figma-root { width: 100%; height: 100dvh; position: relative; background: linear-gradient(180deg, #C7CED6 0%, #043963 50%, #020202 100%); overflow: hidden; z-index: 1; }
-    .content-wrapper { padding: 52px 16px 100px 16px; display: flex; flex-direction: column; gap: 22px; }
+    .figma-root { width: 100%; min-height: 200dvh; position: relative; background: linear-gradient(180deg, #C7CED6 0%, #043963 50%, #020202 100%); overflow-x: hidden; z-index: 1; }
+    .content-wrapper { position: relative; min-height: 200dvh; padding: 0; display: flex; flex-direction: column; gap: 0; }
     .horizontal-scroll { display: flex; gap: 16px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; }
     .horizontal-scroll::-webkit-scrollbar { display: none; }
-    .card-item, .action-card { flex: 0 0 100%; width: 100% !important; min-width: 100% !important; height: 100dvh !important; min-height: 100dvh; }
+    .card-item, .action-card { position: absolute; inset: 0; width: 100% !important; min-width: 100% !important; height: 100% !important; min-height: 100%; touch-action: manipulation; }
     .card-item { padding: 16px; background: rgba(255, 255, 255, 0.10); border-radius: 12px; display: flex; flex-direction: column; }
     .action-card { padding: 24px 22px; border-radius: 12px; display: flex; flex-direction: column; gap: 32px; color: white; }
     .bg-blue { background: linear-gradient(180deg, #1E87E8 0%, #1EE1E8 100%); }
@@ -89,7 +89,7 @@
       <div class="content-wrapper">
         
         <!-- Header -->
-        <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div style="position: absolute; top: 52px; left: 16px; right: 16px; z-index: 3; display: flex; justify-content: space-between; align-items: center;">
           <div id="current-day" style="font-family: 'Averia Serif Libre', serif; font-size: 24px;">Today</div>
           
           <div style="display: flex; align-items: center; gap: 16px;">
@@ -114,12 +114,12 @@
        
 
         <!-- Horizontal Cards (Wear, Binge, Cook, Vibe) -->
-        <div id="quick-insights-container" style="display: flex; flex-direction: column; overflow: hidden; height: 100vh;">
+        <div id="quick-insights-container" style="position: relative; flex: 0 0 100dvh; display: block; overflow: hidden; height: 100dvh;">
           <!-- Dynamically populated from JS -->
         </div>
 
         <!-- Action Items (#1/2, #2/2) -->
-        <div id="actions-container" style="display: flex; flex-direction: column; gap: 16px; overflow: hidden; height: 100vh;">
+        <div id="actions-container" style="position: relative; flex: 0 0 100dvh; display: block; overflow: hidden; height: 100dvh;">
           <!-- Dynamically populated from JS -->
         </div>
 

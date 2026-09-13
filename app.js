@@ -144,6 +144,11 @@ function setupTapCards(container) {
 
   showCard(activeIndex);
   container._showNextCard = () => showCard((activeIndex + 1) % cards.length);
+  container.onpointerup = (event) => {
+    if (event.target.closest('button, input, a')) return;
+    event.preventDefault();
+    container._showNextCard();
+  };
 }
 
 function advanceTapCards(container) {
