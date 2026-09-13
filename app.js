@@ -89,7 +89,7 @@ if (currentDateEl) {
 // Render Quick Cards with embedded SVG Header
   const quickContainer = document.getElementById('quick-insights-container');
   quickContainer.innerHTML = data.quick.map(item => `
-    <div class="card-item" onclick="advanceTapCards(this.parentElement)" style="height: 100vh; width: 100vw; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; background: transparent; cursor: pointer;">
+    <div class="card-item" style="height: 100vh; width: 100vw; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; background: transparent; cursor: pointer;">
       ${zodiacHeaderHTML}
       <div style="text-align: center; color: white; font-size: 40px; font-family: 'Averia Serif Libre', serif;">${item.title}</div>
       <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 16px;">
@@ -103,7 +103,7 @@ if (currentDateEl) {
   // Render Action Cards with embedded SVG Header
   const actionContainer = document.getElementById('actions-container');
   actionContainer.innerHTML = data.actions.map((act, idx) => `
-    <div class="action-card" onclick="advanceTapCards(this.parentElement)" style="height: 100vh; width: 100vw; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; background: transparent; cursor: pointer;">
+    <div class="action-card" style="height: 100vh; width: 100vw; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; background: transparent; cursor: pointer;">
       ${zodiacHeaderHTML}
       <div style="font-size: 28px; font-family: 'Averia Serif Libre', serif; color: white; margin-bottom: 12px;">#${idx + 1}/${data.actions.length}</div>
       <div style="display: flex; flex-direction: column; gap: 12px; text-align: center; color: white;">
@@ -136,23 +136,21 @@ function setupTapCards(container) {
 
   let activeIndex = 0;
   const showCard = (index) => {
-    activeIndex = index;
+    activeIndex = (index + cards.length) % cards.length;
     cards.forEach((card, cardIndex) => {
       card.style.display = cardIndex === activeIndex ? 'flex' : 'none';
+      card.setAttribute('aria-hidden', cardIndex === activeIndex ? 'false' : 'true');
     });
   };
 
   showCard(activeIndex);
-  container._showNextCard = () => showCard((activeIndex + 1) % cards.length);
   container.onpointerup = (event) => {
     if (event.target.closest('button, input, a')) return;
     event.preventDefault();
-    container._showNextCard();
+    const bounds = container.getBoundingClientRect();
+    const direction = event.clientX < bounds.left + bounds.width / 2 ? -1 : 1;
+    showCard(activeIndex + direction);
   };
-}
-
-function advanceTapCards(container) {
-  if (container?._showNextCard) container._showNextCard();
 }
 
 
