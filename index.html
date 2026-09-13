@@ -22,13 +22,13 @@
     .auth-container button { width: 100%; padding: 12px; border-radius: 999px; border: none; background: #1E87E8; color: white; font-weight: 600; font-size: 16px; cursor: pointer; }
 
     /* Figma Layout Styles */
-    .figma-root { width: 100%; height: 100dvh; position: relative; background: linear-gradient(180deg, #F8C99F 0%, #FF705A 54%, #FF2D12 100%); overflow: hidden; z-index: 1; }
+    .figma-root { width: 100%; height: 100dvh; position: relative; background: transparent; overflow: hidden; z-index: 1; }
     .content-wrapper { position: relative; height: 100%; padding: 0; display: block; }
     .horizontal-scroll { display: flex; gap: 16px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; }
     .horizontal-scroll::-webkit-scrollbar { display: none; }
     .card-item, .action-card { position: absolute; inset: 0; width: 100% !important; min-width: 100% !important; height: 100% !important; min-height: 100%; touch-action: manipulation; }
-    .card-item { padding: 16px; background: rgba(255, 255, 255, 0.10); border-radius: 12px; display: flex; flex-direction: column; }
-    .action-card { padding: 24px 22px; border-radius: 12px; display: flex; flex-direction: column; gap: 32px; color: white; }
+    .card-item { padding: 16px; background: rgba(255, 255, 255, 0.10); border-radius: 0; display: flex; flex-direction: column; }
+    .action-card { padding: 24px 22px; border-radius: 0; display: flex; flex-direction: column; gap: 32px; color: white; }
     .bg-blue { background: linear-gradient(180deg, #1E87E8 0%, #1EE1E8 100%); }
     .bg-orange { background: linear-gradient(180deg, #F26522 0%, #D63D00 100%); }
     .pill-btn { padding: 12px; border-radius: 999px; border: 1px solid white; text-align: center; font-family: 'Inter', sans-serif; font-size: 13.3px; font-weight: 500; cursor: pointer; }

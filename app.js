@@ -47,8 +47,11 @@ function getRandomCardGradient() {
   ];
   const toHex = (channel) => channel.toString(16).padStart(2, '0');
   const color = (channels) => `#${channels.map(toHex).join('')}`;
+  const noiseSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noise)" opacity="0.14"/></svg>`;
+  const noise = `url("data:image/svg+xml,${encodeURIComponent(noiseSvg)}")`;
+  const gradient = `linear-gradient(180deg, ${color(edgeColor)} 0%, ${color(mainColor)} 53%, ${color(edgeColor)} 99%)`;
 
-  return `linear-gradient(180deg, ${color(edgeColor)} 0%, ${color(mainColor)} 53%, ${color(edgeColor)} 99%)`;
+  return `${noise} repeat, ${gradient}`;
 }
 
 // 4. Onboarding Handler
