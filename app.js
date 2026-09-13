@@ -113,6 +113,9 @@ if (currentDateEl) {
     </div>
   `).join('');
 
+  setupTapCards(quickContainer);
+  setupTapCards(actionContainer);
+
   showView('view-dashboard');
 
   // Parse and render all Lucide icons on the active screen
@@ -445,9 +448,6 @@ async function loadChatHistory() {
       <strong>${isUser ? 'You' : 'AI'}:</strong> ${msg.message}
     </div>`;
   }).join('');
-
-  setupTapCards(quickContainer);
-  setupTapCards(actionContainer);
 
   messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
