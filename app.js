@@ -111,7 +111,6 @@ if (currentDateEl) {
       ${zodiacHeaderHTML}
       <div style="text-align: center; color: white; font-size: 40px; font-family: 'Averia Serif Libre', serif;">${item.title}</div>
       <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 16px;">
-        <div style="font-size: 48px;">${item.emoji}</div>
         <div style="text-align: center; color: white; font-size: 16px; font-weight: 600;">${item.headline}</div>
         <div style="text-align: center; color: rgba(255, 255, 255, 0.60); font-size: 13px; font-style: italic;">${item.reason}</div>
       </div>
