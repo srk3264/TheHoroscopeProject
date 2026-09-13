@@ -51,7 +51,7 @@ function getRandomCardGradient() {
   const noise = `url("data:image/svg+xml,${encodeURIComponent(noiseSvg)}")`;
   const gradient = `linear-gradient(180deg, ${color(edgeColor)} 0%, ${color(mainColor)} 53%, ${color(edgeColor)} 99%)`;
 
-  return `${noise} repeat, ${gradient}`;
+  return `background-color: ${color(mainColor)}; background-image: ${noise}, ${gradient}; background-repeat: repeat, no-repeat; background-size: 160px 160px, 100% 100%;`;
 }
 
 // 4. Onboarding Handler
@@ -109,7 +109,7 @@ if (currentDateEl) {
 // Render Quick Cards with embedded SVG Header
   const quickContainer = document.getElementById('quick-insights-container');
   quickContainer.innerHTML = data.quick.map(item => `
-    <div class="card-item" style="height: 100vh; width: 100vw; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; background: ${getRandomCardGradient()}; cursor: pointer;">
+    <div class="card-item" style="height: 100vh; width: 100vw; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; ${getRandomCardGradient()} cursor: pointer;">
       ${zodiacHeaderHTML}
       <div style="text-align: center; color: white; font-size: 40px; font-family: 'Averia Serif Libre', serif;">${item.title}</div>
       <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 16px;">
@@ -123,7 +123,7 @@ if (currentDateEl) {
   // Render Action Cards with embedded SVG Header
   const actionContainer = document.getElementById('actions-container');
   actionContainer.innerHTML = data.actions.map((act, idx) => `
-      <div class="action-card" style="height: 100vh; width: 100vw; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; background: ${getRandomCardGradient()}; cursor: pointer;">
+      <div class="action-card" style="height: 100vh; width: 100vw; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; ${getRandomCardGradient()} cursor: pointer;">
       ${zodiacHeaderHTML}
       <div style="font-size: 28px; font-family: 'Averia Serif Libre', serif; color: white; margin-bottom: 12px;">#${idx + 1}/${data.actions.length}</div>
       <div style="display: flex; flex-direction: column; gap: 12px; text-align: center; color: white;">
