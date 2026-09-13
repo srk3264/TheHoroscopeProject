@@ -142,8 +142,14 @@ function setupTapCards(container) {
     });
   };
 
+  cards.forEach((card) => {
+    card.addEventListener('click', (event) => {
+      event.stopPropagation();
+      showCard((activeIndex + 1) % cards.length);
+    });
+  });
+
   showCard(activeIndex);
-  container.onclick = () => showCard((activeIndex + 1) % cards.length);
 }
 
 
