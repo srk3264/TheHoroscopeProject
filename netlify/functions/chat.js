@@ -103,7 +103,7 @@ exports.handler = async (event) => {
     // 5. Build prompt context for Nemotron
     const systemMessage = {
       role: 'system',
-      content: `(${profile.user_sign} and ${profile.partner_sign}) are a couple. \nToday's daily relationship insight context: ${todayInsight}. \nUse this context to answer ${profile.user_sign} query. Don't exceed 24 words.`
+      content: `(${profile.user_sign} and ${profile.partner_sign}) are a couple. \nToday's daily relationship insight context: ${todayInsight}. \nUse this context to answer ${profile.user_sign} query. Never give an advice that's not aligned with ${todayInsight}. Don't exceed 24 words.`
     };
 
     const formattedHistory = (history || []).map(msg => ({
