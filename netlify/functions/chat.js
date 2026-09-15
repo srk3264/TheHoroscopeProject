@@ -11,11 +11,24 @@ exports.handler = async (event) => {
   }
 
   try {
-    const { userId, pairId, userLocalDate, prompt } = JSON.parse(event.body);
+    const { userId: requestedUserId, pairId, userLocalDate, prompt } = JSON.parse(event.body);
 
-    if (!userId || !pairId || !prompt || !userLocalDate) {
+    if (!requestedUserId || !pairId || !prompt || !userLocalDate) {
       return { statusCode: 400, body: JSON.stringify({ error: 'Missing required fields' }) };
     }
+
+    const authorization = event.headers.authorization || event.headers.Authorization || '';
+    const accessToken = authorization.startsWith('Bearer ') ? authorization.slice(7) : '';
+    if (!accessToken) {
+      return { statusCode: 401, body: JSON.stringify({ error: 'Authentication required.' }) };
+    }
+
+    const { data: { user: authenticatedUser }, error: authErr } = await supabase.auth.getUser(accessToken);
+    if (authErr || !authenticatedUser || authenticatedUser.id !== requestedUserId) {
+      return { statusCode: 401, body: JSON.stringify({ error: 'Invalid authenticated user.' }) };
+    }
+
+    const userId = authenticatedUser.id;
 
     // 1. Fetch user & partner signs from profiles
     const { data: profile, error: profileErr } = await supabase
@@ -25,6 +38,30 @@ exports.handler = async (event) => {
       .single();
 
     if (profileErr) throw profileErr;
+
+    const expectedPairId = `${profile.user_sign.toLowerCase()}_${profile.partner_sign.toLowerCase()}`;
+    if (pairId !== expectedPairId) {
+      return { statusCode: 403, body: JSON.stringify({ error: 'Pair does not match the user profile.' }) };
+    }
+
+    const { data: subscription, error: subscriptionErr } = await supabase
+      .from('subscriptions')
+      .select('status, current_period_end')
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    if (subscriptionErr) throw subscriptionErr;
+
+    const subscriptionIsActive = subscription &&
+      ['active', 'trialing'].includes(subscription.status) &&
+      (!subscription.current_period_end || new Date(subscription.current_period_end) > new Date());
+
+    if (!subscriptionIsActive) {
+      return {
+        statusCode: 402,
+        body: JSON.stringify({ error: 'An active subscription is required to use chat.' })
+      };
+    }
 
    // 2. Fetch today's pair insight with auto-sync fallback
     let { data: insightData } = await supabase

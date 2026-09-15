@@ -20,6 +20,10 @@
     .auth-container { padding: 40px 22px; text-align: center; z-index: 1; position: relative; }
     .auth-container input, .auth-container select { width: 100%; padding: 12px; margin: 12px 0; border-radius: 8px; border: none; font-size: 16px; }
     .auth-container button { width: 100%; padding: 12px; border-radius: 999px; border: none; background: #1E87E8; color: white; font-weight: 600; font-size: 16px; cursor: pointer; }
+    .paywall-root { min-height: 100dvh; padding: 48px 22px; background: linear-gradient(180deg, #F8C99F 0%, #FF705A 54%, #FF2D12 100%); color: #000; text-align: center; }
+    .paywall-root h2 { font-family: 'Averia Serif Libre', serif; font-size: 34px; font-weight: 400; margin-bottom: 16px; }
+    .paywall-root p { font-size: 16px; line-height: 1.5; margin-bottom: 28px; }
+    .paywall-root button { width: 100%; padding: 14px; border: 1px solid #000; background: #000; color: #fff; font-weight: 600; font-size: 16px; cursor: pointer; }
 
     /* Figma Layout Styles */
     .figma-root { width: 100%; height: 100dvh; position: relative; background: transparent; overflow: hidden; z-index: 1; }
@@ -96,7 +100,18 @@
     </div>
   </div>
 
-  <!-- 3. DASHBOARD VIEW (FIGMA LAYOUT) -->
+  <!-- 3. PAYWALL VIEW -->
+  <div id="view-paywall" class="view">
+    <div class="paywall-root">
+      <h2>Unlock Cosmic Chat</h2>
+      <p>Subscribe to unlock your daily relationship insights and personalized chat.</p>
+      <button type="button" onclick="startCheckout()">Subscribe to continue</button>
+      <button type="button" onclick="checkSubscription()" style="margin-top: 12px; background: transparent; color: #000;">I already subscribed</button>
+      <button type="button" onclick="handleLogout()" style="margin-top: 24px; background: transparent; border: none; color: #000;">Log out</button>
+    </div>
+  </div>
+
+  <!-- 4. DASHBOARD VIEW (FIGMA LAYOUT) -->
   <div id="view-dashboard" class="view">
     <div class="figma-root">
       <div class="content-wrapper">

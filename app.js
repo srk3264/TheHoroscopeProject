@@ -34,6 +34,58 @@ async function handleLogout() {
   showView('view-login');
 }
 
+async function checkSubscription() {
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (!session) {
+    showView('view-login');
+    return false;
+  }
+
+  const response = await fetch('/.netlify/functions/check-subscription', {
+    headers: { Authorization: `Bearer ${session.access_token}` }
+  });
+  const result = await response.json();
+
+  if (response.ok && result.active) {
+    return true;
+  }
+
+  showView('view-paywall');
+  return false;
+}
+
+async function startCheckout() {
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (!session) {
+    showView('view-login');
+    return;
+  }
+
+  const response = await fetch('/.netlify/functions/create-checkout-session', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${session.access_token}` }
+  });
+  const result = await response.json();
+
+  if (!response.ok || !result.url) {
+    alert(result.error || 'Unable to start checkout.');
+    return;
+  }
+
+  window.location.href = result.url;
+}
+
+async function routeAuthenticatedUser(profile) {
+  if (!profile?.user_sign || !profile?.partner_sign) {
+    showView('view-onboarding');
+    return;
+  }
+
+  if (await checkSubscription()) {
+    loadDashboard(profile.user_sign, profile.partner_sign);
+  }
+}
+
 function getRandomCardGradient() {
   const mainColor = [
     Math.floor(Math.random() * 256),
@@ -68,7 +120,7 @@ async function savePreferences() {
   if (error) {
     alert('Error saving preferences: ' + error.message);
   } else {
-    loadDashboard(userSign, partnerSign);
+    showView('view-paywall');
   }
 }
 
@@ -322,11 +374,7 @@ async function initApp() {
       .eq('id', session.user.id)
       .single();
 
-    if (profile && profile.user_sign && profile.partner_sign) {
-      loadDashboard(profile.user_sign, profile.partner_sign);
-    } else {
-      showView('view-onboarding');
-    }
+    await routeAuthenticatedUser(profile);
   }
 
   supabaseClient.auth.onAuthStateChange(async (event, session) => {
@@ -341,11 +389,7 @@ async function initApp() {
         .eq('id', session.user.id)
         .single();
 
-      if (profile && profile.user_sign && profile.partner_sign) {
-        loadDashboard(profile.user_sign, profile.partner_sign);
-      } else {
-        showView('view-onboarding');
-      }
+      await routeAuthenticatedUser(profile);
     } else if (event === 'SIGNED_OUT') {
       showView('view-login');
     }
@@ -385,7 +429,10 @@ async function handleSendMessage(inputId = null) {
   try {
     const res = await fetch('/.netlify/functions/chat', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session.access_token}`
+      },
       body: JSON.stringify({ userId, pairId, userLocalDate, prompt })
     });
 
