@@ -229,6 +229,40 @@ function getLocalDateString() {
   return `${year}-${month}-${day}`;
 }
 
+function getUtcBoundaryForLocalDate(localDate, timeZone) {
+  const [year, month, day] = localDate.split('-').map(Number);
+  const utcGuess = Date.UTC(year, month - 1, day);
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat('en-US', {
+      timeZone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hourCycle: 'h23'
+    }).formatToParts(new Date(utcGuess))
+      .filter(({ type }) => type !== 'literal')
+      .map(({ type, value }) => [type, value])
+  );
+  const localAsUtc = Date.UTC(
+    Number(parts.year),
+    Number(parts.month) - 1,
+    Number(parts.day),
+    Number(parts.hour),
+    Number(parts.minute),
+    Number(parts.second)
+  );
+  return new Date(utcGuess - (localAsUtc - utcGuess)).toISOString();
+}
+
+function getNextLocalDate(localDate) {
+  const nextDate = new Date(`${localDate}T12:00:00Z`);
+  nextDate.setUTCDate(nextDate.getUTCDate() + 1);
+  return nextDate.toISOString().slice(0, 10);
+}
+
 function setupUnifiedTapCards(...containers) {
   const cards = containers.flatMap(container => Array.from(container.children));
   if (!cards.length) return;
@@ -461,7 +495,13 @@ async function handleSendMessage(inputId = null) {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${session.access_token}`
       },
-      body: JSON.stringify({ userId, pairId, userLocalDate, prompt })
+      body: JSON.stringify({
+        userId,
+        pairId,
+        userLocalDate,
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        prompt
+      })
     });
 
     const data = await res.json();
@@ -522,12 +562,18 @@ async function loadChatHistory() {
   if (!session) return;
 
   const pairId = `${currentUserSign.toLowerCase()}_${currentPartnerSign.toLowerCase()}`;
+  const today = getLocalDateString();
+  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const dayStart = getUtcBoundaryForLocalDate(today, timeZone);
+  const dayEnd = getUtcBoundaryForLocalDate(getNextLocalDate(today), timeZone);
 
   const { data: messages, error } = await supabaseClient
     .from('chat_messages')
     .select('sender, message')
     .eq('user_id', session.user.id)
     .eq('pair_id', pairId)
+    .gte('created_at', dayStart)
+    .lt('created_at', dayEnd)
     .order('created_at', { ascending: true });
 
   if (error) {

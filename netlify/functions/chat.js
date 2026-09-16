@@ -5,15 +5,49 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
+function getUtcBoundaryForLocalDate(localDate, timeZone) {
+  const [year, month, day] = localDate.split('-').map(Number);
+  const utcGuess = Date.UTC(year, month - 1, day);
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat('en-US', {
+      timeZone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hourCycle: 'h23'
+    }).formatToParts(new Date(utcGuess))
+      .filter(({ type }) => type !== 'literal')
+      .map(({ type, value }) => [type, value])
+  );
+  const localAsUtc = Date.UTC(
+    Number(parts.year),
+    Number(parts.month) - 1,
+    Number(parts.day),
+    Number(parts.hour),
+    Number(parts.minute),
+    Number(parts.second)
+  );
+  return new Date(utcGuess - (localAsUtc - utcGuess)).toISOString();
+}
+
+function getNextLocalDate(localDate) {
+  const nextDate = new Date(`${localDate}T12:00:00Z`);
+  nextDate.setUTCDate(nextDate.getUTCDate() + 1);
+  return nextDate.toISOString().slice(0, 10);
+}
+
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
   try {
-    const { userId: requestedUserId, pairId, userLocalDate, prompt } = JSON.parse(event.body);
+    const { userId: requestedUserId, pairId, userLocalDate, timeZone, prompt } = JSON.parse(event.body);
 
-    if (!requestedUserId || !pairId || !prompt || !userLocalDate) {
+    if (!requestedUserId || !pairId || !prompt || !userLocalDate || !timeZone) {
       return { statusCode: 400, body: JSON.stringify({ error: 'Missing required fields' }) };
     }
 
@@ -89,13 +123,15 @@ exports.handler = async (event) => {
       : "No specific daily insight available today.";
 
     // 3. Rate-limiting check BEFORE fetching full chat history
-    const localMidnightISO = new Date(`${userLocalDate}T00:00:00`).toISOString();
+    const localMidnightISO = getUtcBoundaryForLocalDate(userLocalDate, timeZone);
+    const nextLocalMidnightISO = getUtcBoundaryForLocalDate(getNextLocalDate(userLocalDate), timeZone);
     const { data: userMsgs, error: limitErr } = await supabase
       .from('chat_messages')
       .select('created_at')
       .eq('user_id', userId)
       .eq('sender', 'user')
       .gte('created_at', localMidnightISO)
+      .lt('created_at', nextLocalMidnightISO)
       .order('created_at', { ascending: false });
 
     if (limitErr) throw limitErr;
@@ -125,6 +161,7 @@ exports.handler = async (event) => {
       .eq('user_id', userId)
       .eq('pair_id', pairId)
       .gte('created_at', localMidnightISO)
+      .lt('created_at', nextLocalMidnightISO)
       .order('created_at', { ascending: true });
 
     if (historyErr) throw historyErr;
