@@ -20,6 +20,13 @@
     .auth-container { padding: 40px 22px; text-align: center; z-index: 1; position: relative; }
     .auth-container input, .auth-container select { width: 100%; padding: 12px; margin: 12px 0; border-radius: 8px; border: none; font-size: 16px; }
     .auth-container button { width: 100%; padding: 12px; border-radius: 999px; border: none; background: #1E87E8; color: white; font-weight: 600; font-size: 16px; cursor: pointer; }
+    .onboarding-screen { display: none; }
+    .onboarding-screen.active { display: block; }
+    .onboarding-options { display: grid; gap: 10px; margin-top: 24px; text-align: left; }
+    .onboarding-option { display: block; padding: 14px 16px; border: 1px solid rgba(0, 0, 0, 0.35); cursor: pointer; background: rgba(255, 255, 255, 0.3); }
+    .onboarding-option input { position: absolute; opacity: 0; pointer-events: none; }
+    .onboarding-option:has(input:checked) { background: #000; color: #fff; border-color: #000; }
+    .onboarding-next { margin-top: 28px; }
     .paywall-root { min-height: 100dvh; padding: 48px 22px; background: linear-gradient(180deg, #F8C99F 0%, #FF705A 54%, #FF2D12 100%); color: #000; text-align: center; }
     .paywall-root h2 { font-family: 'Averia Serif Libre', serif; font-size: 34px; font-weight: 400; margin-bottom: 16px; }
     .paywall-root p { font-size: 16px; line-height: 1.5; margin-bottom: 28px; }
@@ -65,38 +72,68 @@
   <!-- 2. ONBOARDING VIEW -->
   <div id="view-onboarding" class="view">
     <div class="auth-container">
-      <h2 style="font-family: 'Averia Serif Libre', serif; font-size: 28px; margin-bottom: 16px;">Select Signs</h2>
-      <label>Your Sign</label>
-      <select id="user-sign">
-        <option value="aries">Aries ♈</option>
-        <option value="taurus">Taurus ♉</option>
-        <option value="gemini">Gemini ♊</option>
-        <option value="cancer">Cancer ♋</option>
-        <option value="leo">Leo ♌</option>
-        <option value="virgo">Virgo ♍</option>
-        <option value="libra">Libra ♎</option>
-        <option value="scorpio">Scorpio ♏</option>
-        <option value="sagittarius">Sagittarius ♐</option>
-        <option value="capricorn">Capricorn ♑</option>
-        <option value="aquarius">Aquarius ♒</option>
-        <option value="pisces">Pisces ♓</option>
-      </select>
-      <label style="margin-top: 12px; display: block;">Partner's Sign</label>
-      <select id="partner-sign">
-        <option value="aries">Aries ♈</option>
-        <option value="taurus">Taurus ♉</option>
-        <option value="gemini">Gemini ♊</option>
-        <option value="cancer">Cancer ♋</option>
-        <option value="leo">Leo ♌</option>
-        <option value="virgo">Virgo ♍</option>
-        <option value="libra">Libra ♎</option>
-        <option value="scorpio">Scorpio ♏</option>
-        <option value="sagittarius">Sagittarius ♐</option>
-        <option value="capricorn">Capricorn ♑</option>
-        <option value="aquarius">Aquarius ♒</option>
-        <option value="pisces">Pisces ♓</option>
-      </select>
-      <button onclick="savePreferences()" style="margin-top: 24px;">Save & View Reading</button>
+      <div id="onboarding-user-sign" class="onboarding-screen active">
+        <h2 style="font-family: 'Averia Serif Libre', serif; font-size: 28px; margin-bottom: 8px;">Your sign</h2>
+        <p>Start with you.</p>
+        <div class="onboarding-options">
+          <label class="onboarding-option"><input type="radio" name="user-sign" value="aries">Aries ♈</label>
+          <label class="onboarding-option"><input type="radio" name="user-sign" value="taurus">Taurus ♉</label>
+          <label class="onboarding-option"><input type="radio" name="user-sign" value="gemini">Gemini ♊</label>
+          <label class="onboarding-option"><input type="radio" name="user-sign" value="cancer">Cancer ♋</label>
+          <label class="onboarding-option"><input type="radio" name="user-sign" value="leo">Leo ♌</label>
+          <label class="onboarding-option"><input type="radio" name="user-sign" value="virgo">Virgo ♍</label>
+          <label class="onboarding-option"><input type="radio" name="user-sign" value="libra">Libra ♎</label>
+          <label class="onboarding-option"><input type="radio" name="user-sign" value="scorpio">Scorpio ♏</label>
+          <label class="onboarding-option"><input type="radio" name="user-sign" value="sagittarius">Sagittarius ♐</label>
+          <label class="onboarding-option"><input type="radio" name="user-sign" value="capricorn">Capricorn ♑</label>
+          <label class="onboarding-option"><input type="radio" name="user-sign" value="aquarius">Aquarius ♒</label>
+          <label class="onboarding-option"><input type="radio" name="user-sign" value="pisces">Pisces ♓</label>
+        </div>
+        <button class="onboarding-next" onclick="nextOnboardingStep('onboarding-user-sign', 'onboarding-partner-sign', 'user-sign')">Next</button>
+      </div>
+
+      <div id="onboarding-partner-sign" class="onboarding-screen">
+        <h2 style="font-family: 'Averia Serif Libre', serif; font-size: 28px; margin-bottom: 8px;">Your partner's sign</h2>
+        <p>Now choose theirs.</p>
+        <div class="onboarding-options">
+          <label class="onboarding-option"><input type="radio" name="partner-sign" value="aries">Aries ♈</label>
+          <label class="onboarding-option"><input type="radio" name="partner-sign" value="taurus">Taurus ♉</label>
+          <label class="onboarding-option"><input type="radio" name="partner-sign" value="gemini">Gemini ♊</label>
+          <label class="onboarding-option"><input type="radio" name="partner-sign" value="cancer">Cancer ♋</label>
+          <label class="onboarding-option"><input type="radio" name="partner-sign" value="leo">Leo ♌</label>
+          <label class="onboarding-option"><input type="radio" name="partner-sign" value="virgo">Virgo ♍</label>
+          <label class="onboarding-option"><input type="radio" name="partner-sign" value="libra">Libra ♎</label>
+          <label class="onboarding-option"><input type="radio" name="partner-sign" value="scorpio">Scorpio ♏</label>
+          <label class="onboarding-option"><input type="radio" name="partner-sign" value="sagittarius">Sagittarius ♐</label>
+          <label class="onboarding-option"><input type="radio" name="partner-sign" value="capricorn">Capricorn ♑</label>
+          <label class="onboarding-option"><input type="radio" name="partner-sign" value="aquarius">Aquarius ♒</label>
+          <label class="onboarding-option"><input type="radio" name="partner-sign" value="pisces">Pisces ♓</label>
+        </div>
+        <button class="onboarding-next" onclick="nextOnboardingStep('onboarding-partner-sign', 'onboarding-relationship', 'partner-sign')">Next</button>
+      </div>
+
+      <div id="onboarding-relationship" class="onboarding-screen">
+        <h2 style="font-family: 'Averia Serif Libre', serif; font-size: 28px; margin-bottom: 8px;">What are you two?</h2>
+        <div class="onboarding-options">
+          <label class="onboarding-option"><input type="radio" name="relationship-type" value="dating">Dating</label>
+          <label class="onboarding-option"><input type="radio" name="relationship-type" value="committed">Committed</label>
+          <label class="onboarding-option"><input type="radio" name="relationship-type" value="married">Married</label>
+          <label class="onboarding-option"><input type="radio" name="relationship-type" value="situationship">Situationship</label>
+          <label class="onboarding-option"><input type="radio" name="relationship-type" value="friends-crush">Friends / crush</label>
+          <label class="onboarding-option"><input type="radio" name="relationship-type" value="courting">Courting</label>
+        </div>
+        <button class="onboarding-next" onclick="nextOnboardingStep('onboarding-relationship', 'onboarding-distance', 'relationship-type')">Next</button>
+      </div>
+
+      <div id="onboarding-distance" class="onboarding-screen">
+        <h2 style="font-family: 'Averia Serif Libre', serif; font-size: 28px; margin-bottom: 8px;">How far apart are you?</h2>
+        <div class="onboarding-options">
+          <label class="onboarding-option"><input type="radio" name="distance" value="same-home">Same home</label>
+          <label class="onboarding-option"><input type="radio" name="distance" value="nearby">Nearby</label>
+          <label class="onboarding-option"><input type="radio" name="distance" value="long-distance">Long-distance</label>
+        </div>
+        <button class="onboarding-next" onclick="savePreferences()">Continue</button>
+      </div>
     </div>
   </div>
 
@@ -232,6 +269,23 @@
           <option value="aquarius">Aquarius ♒</option>
           <option value="pisces">Pisces ♓</option>
         </select>
+
+        <label style="display: block; text-align: left; margin-top: 12px;">Relationship type</label>
+        <div class="onboarding-options">
+          <label class="onboarding-option"><input type="radio" name="settings-relationship-type" value="dating">Dating</label>
+          <label class="onboarding-option"><input type="radio" name="settings-relationship-type" value="committed">Committed</label>
+          <label class="onboarding-option"><input type="radio" name="settings-relationship-type" value="married">Married</label>
+          <label class="onboarding-option"><input type="radio" name="settings-relationship-type" value="situationship">Situationship</label>
+          <label class="onboarding-option"><input type="radio" name="settings-relationship-type" value="friends-crush">Friends / crush</label>
+          <label class="onboarding-option"><input type="radio" name="settings-relationship-type" value="courting">Courting</label>
+        </div>
+
+        <label style="display: block; text-align: left; margin-top: 12px;">Distance</label>
+        <div class="onboarding-options">
+          <label class="onboarding-option"><input type="radio" name="settings-distance" value="same-home">Same home</label>
+          <label class="onboarding-option"><input type="radio" name="settings-distance" value="nearby">Nearby</label>
+          <label class="onboarding-option"><input type="radio" name="settings-distance" value="long-distance">Long-distance</label>
+        </div>
 
         <button type="submit" style="margin-top: 24px;">Save Changes</button>
       </form>

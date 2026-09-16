@@ -33,7 +33,7 @@ exports.handler = async (event) => {
     // 1. Fetch user & partner signs from profiles
     const { data: profile, error: profileErr } = await supabase
       .from('profiles')
-      .select('user_sign, partner_sign')
+      .select('user_sign, partner_sign, relationship_type, distance')
       .eq('id', userId)
       .single();
 
@@ -140,7 +140,7 @@ exports.handler = async (event) => {
     // 5. Build prompt context for Nemotron
     const systemMessage = {
       role: 'system',
-      content: `(${profile.user_sign} and ${profile.partner_sign}) are a couple. \nToday's daily relationship insight context: ${todayInsight}. \nUse this context to answer ${profile.user_sign} query. Never give an advice that's not aligned with ${todayInsight}. Don't exceed 24 words.`
+      content: `(${profile.user_sign} and ${profile.partner_sign}) are a couple. Their relationship type is ${profile.relationship_type || 'unspecified'} and their distance is ${profile.distance || 'unspecified'}.\nToday's daily relationship insight context: ${todayInsight}. \nUse this context and their relationship details to answer ${profile.user_sign} query. Never give an advice that's not aligned with ${todayInsight}. Don't exceed 24 words.`
     };
 
     const formattedHistory = (history || []).map(msg => ({

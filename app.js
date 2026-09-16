@@ -7,6 +7,8 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_
 // Global state variables for settings
 let currentUserSign = '';
 let currentPartnerSign = '';
+let currentRelationshipType = '';
+let currentDistance = '';
 
 
 
@@ -81,6 +83,9 @@ async function routeAuthenticatedUser(profile) {
     return;
   }
 
+  currentRelationshipType = profile.relationship_type || '';
+  currentDistance = profile.distance || '';
+
   if (await checkSubscription()) {
     loadDashboard(profile.user_sign, profile.partner_sign);
   }
@@ -105,16 +110,39 @@ function getRandomCardGradient() {
 }
 
 // 4. Onboarding Handler
+function getSelectedValue(name) {
+  return document.querySelector(`input[name="${name}"]:checked`)?.value || '';
+}
+
+function nextOnboardingStep(currentId, nextId, fieldName) {
+  if (!getSelectedValue(fieldName)) {
+    alert('Choose an option to continue.');
+    return;
+  }
+
+  document.getElementById(currentId).classList.remove('active');
+  document.getElementById(nextId).classList.add('active');
+}
+
 async function savePreferences() {
-  const userSign = document.getElementById('user-sign').value;
-  const partnerSign = document.getElementById('partner-sign').value;
+  const userSign = getSelectedValue('user-sign');
+  const partnerSign = getSelectedValue('partner-sign');
+  const relationshipType = getSelectedValue('relationship-type');
+  const distance = getSelectedValue('distance');
+
+  if (!userSign || !partnerSign || !relationshipType || !distance) {
+    alert('Choose an option to continue.');
+    return;
+  }
 
   const { data: { user } } = await supabaseClient.auth.getUser();
   if (!user) return alert('No active session found.');
 
   const { error } = await supabaseClient.from('profiles').update({
     user_sign: userSign,
-    partner_sign: partnerSign
+    partner_sign: partnerSign,
+    relationship_type: relationshipType,
+    distance
   }).eq('id', user.id);
 
   if (error) {
@@ -524,7 +552,7 @@ function openChatView() {
 }
 
 // Populates current sign values when opening settings screen
-function openSettingsView() {
+async function openSettingsView() {
   const userSelect = document.getElementById('settings-user-sign');
   const partnerSelect = document.getElementById('settings-partner-sign');
 
@@ -534,6 +562,23 @@ function openSettingsView() {
   if (partnerSelect && currentPartnerSign) {
     partnerSelect.value = currentPartnerSign.toLowerCase();
   }
+
+  const { data: { user } } = await supabaseClient.auth.getUser();
+  if (user) {
+    const { data: profile } = await supabaseClient
+      .from('profiles')
+      .select('relationship_type, distance')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    currentRelationshipType = profile?.relationship_type || currentRelationshipType;
+    currentDistance = profile?.distance || currentDistance;
+  }
+
+  const relationshipInput = document.querySelector(`input[name="settings-relationship-type"][value="${currentRelationshipType}"]`);
+  const distanceInput = document.querySelector(`input[name="settings-distance"][value="${currentDistance}"]`);
+  if (relationshipInput) relationshipInput.checked = true;
+  if (distanceInput) distanceInput.checked = true;
 
   showView('view-settings');
 }
@@ -546,6 +591,13 @@ async function handleUpdateSigns(event) {
 
   const newUserSign = document.getElementById('settings-user-sign').value;
   const newPartnerSign = document.getElementById('settings-partner-sign').value;
+  const newRelationshipType = getSelectedValue('settings-relationship-type');
+  const newDistance = getSelectedValue('settings-distance');
+
+  if (!newRelationshipType || !newDistance) {
+    alert('Choose a relationship type and distance to continue.');
+    return;
+  }
 
   const { data: { user } } = await supabaseClient.auth.getUser();
   if (!user) return;
@@ -554,7 +606,9 @@ async function handleUpdateSigns(event) {
     .from('profiles')
     .update({
       user_sign: newUserSign,
-      partner_sign: newPartnerSign
+      partner_sign: newPartnerSign,
+      relationship_type: newRelationshipType,
+      distance: newDistance
     })
     .eq('id', user.id);
 
@@ -565,6 +619,8 @@ async function handleUpdateSigns(event) {
 
   currentUserSign = newUserSign;
   currentPartnerSign = newPartnerSign;
+  currentRelationshipType = newRelationshipType;
+  currentDistance = newDistance;
 
   alert('Signs updated successfully!');
   loadDashboard(currentUserSign, currentPartnerSign);
