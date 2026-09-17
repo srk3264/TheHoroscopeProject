@@ -41,7 +41,7 @@
     .card-item, .action-card { isolation: isolate; }
     .card-item::before, .action-card::before { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: 0.28; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E"); mix-blend-mode: overlay; }
     .card-item { padding: 16px; border-radius: 0; display: flex; flex-direction: column; }
-    .action-card { padding: 24px 22px; border-radius: 0; display: flex; flex-direction: column; gap: 24px; color: white; }
+    .action-card { padding: 24px 22px; border-radius: 0; display: flex; flex-direction: column; gap: 16px; color: white; }
     .bg-blue { background: linear-gradient(180deg, #1E87E8 0%, #1EE1E8 100%); }
     .bg-orange { background: linear-gradient(180deg, #F26522 0%, #D63D00 100%); }
     .pill-btn { padding: 12px; border-radius: 999px; border: 1px solid white; text-align: center; font-family: 'Inter', sans-serif; font-size: 13.3px; font-weight: 500; cursor: pointer; }
@@ -55,7 +55,10 @@
     .chat-view-header button { color: #000 !important; }
     .chat-view-header h2 { color: #000; }
     .chat-messages { position: relative; z-index: 1; color: #000; }
-    .chat-msg { color: #000; }
+    .chat-msg { max-width: 82%; color: #000; padding: 10px 14px; line-height: 1.4; }
+    .user-msg { align-self: flex-end; text-align: right; background: rgba(255, 255, 255, 0.45); }
+    .assistant-msg { align-self: flex-start; text-align: left; background: rgba(255, 255, 255, 0.7); }
+    .chat-msg strong { display: none; }
     .chat-bar.chat-page-bar { position: relative; z-index: 1; transform: none; left: auto; bottom: auto; width: 100%; max-width: 100%; margin-top: auto; }
   </style>
 </head>

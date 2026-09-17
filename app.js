@@ -187,10 +187,10 @@ if (currentDateEl) {
 // Render Quick Cards with embedded SVG Header
   const quickContainer = document.getElementById('quick-insights-container');
   quickContainer.innerHTML = data.quick.map(item => `
-    <div class="card-item" style="height: 100vh; width: 100vw; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 24px; padding: 20px; box-sizing: border-box; ${getRandomCardGradient()} cursor: pointer;">
+    <div class="card-item" style="height: 100vh; width: 100vw; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 16px; padding: 20px; box-sizing: border-box; ${getRandomCardGradient()} cursor: pointer;">
       ${zodiacHeaderHTML}
       <div style="text-align: center; color: white; font-size: 40px; font-family: 'Averia Serif Libre', serif;">${item.title}</div>
-      <div style="display: flex; flex-direction: column; align-items: center; gap: 24px; margin-top: 0;">
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 16px; margin-top: 0;">
         <div style="text-align: center; color: white; font-size: 16px; font-weight: 600;">${item.headline}</div>
         <div style="text-align: center; color: rgba(255, 255, 255, 0.60); font-size: 13px; font-style: italic;">${item.reason}</div>
       </div>
@@ -483,7 +483,7 @@ async function handleSendMessage(inputId = null) {
 
   // Append user message immediately to chat UI
   if (messagesContainer) {
-    messagesContainer.innerHTML += `<div class="chat-msg user-msg"><strong>You:</strong> ${prompt}</div>`;
+    messagesContainer.innerHTML += `<div class="chat-msg user-msg">${prompt}</div>`;
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
   }
   input.value = '';
@@ -509,7 +509,7 @@ async function handleSendMessage(inputId = null) {
     if (!res.ok) {
       alert(data.error || 'Failed to send message.');
     } else if (messagesContainer) {
-      messagesContainer.innerHTML += `<div class="chat-msg assistant-msg"><strong>AI:</strong> ${data.reply}</div>`;
+      messagesContainer.innerHTML += `<div class="chat-msg assistant-msg">${data.reply}</div>`;
       messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
   } catch (err) {
@@ -584,9 +584,7 @@ async function loadChatHistory() {
   // Render fetched history using exact column names: sender & message
   messagesContainer.innerHTML = (messages || []).map(msg => {
     const isUser = msg.sender === 'user';
-    return `<div class="chat-msg ${isUser ? 'user-msg' : 'assistant-msg'}">
-      <strong>${isUser ? 'You' : 'AI'}:</strong> ${msg.message}
-    </div>`;
+    return `<div class="chat-msg ${isUser ? 'user-msg' : 'assistant-msg'}">${msg.message}</div>`;
   }).join('');
 
   messagesContainer.scrollTop = messagesContainer.scrollHeight;
