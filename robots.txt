@@ -1,0 +1,13 @@
+# Allow all crawlers to crawl all pages
+User-agent: *
+Allow: /
+
+# Disallow private/admin areas (add as needed)
+Disallow: /admin/
+Disallow: /private/
+
+# Crawl delay (optional - be nice to bots)
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://yourdomain.com/sitemap.xml
