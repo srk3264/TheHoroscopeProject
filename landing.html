@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Discover fun couples activities, romantic date ideas, games, and things to do together. Spark helps couples find memorable date nights and activities to strengthen their connection.">
+  <meta name="keywords" content="couple activities ideas, romantic date ideas, couples activities, date night ideas, long distance relationship activities, couples games, things to do as a couple">
+  <meta name="author" content="Spark">
+
+  <!-- Open Graph Tags -->
+  <meta property="og:title" content="Fun Couples Activities & Romantic Date Ideas | Spark">
+  <meta property="og:description" content="Stop scrolling for date ideas. Spark helps couples discover fun activities, romantic date nights, and memorable things to do together.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://spark.local">
+  <meta property="og:image" content="https://spark.local/og-image.jpg">
+
+  <!-- Twitter Card Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Fun Couples Activities & Romantic Date Ideas | Spark">
+  <meta name="twitter:description" content="Stop scrolling for date ideas. Spark helps couples discover fun activities and memorable date nights.">
+
+  <!-- Canonical -->
+  <link rel="canonical" href="https://spark.local/">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✨</text></svg>">
+
+  <title>Fun Couples Activities & Romantic Date Ideas | Spark</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #ff4757;
+      --primary-dark: #ff3838;
+      --secondary: #2f3542;
+      --light: #f8f9fa;
+      --gray: #6c757d;
+      --text: #2c3e50;
+      --border: #e9ecef;
+      --spacing-xs: 8px;
+      --spacing-sm: 16px;
+      --spacing-md: 24px;
+      --spacing-lg: 40px;
+      --spacing-xl: 60px;
+      --transition: 0.3s ease;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.6;
+      color: var(--text);
+      background: #fff;
+    }
+
+    /* Navigation */
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--spacing-md) var(--spacing-sm);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: white;
+      z-index: 100;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    nav button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: var(--spacing-xs) var(--spacing-md);
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: background var(--transition);
+    }
+
+    nav button:hover {
+      background: var(--primary-dark);
+    }
+
+    @media (max-width: 640px) {
+      nav {
+        padding: var(--spacing-sm);
+      }
+
+      nav button {
+        padding: 8px 12px;
+        font-size: 12px;
+      }
+    }
+
+    /* Hero Section */
+    .hero {
+      padding: var(--spacing-xl) var(--spacing-sm);
+      text-align: center;
+      background: linear-gradient(135deg, rgba(255, 71, 87, 0.05) 0%, rgba(255, 71, 87, 0.02) 100%);
+      max-width: 100%;
+    }
+
+    .hero-content {
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .hero h1 {
+      font-size: clamp(28px, 6vw, 48px);
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: var(--spacing-md);
+      color: var(--text);
+    }
+
+    .hero p {
+      font-size: clamp(16px, 4vw, 20px);
+      color: var(--gray);
+      margin-bottom: var(--spacing-lg);
+      line-height: 1.5;
+    }
+
+    .cta-button {
+      display: inline-block;
+      background: var(--primary);
+      color: white;
+      padding: 14px 32px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: background var(--transition), transform var(--transition);
+      font-size: 16px;
+    }
+
+    .cta-button:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+
+    /* Problem Section */
+    .problem-section {
+      padding: var(--spacing-xl) var(--spacing-sm);
+      background: var(--light);
+    }
+
+    .section-content {
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .problem-section h2 {
+      font-size: clamp(24px, 5vw, 36px);
+      font-weight: 700;
+      margin-bottom: var(--spacing-md);
+      text-align: center;
+    }
+
+    .problem-section p {
+      font-size: 16px;
+      color: var(--gray);
+      margin-bottom: var(--spacing-md);
+      line-height: 1.7;
+    }
+
+    .problem-list {
+      background: white;
+      border-left: 4px solid var(--primary);
+      padding: var(--spacing-md);
+      margin: var(--spacing-lg) 0;
+      border-radius: 4px;
+    }
+
+    .problem-list li {
+      list-style: none;
+      padding: var(--spacing-xs) 0;
+      font-size: 16px;
+      color: var(--text);
+      font-style: italic;
+    }
+
+    /* Features Section */
+    .features-section {
+      padding: var(--spacing-xl) var(--spacing-sm);
+    }
+
+    .features-content {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .features-section h2 {
+      font-size: clamp(24px, 5vw, 36px);
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: var(--spacing-lg);
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .feature-card {
+      padding: var(--spacing-md);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      transition: all var(--transition);
+      background: white;
+    }
+
+    .feature-card:hover {
+      border-color: var(--primary);
+      box-shadow: 0 8px 24px rgba(255, 71, 87, 0.1);
+      transform: translateY(-4px);
+    }
+
+    .feature-icon {
+      font-size: 32px;
+      margin-bottom: var(--spacing-sm);
+      display: block;
+    }
+
+    .feature-card h3 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: var(--spacing-sm);
+      color: var(--text);
+    }
+
+    .feature-card p {
+      font-size: 14px;
+      color: var(--gray);
+      line-height: 1.6;
+    }
+
+    /* Use Cases Section */
+    .usecases-section {
+      padding: var(--spacing-xl) var(--spacing-sm);
+      background: var(--light);
+    }
+
+    .usecases-content {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .usecases-section h2 {
+      font-size: clamp(24px, 5vw, 36px);
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .usecases-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: var(--spacing-md);
+    }
+
+    .usecase-card {
+      background: white;
+      padding: var(--spacing-md);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .usecase-card h3 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: var(--spacing-sm);
+      color: var(--primary);
+    }
+
+    .usecase-card p {
+      font-size: 14px;
+      color: var(--gray);
+      line-height: 1.6;
+    }
+
+    /* CTA Section */
+    .cta-section {
+      padding: var(--spacing-xl) var(--spacing-sm);
+      text-align: center;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+    }
+
+    .cta-section-content {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .cta-section h2 {
+      font-size: clamp(24px, 5vw, 36px);
+      font-weight: 700;
+      margin-bottom: var(--spacing-md);
+    }
+
+    .cta-section p {
+      font-size: 16px;
+      margin-bottom: var(--spacing-lg);
+      opacity: 0.95;
+    }
+
+    .cta-button-white {
+      display: inline-block;
+      background: white;
+      color: var(--primary);
+      padding: 14px 32px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all var(--transition);
+      font-size: 16px;
+    }
+
+    .cta-button-white:hover {
+      background: var(--light);
+      transform: translateY(-2px);
+    }
+
+    /* Footer */
+    footer {
+      background: var(--secondary);
+      color: white;
+      padding: var(--spacing-lg) var(--spacing-sm);
+      text-align: center;
+      font-size: 14px;
+    }
+
+    footer p {
+      margin-bottom: var(--spacing-xs);
+    }
+
+    /* Waitlist Modal (hidden by default) */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      padding: var(--spacing-lg);
+      border-radius: 8px;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-content h2 {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: var(--spacing-md);
+      color: var(--text);
+    }
+
+    .modal-content p {
+      color: var(--gray);
+      margin-bottom: var(--spacing-md);
+      font-size: 14px;
+    }
+
+    .modal-content input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      margin-bottom: var(--spacing-md);
+      font-size: 14px;
+      font-family: inherit;
+    }
+
+    .modal-content input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(255, 71, 87, 0.1);
+    }
+
+    .modal-content button {
+      width: 100%;
+      padding: 12px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background var(--transition);
+      font-size: 14px;
+    }
+
+    .modal-content button:hover {
+      background: var(--primary-dark);
+    }
+
+    .modal-close {
+      float: right;
+      font-size: 24px;
+      cursor: pointer;
+      color: var(--gray);
+      background: none;
+      border: none;
+      padding: 0;
+      width: auto;
+    }
+
+    .modal-close:hover {
+      color: var(--text);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      :root {
+        --spacing-xl: 40px;
+        --spacing-lg: 24px;
+      }
+
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .usecases-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      @media (max-width: 500px) {
+        .usecases-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav>
+    <a href="#" class="logo">✨ Spark</a>
+    <button onclick="openWaitlistModal()">Join Waitlist</button>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1>Fun Couples Activities & Romantic Date Ideas</h1>
+      <p>Your next great date is about to get a lot more fun.</p>
+      <button class="cta-button" onclick="openWaitlistModal()">Join the Waitlist →</button>
+    </div>
+  </section>
+
+  <!-- Value Proposition -->
+  <section class="problem-section">
+    <div class="section-content">
+      <h2>Stop searching. Start making memories.</h2>
+      <p>Finding something fun to do together shouldn't take an hour of scrolling. Spark is being built to make discovering date night ideas and activities for couples simple, inspiring, and actually fun.</p>
+
+      <div class="problem-list">
+        <p>No more:</p>
+        <ul>
+          <li>"Whatever you want."</li>
+          <li>"I don't know."</li>
+          <li>"You pick."</li>
+        </ul>
+      </div>
+
+      <p style="text-align: center; margin-top: var(--spacing-lg);">Spark is coming to make that conversation a little easier.</p>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features-section">
+    <div class="features-content">
+      <h2>What Spark Offers</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <span class="feature-icon">💕</span>
+          <h3>Discover Better Date Ideas</h3>
+          <p>From romantic nights out to spontaneous adventures, Spark helps you find date night activities that fit your mood, your relationship, and your time.</p>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon">🎲</span>
+          <h3>Find Fun Things to Do Together</h3>
+          <p>Looking for something different? Discover fun couples activities designed to get you laughing, talking, playing, and spending quality time together.</p>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon">🏠</span>
+          <h3>Stay In Without Getting Bored</h3>
+          <p>Not every date needs to involve going out. Find creative couples activities at home and date night ideas for nights when the couch sounds perfect.</p>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon">💬</span>
+          <h3>Get Closer While Having Fun</h3>
+          <p>Great dates aren't just about what you do—they're about how you feel together. Spark combines activities, questions, and games to help couples connect.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Use Cases Section -->
+  <section class="usecases-section">
+    <div class="usecases-content">
+      <h2>Made for Couples Who Want More</h2>
+      <p style="text-align: center; color: var(--gray); margin-bottom: var(--spacing-lg);">Whether you're newly dating, years into a relationship, or somewhere in between, there's always another experience to share.</p>
+
+      <div class="usecases-grid">
+        <div class="usecase-card">
+          <h3>🌹 Something Romantic?</h3>
+          <p>Discover romantic activities for couples and memorable date ideas that spark connection and passion.</p>
+        </div>
+        <div class="usecase-card">
+          <h3>🎯 Want Something New?</h3>
+          <p>Find activities that break you out of the usual dinner-and-a-movie routine and keep your relationship fresh.</p>
+        </div>
+        <div class="usecase-card">
+          <h3>🏡 Staying In?</h3>
+          <p>Get inspired with creative activities for couples at home that don't require leaving the couch.</p>
+        </div>
+        <div class="usecase-card">
+          <h3>✈️ Long-Distance?</h3>
+          <p>Discover activities for long distance couples that help you feel connected, even when you're apart.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Final CTA Section -->
+  <section class="cta-section">
+    <div class="cta-section-content">
+      <h2>Something Fun is Coming</h2>
+      <p>Spark is being built for couples who want to spend less time figuring out what to do—and more time enjoying being together.</p>
+      <button class="cta-button-white" onclick="openWaitlistModal()">Join the Spark Waitlist →</button>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>&copy; 2026 Spark. All rights reserved.</p>
+    <p>Be first to know when Spark launches.</p>
+  </footer>
+
+  <!-- Waitlist Modal -->
+  <div id="waitlistModal" class="modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeWaitlistModal()">&times;</button>
+      <h2>Join the Waitlist</h2>
+      <p>Be among the first to try Spark and never wonder "what should we do tonight?" again.</p>
+      <form onsubmit="handleWaitlistSubmit(event)">
+        <input
+          type="email"
+          id="waitlistEmail"
+          placeholder="Enter your email"
+          required
+          aria-label="Email address"
+        >
+        <button type="submit">Get Early Access</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Schema Markup -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Spark",
+    "description": "Discover fun couples activities, romantic date ideas, and things to do together.",
+    "applicationCategory": "LifestyleApplication",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "url": "https://spark.local"
+  }
+  </script>
+
+  <!-- Functionality -->
+  <script>
+    function openWaitlistModal() {
+      document.getElementById('waitlistModal').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeWaitlistModal() {
+      document.getElementById('waitlistModal').classList.remove('active');
+      document.body.style.overflow = 'auto';
+    }
+
+    function handleWaitlistSubmit(event) {
+      event.preventDefault();
+      const email = document.getElementById('waitlistEmail').value;
+
+      // TODO: Connect to backend/database
+      console.log('Waitlist signup:', email);
+
+      alert('Thanks for joining! Check your email for next steps.');
+      document.getElementById('waitlistEmail').value = '';
+      closeWaitlistModal();
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+      const modal = document.getElementById('waitlistModal');
+      if (event.target == modal) {
+        closeWaitlistModal();
+      }
+    }
+  </script>
+</body>
+</html>
