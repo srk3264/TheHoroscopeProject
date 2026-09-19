@@ -280,6 +280,7 @@ function setupUnifiedTapCards(...containers) {
 
   showCard(activeIndex);
   const deck = containers[0].parentElement;
+
   deck.onpointerup = (event) => {
     if (event.target.closest('button, input, a')) return;
     event.preventDefault();
@@ -287,6 +288,16 @@ function setupUnifiedTapCards(...containers) {
     const direction = event.clientX < bounds.left + bounds.width / 2 ? -1 : 1;
     showCard(activeIndex + direction);
   };
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'ArrowLeft') {
+      event.preventDefault();
+      showCard(activeIndex - 1);
+    } else if (event.key === 'ArrowRight') {
+      event.preventDefault();
+      showCard(activeIndex + 1);
+    }
+  });
 }
 
 
