@@ -85,28 +85,24 @@
 
     .logo {
       font-size: 24px;
-      font-weight: 700;
-      color: var(--primary);
       text-decoration: none;
-      font-family: 'Averia Serif Libre', serif;
     }
 
-    nav button {
-      background: var(--primary);
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 999px;
-      cursor: pointer;
-      font-weight: 600;
+    .nav-links {
+      display: flex;
+      gap: var(--spacing-md);
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: var(--text);
       font-size: 14px;
-      transition: all var(--transition);
-      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      transition: color var(--transition);
     }
 
-    nav button:hover {
-      background: var(--primary-dark);
-      transform: translateY(-2px);
+    .nav-links a:hover {
+      color: var(--primary);
     }
 
     @media (max-width: 1024px) {
@@ -180,6 +176,49 @@
 
     .hero-text {
       text-align: left;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .hero h1 .accent {
+      color: #ff6b4a;
+    }
+
+    .hero-email-group {
+      display: flex;
+      gap: var(--spacing-sm);
+      margin-top: var(--spacing-md);
+    }
+
+    .hero-email-group input {
+      flex: 1;
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      background: var(--light);
+      color: var(--text);
+    }
+
+    .hero-email-group input::placeholder {
+      color: var(--gray);
+    }
+
+    .hero-email-group input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(30, 135, 232, 0.1);
+    }
+
+    .waitlist-label {
+      font-size: 12px;
+      color: var(--gray);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-top: var(--spacing-lg);
+      margin-bottom: var(--spacing-xs);
     }
 
     .hero-image {
@@ -650,17 +689,25 @@
 <body>
   <!-- Navigation -->
   <nav>
-    <a href="#" class="logo">✨ Spark</a>
-    <button onclick="openWaitlistModal()">Join Waitlist</button>
+    <a href="#" class="logo">🌿</a>
+    <div class="nav-links">
+      <a href="#blogs">Blogs</a>
+      <a href="#about">About</a>
+    </div>
   </nav>
 
   <!-- Hero Section -->
   <section class="hero">
     <div class="hero-content">
       <div class="hero-text">
-        <h1>Fun Couples Activities & Romantic Date Ideas</h1>
-        <p>Your next great date is about to get a lot more fun.</p>
-        <button class="cta-button" onclick="openWaitlistModal()">Join the Waitlist →</button>
+        <h1>Fun Couples <span class="accent">Activities</span> & Romantic Date Ideas</h1>
+        <p>Finding something fun to do together shouldn't take an hour of scrolling. Spark is being built to make discovering daily-date ideas and activities for couples simple, inspiring, and actually fun.</p>
+
+        <div class="waitlist-label">Join the waitlist</div>
+        <div class="hero-email-group">
+          <input type="email" placeholder="john.doe@gmail.com" id="heroEmail">
+          <button class="cta-button" onclick="handleHeroWaitlist()">Join the Waitlist →</button>
+        </div>
       </div>
       <div class="hero-image">
         <div class="hero-image-placeholder">
@@ -818,6 +865,20 @@
       alert('Thanks for joining! Check your email for next steps.');
       document.getElementById('waitlistEmail').value = '';
       closeWaitlistModal();
+    }
+
+    function handleHeroWaitlist() {
+      const email = document.getElementById('heroEmail').value;
+      if (!email) {
+        alert('Please enter your email address.');
+        return;
+      }
+
+      // TODO: Connect to backend/database
+      console.log('Hero waitlist signup:', email);
+
+      alert('Thanks for joining! Check your email for next steps.');
+      document.getElementById('heroEmail').value = '';
     }
 
     // Close modal when clicking outside
