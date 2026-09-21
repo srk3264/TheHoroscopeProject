@@ -71,21 +71,19 @@
 
     /* Navigation */
     nav {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: var(--spacing-md) var(--spacing-sm);
-      border-bottom: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      width: 100%;
-      background: transparent;
-      backdrop-filter: none;
-      -webkit-backdrop-filter: none;
-      z-index: 999;
-    }
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md) 0;
+  border-bottom: none;
+  position: relative;
+  width: 100%;
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  z-index: 10;
+}
+
 
     .logo {
       font-size: 24px;
