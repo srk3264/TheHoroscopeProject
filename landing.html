@@ -66,6 +66,7 @@
       line-height: 1.6;
       color: var(--text);
       background: var(--light);
+      margin-top: 60px;
     }
 
     /* Navigation */
@@ -74,13 +75,16 @@
       justify-content: space-between;
       align-items: center;
       padding: var(--spacing-md) var(--spacing-sm);
-      border-bottom: 1px solid var(--border);
-      position: sticky;
+      border-bottom: none;
+      position: fixed;
       top: 0;
-      background: rgba(255, 255, 255, 0.95);
+      left: 0;
+      right: 0;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.85);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
-      z-index: 100;
+      z-index: 999;
     }
 
     .logo {
@@ -699,7 +703,9 @@
   <!-- Hero Section -->
   <section style="align-self: stretch; padding-right: 72px; background: #FCFCFC; justify-content: center; align-items: center; gap: 64px; display: inline-flex; width: 100%;">
     <div style="flex: 1 1 0; height: 716px; overflow: hidden; background-image: url(assets/landing/background.jpg); background-size: cover; background-position: center; flex-direction: column; justify-content: center; align-items: center; gap: 142px; display: inline-flex">
-      <img style="width: 300px; height: 604px; position: relative; box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.16); border-radius: 24px; outline: 12px rgba(255, 255, 255, 0.10) solid" src="assets/landing/hero-video.mp4" alt="Couples app preview" />
+      <video style="width: 300px; height: 604px; position: relative; box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.16); border-radius: 24px; outline: 12px rgba(255, 255, 255, 0.10) solid; object-fit: cover;" autoplay muted loop playsinline>
+        <source src="assets/landing/hero-video.mp4" type="video/mp4" />
+      </video>
     </div>
     <div style="flex: 1 1 0; align-self: stretch; padding-top: 32px; padding-bottom: 32px; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 64px; display: inline-flex">
       <div style="align-self: stretch; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 32px; display: flex">
@@ -716,6 +722,46 @@
           </div>
           <div style="align-self: stretch; padding-left: 24px; padding-right: 24px; padding-top: 14px; padding-bottom: 14px; background: black; border-radius: 999px; justify-content: center; align-items: center; gap: 10px; display: inline-flex; cursor: pointer;">
             <div style="text-align: center; justify-content: center; display: flex; flex-direction: column; color: white; font-size: 16px; font-family: Inter; font-weight: 600; line-height: 19.36px; word-wrap: break-word">Join the Waitlist →</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- No More Dilly Dallying Section -->
+  <section style="width: 100%; padding-top: 48px; padding-bottom: 48px; position: relative; background: linear-gradient(180deg, white 0%, #F3B9D0 100%); overflow: hidden; flex-direction: column; justify-content: center; align-items: center; gap: 24px; display: inline-flex;">
+    <div style="width: 100%; height: 475px; left: 0; top: 471px; position: absolute; background: linear-gradient(180deg, #F3B9D0 0%, #1E87E8 100%); z-index: 1;"></div>
+    <div style="text-align: center; position: relative; z-index: 2;"><span style="color: #E81E64; font-size: 48px; font-family: Averia Serif Libre; font-weight: 400; line-height: 56px; word-wrap: break-word">No more <br/></span><span style="color: #E81E64; font-size: 56px; font-family: Averia Serif Libre; font-style: italic; font-weight: 700; line-height: 48px; word-wrap: break-word">dilly dallying</span></div>
+    <div style="align-self: stretch; position: relative; flex-direction: column; justify-content: flex-start; align-items: center; display: flex; z-index: 2;">
+      <img style="width: 368px; height: 490.50px; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.16); outline: 6px #EFEFEF solid" src="https://placehold.co/368x491" alt="Chat conversation preview" />
+      <div style="width: 536px; left: 339px; top: 99.75px; position: absolute; justify-content: space-between; align-items: center; display: inline-flex;">
+        <div style="width: 152px; transform: rotate(180deg); transform-origin: top left; justify-content: flex-start; align-items: center; display: flex">
+          <div style="flex: 1 1 0; padding: 12px; background: #2E9DFB; border-top-left-radius: 16px; border-bottom-left-radius: 16px; outline: 1px #2E9DFB solid; outline-offset: -0.50px; justify-content: flex-start; align-items: flex-start; gap: 6.42px; display: flex">
+            <div style="transform: rotate(180deg); transform-origin: top left; color: white; font-size: 16px; font-family: Inter; font-weight: 400; line-height: 24px; word-wrap: break-word">I don't know</div>
+          </div>
+          <div style="height: 63px; transform: rotate(180deg); transform-origin: top left; flex-direction: column; justify-content: center; align-items: flex-end; display: inline-flex">
+            <div style="width: 24px; height: 12px; background: #2E9DFB; border-top-left-radius: 88px; outline: 1px #2E9DFB solid; outline-offset: -0.50px"></div>
+            <div style="width: 24.39px; height: 1px; background: #2E9DFB; outline: 1px #2E9DFB solid; outline-offset: -0.50px"></div>
+          </div>
+        </div>
+        <div style="width: 205px; flex-direction: column; justify-content: flex-start; align-items: center; gap: 166px; display: inline-flex">
+          <div style="align-self: stretch; justify-content: flex-start; align-items: center; display: inline-flex">
+            <div style="flex: 1 1 0; padding: 12px; background: #2E9DFB; border-top-left-radius: 16px; border-bottom-left-radius: 16px; outline: 1px #2E9DFB solid; outline-offset: -0.50px; justify-content: flex-start; align-items: flex-start; gap: 6.42px; display: flex">
+              <div style="flex: 1 1 0; color: white; font-size: 16px; font-family: Inter; font-weight: 400; line-height: 24px; word-wrap: break-word">Whatever you want</div>
+            </div>
+            <div style="height: 63px; transform: rotate(180deg); transform-origin: top left; flex-direction: column; justify-content: center; align-items: flex-end; display: inline-flex">
+              <div style="width: 24px; height: 12px; background: #2E9DFB; border-top-left-radius: 88px; outline: 1px #2E9DFB solid; outline-offset: -0.50px"></div>
+              <div style="width: 24.39px; height: 1px; background: #2E9DFB; outline: 1px #2E9DFB solid; outline-offset: -0.50px"></div>
+            </div>
+          </div>
+          <div style="width: 112px; justify-content: flex-start; align-items: center; display: inline-flex">
+            <div style="flex: 1 1 0; padding: 12px; background: #2E9DFB; border-top-left-radius: 16px; border-bottom-left-radius: 16px; outline: 1px #2E9DFB solid; outline-offset: -0.50px; justify-content: flex-start; align-items: flex-start; gap: 6.42px; display: flex">
+              <div style="color: white; font-size: 16px; font-family: Inter; font-weight: 400; line-height: 24px; word-wrap: break-word">You pick</div>
+            </div>
+            <div style="height: 63px; transform: rotate(180deg); transform-origin: top left; flex-direction: column; justify-content: center; align-items: flex-end; display: inline-flex">
+              <div style="width: 24px; height: 12px; background: #2E9DFB; border-top-left-radius: 88px; outline: 1px #2E9DFB solid; outline-offset: -0.50px"></div>
+              <div style="width: 24.39px; height: 1px; background: #2E9DFB; outline: 1px #2E9DFB solid; outline-offset: -0.50px"></div>
+            </div>
           </div>
         </div>
       </div>
