@@ -278,139 +278,131 @@
       transform: translateY(-2px);
     }
 
-    /* Problem Section */
-    .problem-section {
-      padding: var(--spacing-xl) var(--spacing-sm);
-      background: var(--secondary);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .problem-section::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      opacity: 0.08;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-      mix-blend-mode: overlay;
-      pointer-events: none;
-    }
-
-    .section-content {
-      max-width: 700px;
-      margin: 0 auto;
-      position: relative;
-      z-index: 2;
-    }
-
-    .problem-section h2 {
-      font-size: clamp(24px, 5vw, 36px);
-      font-weight: 400;
-      margin-bottom: var(--spacing-md);
-      text-align: center;
-      font-family: 'Averia Serif Libre', serif;
-      color: var(--text);
-    }
-
-    .problem-section p {
-      font-size: 16px;
-      color: var(--text-secondary);
-      margin-bottom: var(--spacing-md);
-      line-height: 1.7;
-    }
-
-    .problem-list {
-      background: rgba(30, 135, 232, 0.05);
-      border-left: 4px solid var(--primary);
-      padding: var(--spacing-md);
-      margin: var(--spacing-lg) 0;
-      border-radius: 8px;
-    }
-
-    .problem-list li {
-      list-style: none;
-      padding: var(--spacing-xs) 0;
-      font-size: 16px;
-      color: var(--text);
-      font-style: italic;
-    }
+    
 
     /* Features Section */
-    .features-section {
-      padding: var(--spacing-xl) var(--spacing-sm);
-      background: var(--light);
-      position: relative;
-      overflow: hidden;
-    }
+.features-section {
+  padding: 80px 24px;
+  background: var(--light);
+  position: relative;
+  overflow: hidden;
+}
 
-    .features-section::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      opacity: 0.08;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-      mix-blend-mode: overlay;
-      pointer-events: none;
-    }
+.features-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.08;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
 
-    .features-content {
-      max-width: 900px;
-      margin: 0 auto;
-      position: relative;
-      z-index: 2;
-    }
+.features-content {
+  max-width: 1100px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
 
-    .features-section h2 {
-      font-size: clamp(24px, 5vw, 36px);
-      font-weight: 400;
-      text-align: center;
-      margin-bottom: var(--spacing-lg);
-      font-family: 'Averia Serif Libre', serif;
-      color: var(--text);
-    }
+.features-section h2 {
+  font-size: clamp(28px, 5vw, 40px);
+  font-weight: 400;
+  text-align: center;
+  margin-bottom: 80px;
+  font-family: 'Averia Serif Libre', serif;
+  color: var(--text);
+}
 
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: var(--spacing-lg);
-      margin-bottom: var(--spacing-xl);
-    }
+.features-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 120px;
+  margin-bottom: var(--spacing-xl);
+}
 
-    .feature-card {
-      padding: var(--spacing-md);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      transition: all var(--transition);
-      background: var(--light);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    }
+.feature-card {
+  width: 432px;
+  max-width: 100%;
+  align-self: flex-start;
 
-    .feature-card:hover {
-      border-color: var(--primary);
-      box-shadow: 0 8px 24px rgba(30, 135, 232, 0.12);
-      transform: translateY(-4px);
-      background: var(--light);
-    }
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 
-    .feature-icon {
-      font-size: 32px;
-      margin-bottom: var(--spacing-sm);
-      display: block;
-    }
+  opacity: 0;
+  transform: translateY(50px);
 
-    .feature-card h3 {
-      font-size: 18px;
-      font-weight: 600;
-      margin-bottom: var(--spacing-sm);
-      color: var(--text);
-      font-family: 'Inter', sans-serif;
-    }
+  transition:
+    opacity 0.8s ease,
+    transform 0.8s ease;
+}
 
-    .feature-card p {
-      font-size: 14px;
-      color: var(--text-secondary);
-      line-height: 1.6;
-    }
+/* Zig-zag */
+.feature-card:nth-child(even) {
+  align-self: flex-end;
+}
+
+/* Fade/slide in */
+.feature-card.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Feature image */
+.feature-card-image {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  display: block;
+  object-fit: cover;
+  border-radius: 0;
+  margin-bottom: 24px;
+}
+
+/* Text */
+.feature-icon {
+  font-size: 28px;
+  margin-bottom: 10px;
+  display: block;
+}
+
+.feature-card h3 {
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0 0 10px;
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+}
+
+.feature-card p {
+  font-size: 15px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .features-section {
+    padding: 60px 20px;
+  }
+
+  .features-section h2 {
+    margin-bottom: 56px;
+  }
+
+  .features-grid {
+    gap: 80px;
+  }
+
+  .feature-card,
+  .feature-card:nth-child(even) {
+    width: min(432px, 100%);
+    align-self: center;
+  }
+}
 
     /* Use Cases Section */
     .usecases-section {
@@ -730,7 +722,7 @@
 
 /* Top-right bubble */
 .bubble-right-top {
-  left: 338px;
+  left: 320px;
   top: 80px;
   border-bottom-right-radius: 4px;
   transition-delay: 0.35s;
@@ -738,7 +730,7 @@
 
 /* Bottom-right bubble */
 .bubble-right-bottom {
-  left: 338px;
+  left: 320px;
   top: 355px;
   border-bottom-right-radius: 4px;
   transition-delay: 0.55s;
@@ -889,51 +881,63 @@
     <img src="assets/landing/wave-divider.svg" alt="Wave divider" style="width: 100%; height: auto; position: absolute; bottom: -1px; left: 0; z-index: 1;" />
   </section>
 
-  <!-- Value Proposition -->
-  <section class="problem-section">
-    <div class="section-content">
-      <h2>Stop searching. Start making memories.</h2>
-      <p>Finding something fun to do together shouldn't take an hour of scrolling. Spark is being built to make discovering date night ideas and activities for couples simple, inspiring, and actually fun.</p>
-
-      <div class="problem-list">
-        <p>No more:</p>
-        <ul>
-          <li>"Whatever you want."</li>
-          <li>"I don't know."</li>
-          <li>"You pick."</li>
-        </ul>
-      </div>
-
-      <p style="text-align: center; margin-top: var(--spacing-lg);">Spark is coming to make that conversation a little easier.</p>
-    </div>
-  </section>
+  
 
   <!-- Features Section -->
   <section class="features-section">
     <div class="features-content">
       <h2>What Spark Offers</h2>
       <div class="features-grid">
-        <div class="feature-card">
-          <span class="feature-icon">💕</span>
-          <h3>Discover Better Date Ideas</h3>
-          <p>From romantic nights out to spontaneous adventures, Spark helps you find date night activities that fit your mood, your relationship, and your time.</p>
-        </div>
-        <div class="feature-card">
-          <span class="feature-icon">🎲</span>
-          <h3>Find Fun Things to Do Together</h3>
-          <p>Looking for something different? Discover fun couples activities designed to get you laughing, talking, playing, and spending quality time together.</p>
-        </div>
-        <div class="feature-card">
-          <span class="feature-icon">🏠</span>
-          <h3>Stay In Without Getting Bored</h3>
-          <p>Not every date needs to involve going out. Find creative couples activities at home and date night ideas for nights when the couch sounds perfect.</p>
-        </div>
-        <div class="feature-card">
-          <span class="feature-icon">💬</span>
-          <h3>Get Closer While Having Fun</h3>
-          <p>Great dates aren't just about what you do—they're about how you feel together. Spark combines activities, questions, and games to help couples connect.</p>
-        </div>
-      </div>
+
+  <div class="feature-card">
+    <img
+      class="feature-card-image"
+      src="assets/landing/feature-01.jpg"
+      alt="Couple discovering a date idea"
+    />
+
+    <span class="feature-icon">💕</span>
+    <h3>Discover Better Date Ideas</h3>
+    <p>From romantic nights out to spontaneous adventures, Spark helps you find date night activities that fit your mood, your relationship, and your time.</p>
+  </div>
+
+  <div class="feature-card">
+    <img
+      class="feature-card-image"
+      src="assets/landing/feature-02.jpg"
+      alt="Couple doing something fun together"
+    />
+
+    <span class="feature-icon">🎲</span>
+    <h3>Find Fun Things to Do Together</h3>
+    <p>Looking for something different? Discover fun couples activities designed to get you laughing, talking, playing, and spending quality time together.</p>
+  </div>
+
+  <div class="feature-card">
+    <img
+      class="feature-card-image"
+      src="assets/landing/feature-03.jpg"
+      alt="Couple enjoying a night at home"
+    />
+
+    <span class="feature-icon">🏠</span>
+    <h3>Stay In Without Getting Bored</h3>
+    <p>Not every date needs to involve going out. Find creative couples activities at home and date night ideas for nights when the couch sounds perfect.</p>
+  </div>
+
+  <div class="feature-card">
+    <img
+      class="feature-card-image"
+      src="assets/landing/feature-04.jpg"
+      alt="Couple connecting while having fun"
+    />
+
+    <span class="feature-icon">💬</span>
+    <h3>Get Closer While Having Fun</h3>
+    <p>Great dates aren't just about what you do—they're about how you feel together. Spark combines activities, questions, and games to help couples connect.</p>
+  </div>
+
+</div>
     </div>
   </section>
 
@@ -1079,6 +1083,28 @@ if (dillySection) {
   );
 
   dillyObserver.observe(dillySection);
+}
+
+const featureCards = document.querySelectorAll('.feature-card');
+
+if (featureCards.length) {
+  const featureObserver = new IntersectionObserver(
+    (entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    },
+    {
+      threshold: 0.2
+    }
+  );
+
+  featureCards.forEach(card => {
+    featureObserver.observe(card);
+  });
 }
   </script>
 </body>
