@@ -665,9 +665,35 @@
       color: var(--text);
     }
 
-    .dilly-bubbles {
+    /* Dilly Dallying */
+.dilly-section {
+  position: relative;
+  overflow: hidden;
+}
+
+.dilly-image-frame {
+  width: 368px;
+  border: 6px solid #EFEFEF;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.16);
+  line-height: 0;
+  position: relative;
+  z-index: 2;
+}
+
+.dilly-image {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.dilly-bubbles {
   position: absolute;
-  inset: 0;
+  width: 368px;
+  height: 490px;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
   pointer-events: none;
 }
 
@@ -681,24 +707,84 @@
   line-height: 24px;
   border-radius: 16px;
   white-space: nowrap;
+
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s ease;
 }
 
+.dilly-section.is-visible .dilly-bubble {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Left bubble */
 .bubble-left {
-  left: calc(50% - 350px);
+  left: -168px;
   top: 155px;
   border-bottom-left-radius: 4px;
+  transition-delay: 0.15s;
 }
 
+/* Top-right bubble */
 .bubble-right-top {
-  left: calc(50% + 135px);
+  left: 338px;
   top: 80px;
   border-bottom-right-radius: 4px;
+  transition-delay: 0.35s;
 }
 
+/* Bottom-right bubble */
 .bubble-right-bottom {
-  left: calc(50% + 165px);
+  left: 370px;
   top: 355px;
   border-bottom-right-radius: 4px;
+  transition-delay: 0.55s;
+}
+
+/* Wave animation */
+.dilly-wave {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 1s ease,
+    transform 1s ease;
+  z-index: 1;
+}
+
+.dilly-section.is-visible .dilly-wave {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .dilly-image-frame {
+    width: min(368px, calc(100vw - 48px));
+  }
+
+  .dilly-bubbles {
+    width: min(368px, calc(100vw - 48px));
+  }
+
+  .bubble-left {
+    left: -20px;
+    top: 130px;
+  }
+
+  .bubble-right-top {
+    left: auto;
+    right: -20px;
+    top: 70px;
+  }
+
+  .bubble-right-bottom {
+    left: auto;
+    right: -10px;
+    top: 320px;
+  }
 }
 
     /* Responsive */
@@ -767,15 +853,25 @@
   </section>
 
   <!-- No More Dilly Dallying Section -->
-  <section style="width: 100%; padding-top: 48px; padding-bottom: 48px; position: relative; background: linear-gradient(180deg, white 0%, #F3B9D0 100%); overflow: hidden; flex-direction: column; justify-content: center; align-items: center; gap: 24px; display: inline-flex;">
+  <section
+  class="dilly-section"
+  style="width: 100%; padding-top: 48px; padding-bottom: 48px; position: relative; background: linear-gradient(180deg, white 0%, #F3B9D0 100%); overflow: hidden; flex-direction: column; justify-content: center; align-items: center; gap: 24px; display: inline-flex;"
+>
     
-    <div style="text-align: center; position: relative; z-index: 2;"><span style="color: #E81E64; font-size: 48px; font-family: Averia Serif Libre; font-weight: 400; line-height: 56px; word-wrap: break-word">No more <br/></span><span style="color: #E81E64; font-size: 56px; font-family: Averia Serif Libre; font-style: italic; font-weight: 700; line-height: 48px; word-wrap: break-word">dilly dallying</span></div>
+    <div style="text-align: center; position: relative; z-index: 2;">
+      <span style="color: #E81E64; font-size: 48px; font-family: Averia Serif Libre; font-weight: 400; line-height: 56px; word-wrap: break-word">No more <br/>
+      </span>
+      <span style="color: #E81E64; font-size: 56px; font-family: Averia Serif Libre; font-style: italic; font-weight: 700; line-height: 48px; word-wrap: break-word">dilly dallying
+        
+      </span></div>
     <div style="align-self: stretch; position: relative; flex-direction: column; justify-content: flex-start; align-items: center; display: flex; z-index: 2;">
-      <img
-  style="width: 368px; height: auto; display: block; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.16); outline: 6px #EFEFEF solid; outline-offset: 0;"
-  src="assets/landing/dilly dally image.png"
-  alt="Chat conversation preview"
-/>
+      <div class="dilly-image-frame">
+  <img
+    class="dilly-image"
+    src="assets/landing/dilly dally image.png"
+    alt="Chat conversation preview"
+  />
+</div>
       <div class="dilly-bubbles">
   <div class="dilly-bubble bubble-left">
     I don't know
@@ -964,6 +1060,26 @@
         closeWaitlistModal();
       }
     }
+
+    const dillySection = document.querySelector('.dilly-section');
+
+if (dillySection) {
+  const dillyObserver = new IntersectionObserver(
+    (entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          dillySection.classList.add('is-visible');
+          observer.unobserve(dillySection);
+        }
+      });
+    },
+    {
+      threshold: 0.25
+    }
+  );
+
+  dillyObserver.observe(dillySection);
+}
   </script>
 </body>
 </html>
