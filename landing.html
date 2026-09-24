@@ -729,12 +729,14 @@
 
   .hero-video-wrap {
     order:2;
-    width: 100%;
+    width: calc(100% +40px);
     height: auto;
     min-height: 0;
     flex: none;
     padding: 40px 0;
     overflow: visible;
+    margin-left: -20px;
+  margin-right: -20px;
   }
 
   .hero-video {
@@ -757,8 +759,12 @@
   }
 
   .hero-video-wrap {
-    padding: 24px 0;
-  }
+  width: calc(100% + 32px);
+  margin-left: -16px;
+  margin-right: -16px;
+  padding: 24px 0;
+}
+
 
   .hero-video {
     width: min(280px, 82vw);
