@@ -62,7 +62,7 @@ async function testKaggleConnection() {
   console.log(`Kaggle dataset: ${dataset.title}`);
   console.log("Kaggle files:");
 
-  (dataset.resources || []).forEach(file => {
+  (dataset.files || []).forEach(file => {
     console.log(`- ${file.name}`);
   });
 }
