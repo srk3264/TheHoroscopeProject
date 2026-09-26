@@ -1,3 +1,10 @@
+
+if (!process.env.KAGGLE_API_TOKEN) {
+  throw new Error("KAGGLE_API_TOKEN is missing");
+}
+
+console.log("Kaggle API token detected.");
+
 const fs = require("fs");
 const path = require("path");
 
