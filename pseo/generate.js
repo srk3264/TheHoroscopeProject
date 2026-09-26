@@ -5,8 +5,70 @@ if (!process.env.KAGGLE_API_TOKEN) {
 
 console.log("Kaggle API token detected.");
 
+async function testKaggleConnection() {
+  const response = await fetch(
+    "https://www.kaggle.com/api/v1/datasets/list?search=foodcom",
+    {
+      headers: {
+        Authorization: `Bearer ${process.env.KAGGLE_API_TOKEN}`
+      }
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(`Kaggle API error: ${response.status}`);
+  }
+
+  const datasets = await response.json();
+
+  console.log(`Kaggle datasets found: ${datasets.length}`);
+
+  datasets.slice(0, 5).forEach(dataset => {
+    console.log(`Kaggle dataset: ${dataset.ref} — ${dataset.title}`);
+  });
+}
+
+testKaggleConnection().catch(error => {
+  console.error(error);
+  process.exit(1);
+});
+
 const fs = require("fs");
 const path = require("path");
+
+if (!process.env.KAGGLE_API_TOKEN) {
+  throw new Error("KAGGLE_API_TOKEN is missing");
+}
+
+console.log("Kaggle API token detected.");
+
+async function testKaggleConnection() {
+  const response = await fetch(
+    "https://www.kaggle.com/api/v1/datasets/list?search=foodcom",
+    {
+      headers: {
+        Authorization: `Bearer ${process.env.KAGGLE_API_TOKEN}`
+      }
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(`Kaggle API error: ${response.status}`);
+  }
+
+  const datasets = await response.json();
+
+  console.log(`Kaggle datasets found: ${datasets.length}`);
+
+  datasets.slice(0, 5).forEach(dataset => {
+    console.log(`Kaggle dataset: ${dataset.ref} — ${dataset.title}`);
+  });
+}
+
+testKaggleConnection().catch(error => {
+  console.error(error);
+  process.exit(1);
+});
 
 const templatePath = path.join(__dirname, "template.html");
 const dataPath = path.join(__dirname, "data", "pages.json");
