@@ -7,7 +7,7 @@ console.log("Kaggle API token detected.");
 
 async function testKaggleConnection() {
   const response = await fetch(
-    "https://www.kaggle.com/api/v1/datasets/list?search=foodcom",
+    "https://www.kaggle.com/api/v1/datasets/view/irkaal/foodcom-recipes-and-reviews",
     {
       headers: {
         Authorization: `Bearer ${process.env.KAGGLE_API_TOKEN}`
@@ -19,12 +19,13 @@ async function testKaggleConnection() {
     throw new Error(`Kaggle API error: ${response.status}`);
   }
 
-  const datasets = await response.json();
+  const dataset = await response.json();
 
-  console.log(`Kaggle datasets found: ${datasets.length}`);
+  console.log(`Kaggle dataset: ${dataset.title}`);
+  console.log("Kaggle files:");
 
-  datasets.slice(0, 5).forEach(dataset => {
-    console.log(`Kaggle dataset: ${dataset.ref} — ${dataset.title}`);
+  (dataset.resources || []).forEach(file => {
+    console.log(`- ${file.name}`);
   });
 }
 
