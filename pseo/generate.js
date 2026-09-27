@@ -1,4 +1,8 @@
 
+const fs = require("fs");
+const path = require("path");
+
+
 if (!process.env.KAGGLE_API_TOKEN) {
   throw new Error("KAGGLE_API_TOKEN is missing");
 }
@@ -51,45 +55,9 @@ testKaggleConnection().catch(error => {
   process.exit(1);
 });
 
-const fs = require("fs");
-const path = require("path");
 
-if (!process.env.KAGGLE_API_TOKEN) {
-  throw new Error("KAGGLE_API_TOKEN is missing");
-}
 
-console.log("Kaggle API token detected.");
 
-async function testKaggleConnection() {
-  const response = await fetch(
-    "https://www.kaggle.com/api/v1/datasets/download/irkaal/foodcom-recipes-and-reviews?filename=recipes.parquet",
-    {
-      headers: {
-        Authorization: `Bearer ${process.env.KAGGLE_API_TOKEN}`
-      }
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error(`Kaggle API error: ${response.status}`);
-  }
-
-  const buffer = Buffer.from(await response.arrayBuffer());
-  const zip = await import("node:zlib");
-
-  console.log("Retrieved ZIP size:", buffer.length);
-  console.log("ZIP header:", buffer.subarray(0, 4).toString("hex"));
-}
-
-testKaggleConnection().catch(error => {
-  console.error(error);
-  process.exit(1);
-});
-
-testKaggleConnection().catch(error => {
-  console.error(error);
-  process.exit(1);
-});
 
 const templatePath = path.join(__dirname, "template.html");
 const dataPath = path.join(__dirname, "data", "pages.json");
