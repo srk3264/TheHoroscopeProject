@@ -59,8 +59,12 @@ async function testKaggleConnection() {
 
   const data = await response.json();
 
-  console.log("Kaggle dataset files:");
-  console.log(JSON.stringify(data, null, 2));
+  const recipeFile = data.datasetFiles?.find(
+    file => file.name === "recipes.parquet"
+  );
+
+  console.log("Recipe file metadata:");
+  console.log(JSON.stringify(recipeFile, null, 2));
 }
 
 testKaggleConnection().catch(error => {
