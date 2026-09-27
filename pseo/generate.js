@@ -57,9 +57,11 @@ async function testKaggleConnection() {
     throw new Error(`Kaggle API error: ${response.status}`);
   }
 
-  console.log("recipes.parquet retrieved successfully.");
-  console.log("Content-Type:", response.headers.get("content-type"));
-  console.log("Content-Length:", response.headers.get("content-length"));
+  const buffer = Buffer.from(await response.arrayBuffer());
+  const zip = await import("node:zlib");
+
+  console.log("Retrieved ZIP size:", buffer.length);
+  console.log("ZIP header:", buffer.subarray(0, 4).toString("hex"));
 }
 
 testKaggleConnection().catch(error => {
