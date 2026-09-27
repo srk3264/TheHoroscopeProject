@@ -19,6 +19,8 @@
   },
   "homepage": "https://github.com/srk3264/TheHoroscopeProject#readme",
   "dependencies": {
-    "@supabase/supabase-js": "^2.112.2"
+    "@supabase/supabase-js": "^2.112.2",
+    "adm-zip": "^0.6.1",
+    "parquetjs-lite": "^0.8.7"
   }
 }

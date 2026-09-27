@@ -7,7 +7,7 @@ console.log("Kaggle API token detected.");
 
 async function testKaggleConnection() {
   const response = await fetch(
-    "https://www.kaggle.com/api/v1/datasets/view/irkaal/foodcom-recipes-and-reviews",
+    "https://www.kaggle.com/api/v1/datasets/download/irkaal/foodcom-recipes-and-reviews?filename=recipes.parquet",
     {
       headers: {
         Authorization: `Bearer ${process.env.KAGGLE_API_TOKEN}`
@@ -19,14 +19,31 @@ async function testKaggleConnection() {
     throw new Error(`Kaggle API error: ${response.status}`);
   }
 
-  const dataset = await response.json();
+  const buffer = Buffer.from(await response.arrayBuffer());
 
-  console.log(`Kaggle dataset: ${dataset.title}`);
-  console.log("Kaggle files:");
+  const AdmZip = require("adm-zip");
+  const parquet = require("parquetjs-lite");
 
-  (dataset.resources || []).forEach(file => {
-    console.log(`- ${file.name}`);
-  });
+  const zip = new AdmZip(buffer);
+  const entry = zip.getEntry("recipes.parquet");
+
+  if (!entry) {
+    throw new Error("recipes.parquet not found inside ZIP");
+  }
+
+  const parquetBuffer = entry.getData();
+
+  const tempPath = "/tmp/recipes.parquet";
+  fs.writeFileSync(tempPath, parquetBuffer);
+
+  const reader = await parquet.ParquetReader.openFile(tempPath);
+
+  console.log(
+    "Recipe columns:",
+    reader.schema.fieldList.map(field => field.name)
+  );
+
+  await reader.close();
 }
 
 testKaggleConnection().catch(error => {
