@@ -45,7 +45,7 @@ console.log("Kaggle API token detected.");
 
 async function testKaggleConnection() {
   const response = await fetch(
-    "https://www.kaggle.com/api/v1/datasets/list/irkaal/foodcom-recipes-and-reviews",
+    "https://www.kaggle.com/api/v1/datasets/download/irkaal/foodcom-recipes-and-reviews?filename=recipes.parquet",
     {
       headers: {
         Authorization: `Bearer ${process.env.KAGGLE_API_TOKEN}`
@@ -57,15 +57,15 @@ async function testKaggleConnection() {
     throw new Error(`Kaggle API error: ${response.status}`);
   }
 
-  const data = await response.json();
-
-  const recipeFile = data.datasetFiles?.find(
-    file => file.name === "recipes.parquet"
-  );
-
-  console.log("Recipe file metadata:");
-  console.log(JSON.stringify(recipeFile, null, 2));
+  console.log("recipes.parquet retrieved successfully.");
+  console.log("Content-Type:", response.headers.get("content-type"));
+  console.log("Content-Length:", response.headers.get("content-length"));
 }
+
+testKaggleConnection().catch(error => {
+  console.error(error);
+  process.exit(1);
+});
 
 testKaggleConnection().catch(error => {
   console.error(error);
