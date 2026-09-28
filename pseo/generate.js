@@ -35,17 +35,25 @@ async function testKaggleConnection() {
     throw new Error("recipes.parquet not found inside ZIP");
   }
 
-  const parquetBuffer = entry.getData();
-
   const tempPath = "/tmp/recipes.parquet";
-  fs.writeFileSync(tempPath, parquetBuffer);
+  fs.writeFileSync(tempPath, entry.getData());
 
   const reader = await parquet.ParquetReader.openFile(tempPath);
+  const cursor = reader.getCursor();
 
-  console.log(
-    "Recipe columns:",
-    reader.schema.fieldList.map(field => field.name)
-  );
+  console.log("Sample recipes:");
+
+  for (let i = 0; i < 50; i++) {
+    const record = await cursor.next();
+
+    if (!record) break;
+
+    console.log({
+      Name: record.Name,
+      RecipeCategory: record.RecipeCategory,
+      Keywords: record.Keywords
+    });
+  }
 
   await reader.close();
 }
