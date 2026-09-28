@@ -39,7 +39,12 @@ async function testKaggleConnection() {
   fs.writeFileSync(tempPath, entry.getData());
 
   const reader = await parquet.ParquetReader.openFile(tempPath);
-  const cursor = reader.getCursor();
+
+  const cursor = reader.getCursor([
+    "Name",
+    "RecipeCategory",
+    "Keywords"
+  ]);
 
   console.log("Sample recipes:");
 
