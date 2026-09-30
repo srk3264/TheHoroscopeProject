@@ -71,6 +71,7 @@ for (let i = 0; i < 50; i++) {
 }
 
 await reader.close();
+}
 
 testKaggleConnection().catch(error => {
   console.error(error);
