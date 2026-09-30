@@ -41,27 +41,36 @@ async function testKaggleConnection() {
   const reader = await parquet.ParquetReader.openFile(tempPath);
 
   const cursor = reader.getCursor([
-    "Name",
-    "RecipeCategory",
-    "Keywords"
-  ]);
+  "Name",
+  "RecipeCategory",
+  "Description",
+  "RecipeIngredientParts",
+  "RecipeInstructions",
+  "RecipeServings",
+  "TotalTime",
+  "AggregatedRating"
+]);
 
-  console.log("Sample recipes:");
+console.log("Sample recipes:");
 
-  for (let i = 0; i < 50; i++) {
-    const record = await cursor.next();
+for (let i = 0; i < 50; i++) {
+  const record = await cursor.next();
 
-    if (!record) break;
+  if (!record) break;
 
-    console.log({
-      Name: record.Name,
-      RecipeCategory: record.RecipeCategory,
-      Keywords: record.Keywords
-    });
-  }
-
-  await reader.close();
+  console.log({
+    Name: record.Name,
+    RecipeCategory: record.RecipeCategory,
+    Description: record.Description,
+    RecipeIngredientParts: record.RecipeIngredientParts,
+    RecipeInstructions: record.RecipeInstructions,
+    RecipeServings: record.RecipeServings,
+    TotalTime: record.TotalTime,
+    AggregatedRating: record.AggregatedRating
+  });
 }
+
+await reader.close();
 
 testKaggleConnection().catch(error => {
   console.error(error);
