@@ -11,7 +11,7 @@ console.log("Kaggle API token detected.");
 
 async function testKaggleConnection() {
   const response = await fetch(
-    "https://www.kaggle.com/api/v1/datasets/download/irkaal/foodcom-recipes-and-reviews?filename=recipes.parquet",
+    "https://www.kaggle.com/api/v1/datasets/list/shuyangli94/foodcom-recipes-with-search-terms-and-tags",
     {
       headers: {
         Authorization: `Bearer ${process.env.KAGGLE_API_TOKEN}`
@@ -23,55 +23,18 @@ async function testKaggleConnection() {
     throw new Error(`Kaggle API error: ${response.status}`);
   }
 
-  const buffer = Buffer.from(await response.arrayBuffer());
+  const data = await response.json();
 
-  const AdmZip = require("adm-zip");
-  const parquet = require("parquetjs-lite");
-
-  const zip = new AdmZip(buffer);
-  const entry = zip.getEntry("recipes.parquet");
-
-  if (!entry) {
-    throw new Error("recipes.parquet not found inside ZIP");
-  }
-
-  const tempPath = "/tmp/recipes.parquet";
-  fs.writeFileSync(tempPath, entry.getData());
-
-  const reader = await parquet.ParquetReader.openFile(tempPath);
-
-  const cursor = reader.getCursor([
-  "Name",
-  "RecipeCategory",
-  "Description",
-  "RecipeIngredientParts",
-  "RecipeInstructions",
-  "RecipeServings",
-  "TotalTime",
-  "AggregatedRating"
-]);
-
-console.log("Sample recipes:");
-
-for (let i = 0; i < 50; i++) {
-  const record = await cursor.next();
-
-  if (!record) break;
-
-  console.log({
-    Name: record.Name,
-    RecipeCategory: record.RecipeCategory,
-    Description: record.Description,
-    RecipeIngredientParts: record.RecipeIngredientParts,
-    RecipeInstructions: record.RecipeInstructions,
-    RecipeServings: record.RecipeServings,
-    TotalTime: record.TotalTime,
-    AggregatedRating: record.AggregatedRating
-  });
+  console.log(
+    "Dataset #2 files:",
+    JSON.stringify(data.datasetFiles, null, 2)
+  );
 }
 
-await reader.close();
-}
+testKaggleConnection().catch(error => {
+  console.error(error);
+  process.exit(1);
+});
 
 testKaggleConnection().catch(error => {
   console.error(error);
