@@ -130,6 +130,63 @@ function nextOnboardingStep(currentId, nextId, fieldName) {
   document.getElementById(nextId).classList.add('active');
 }
 
+function setupLocationAutocomplete(cityInputId, postalCodeInputId, suggestionsId) {
+  const cityInput = document.getElementById(cityInputId);
+  const postalCodeInput = document.getElementById(postalCodeInputId);
+  const suggestions = document.getElementById(suggestionsId);
+  if (!cityInput || !postalCodeInput || !suggestions) return;
+
+  let debounceTimer;
+  cityInput.addEventListener('input', () => {
+    postalCodeInput.value = '';
+    clearTimeout(debounceTimer);
+    const query = cityInput.value.trim();
+    if (query.length < 2) {
+      suggestions.innerHTML = '';
+      suggestions.style.display = 'none';
+      return;
+    }
+
+    debounceTimer = setTimeout(async () => {
+      try {
+        const response = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=5&lang=en`);
+        if (!response.ok) return;
+        const result = await response.json();
+        const places = (result.features || []).filter(({ properties }) =>
+          properties?.city || properties?.town || properties?.village || properties?.municipality
+        );
+
+        suggestions.innerHTML = places.map((place, index) => {
+          const properties = place.properties;
+          const name = properties.city || properties.town || properties.village || properties.municipality || properties.name;
+          const region = [properties.state, properties.country].filter(Boolean).join(', ');
+          return `<button type="button" class="location-suggestion" data-place-index="${index}">${name}${region ? `, ${region}` : ''}</button>`;
+        }).join('');
+        suggestions.style.display = places.length ? 'block' : 'none';
+
+        suggestions.querySelectorAll('.location-suggestion').forEach((button) => {
+          button.addEventListener('click', () => {
+            const properties = places[Number(button.dataset.placeIndex)].properties;
+            cityInput.value = properties.city || properties.town || properties.village || properties.municipality || properties.name || '';
+            postalCodeInput.value = properties.postcode || '';
+            suggestions.innerHTML = '';
+            suggestions.style.display = 'none';
+          });
+        });
+      } catch (error) {
+        suggestions.innerHTML = '';
+        suggestions.style.display = 'none';
+      }
+    }, 300);
+  });
+
+  document.addEventListener('click', (event) => {
+    if (!event.target.closest(`#${cityInputId}`) && !event.target.closest(`#${suggestionsId}`)) {
+      suggestions.style.display = 'none';
+    }
+  });
+}
+
 async function savePreferences() {
   const userSign = getSelectedValue('user-sign');
   const partnerSign = getSelectedValue('partner-sign');
@@ -482,6 +539,8 @@ async function initApp() {
 }
 
 // Boot application
+setupLocationAutocomplete('onboarding-city', 'onboarding-postal-code', 'onboarding-city-suggestions');
+setupLocationAutocomplete('settings-city', 'settings-postal-code', 'settings-city-suggestions');
 initApp();
 
 // Tracks the last date the dashboard was updated
