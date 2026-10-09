@@ -204,7 +204,7 @@ async function savePreferences() {
   const { data: { user } } = await supabaseClient.auth.getUser();
   if (!user) return alert('No active session found.');
 
-  const { error } = await supabaseClient.from('profiles').update({
+  const { data: savedProfile, error } = await supabaseClient.from('profiles').update({
     user_sign: userSign,
     partner_sign: partnerSign,
     relationship_type: relationshipType,
@@ -212,11 +212,18 @@ async function savePreferences() {
     budget_preference: budgetPreference,
     city,
     postal_code: postalCode
-  }).eq('id', user.id);
+  }).eq('id', user.id).select('user_sign, partner_sign, relationship_type, distance, budget_preference, city, postal_code').maybeSingle();
 
-  if (error) {
-    alert('Error saving preferences: ' + error.message);
+  if (error || !savedProfile) {
+    alert('Could not save preferences. Run supabase/profile-preferences.sql in Supabase first.' + (error ? `\n\n${error.message}` : ''));
   } else {
+    currentUserSign = savedProfile.user_sign;
+    currentPartnerSign = savedProfile.partner_sign;
+    currentRelationshipType = savedProfile.relationship_type;
+    currentDistance = savedProfile.distance;
+    currentBudgetPreference = savedProfile.budget_preference;
+    currentCity = savedProfile.city;
+    currentPostalCode = savedProfile.postal_code;
     showView('view-paywall');
   }
 }
@@ -512,7 +519,7 @@ async function initApp() {
   } else {
     const { data: profile } = await supabaseClient
       .from('profiles')
-      .select('user_sign, partner_sign')
+      .select('user_sign, partner_sign, relationship_type, distance, budget_preference, city, postal_code')
       .eq('id', session.user.id)
       .single();
 

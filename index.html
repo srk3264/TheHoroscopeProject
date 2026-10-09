@@ -24,6 +24,8 @@
     .location-suggestion { width: 100%; padding: 12px; border: 0; border-bottom: 1px solid rgba(0, 0, 0, 0.12); background: #fff; color: #000; text-align: left; cursor: pointer; font-size: 14px; }
     .location-suggestion:last-child { border-bottom: 0; }
     .location-suggestion:hover { background: #f1f1f1; }
+    .location-attribution { margin-top: 6px; color: rgba(0, 0, 0, 0.48); font-size: 10px; text-align: left; }
+    .location-attribution a { color: inherit; }
     .auth-container button { width: 100%; padding: 12px; border-radius: 999px; border: none; background: #1E87E8; color: white; font-weight: 600; font-size: 16px; cursor: pointer; }
     .onboarding-screen { display: none; }
     .onboarding-screen.active { display: block; }
@@ -162,6 +164,7 @@
           <div id="onboarding-city-suggestions" class="location-suggestions"></div>
         </div>
         <input type="text" id="onboarding-postal-code" placeholder="ZIP or postal code" autocomplete="postal-code" required />
+        <div class="location-attribution">Location data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap contributors</a></div>
         <button class="onboarding-next" onclick="savePreferences()">Continue</button>
       </div>
     </div>
@@ -295,6 +298,7 @@
 
         <label class="settings-label" for="settings-postal-code">ZIP or postal code</label>
         <input id="settings-postal-code" type="text" placeholder="ZIP or postal code" autocomplete="postal-code" required />
+        <div class="location-attribution">Location data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap contributors</a></div>
 
         <button class="settings-save" type="submit">Save Changes</button>
       </form>
