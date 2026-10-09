@@ -9,6 +9,9 @@ let currentUserSign = '';
 let currentPartnerSign = '';
 let currentRelationshipType = '';
 let currentDistance = '';
+let currentBudgetPreference = '';
+let currentCity = '';
+let currentPostalCode = '';
 
 
 
@@ -85,6 +88,9 @@ async function routeAuthenticatedUser(profile) {
 
   currentRelationshipType = profile.relationship_type || '';
   currentDistance = profile.distance || '';
+  currentBudgetPreference = profile.budget_preference || '';
+  currentCity = profile.city || '';
+  currentPostalCode = profile.postal_code || '';
 
   if (await checkSubscription()) {
     loadDashboard(profile.user_sign, profile.partner_sign);
@@ -129,8 +135,11 @@ async function savePreferences() {
   const partnerSign = getSelectedValue('partner-sign');
   const relationshipType = getSelectedValue('relationship-type');
   const distance = getSelectedValue('distance');
+  const budgetPreference = getSelectedValue('budget-preference');
+  const city = document.getElementById('onboarding-city')?.value.trim() || '';
+  const postalCode = document.getElementById('onboarding-postal-code')?.value.trim() || '';
 
-  if (!userSign || !partnerSign || !relationshipType || !distance) {
+  if (!userSign || !partnerSign || !relationshipType || !distance || !budgetPreference || !city || !postalCode) {
     alert('Choose an option to continue.');
     return;
   }
@@ -142,7 +151,10 @@ async function savePreferences() {
     user_sign: userSign,
     partner_sign: partnerSign,
     relationship_type: relationshipType,
-    distance
+    distance,
+    budget_preference: budgetPreference,
+    city,
+    postal_code: postalCode
   }).eq('id', user.id);
 
   if (error) {
@@ -458,7 +470,7 @@ async function initApp() {
     if (event === 'SIGNED_IN' && session) {
       const { data: profile } = await supabaseClient
         .from('profiles')
-        .select('user_sign, partner_sign')
+        .select('user_sign, partner_sign, relationship_type, distance, budget_preference, city, postal_code')
         .eq('id', session.user.id)
         .single();
 
@@ -488,7 +500,7 @@ document.addEventListener('visibilitychange', async () => {
       if (session) {
         const { data: profile } = await supabaseClient
           .from('profiles')
-          .select('user_sign, partner_sign')
+          .select('user_sign, partner_sign, relationship_type, distance, budget_preference, city, postal_code')
           .eq('id', session.user.id)
           .single();
 
@@ -518,18 +530,27 @@ async function openSettingsView() {
   if (user) {
     const { data: profile } = await supabaseClient
       .from('profiles')
-      .select('relationship_type, distance')
+      .select('relationship_type, distance, budget_preference, city, postal_code')
       .eq('id', user.id)
       .maybeSingle();
 
     currentRelationshipType = profile?.relationship_type || currentRelationshipType;
     currentDistance = profile?.distance || currentDistance;
+    currentBudgetPreference = profile?.budget_preference || currentBudgetPreference;
+    currentCity = profile?.city || currentCity;
+    currentPostalCode = profile?.postal_code || currentPostalCode;
   }
 
   const relationshipInput = document.querySelector(`input[name="settings-relationship-type"][value="${currentRelationshipType}"]`);
   const distanceInput = document.querySelector(`input[name="settings-distance"][value="${currentDistance}"]`);
+  const budgetInput = document.querySelector(`input[name="settings-budget-preference"][value="${currentBudgetPreference}"]`);
+  const cityInput = document.getElementById('settings-city');
+  const postalCodeInput = document.getElementById('settings-postal-code');
   if (relationshipInput) relationshipInput.checked = true;
   if (distanceInput) distanceInput.checked = true;
+  if (budgetInput) budgetInput.checked = true;
+  if (cityInput) cityInput.value = currentCity;
+  if (postalCodeInput) postalCodeInput.value = currentPostalCode;
 
   showView('view-settings');
 }
@@ -544,9 +565,12 @@ async function handleUpdateSigns(event) {
   const newPartnerSign = document.getElementById('settings-partner-sign').value;
   const newRelationshipType = getSelectedValue('settings-relationship-type');
   const newDistance = getSelectedValue('settings-distance');
+  const newBudgetPreference = getSelectedValue('settings-budget-preference');
+  const newCity = document.getElementById('settings-city').value.trim();
+  const newPostalCode = document.getElementById('settings-postal-code').value.trim();
 
-  if (!newRelationshipType || !newDistance) {
-    alert('Choose a relationship type and distance to continue.');
+  if (!newRelationshipType || !newDistance || !newBudgetPreference || !newCity || !newPostalCode) {
+    alert('Complete all relationship, budget, city, and postal code fields to continue.');
     return;
   }
 
@@ -559,7 +583,10 @@ async function handleUpdateSigns(event) {
       user_sign: newUserSign,
       partner_sign: newPartnerSign,
       relationship_type: newRelationshipType,
-      distance: newDistance
+      distance: newDistance,
+      budget_preference: newBudgetPreference,
+      city: newCity,
+      postal_code: newPostalCode
     })
     .eq('id', user.id);
 
@@ -572,6 +599,9 @@ async function handleUpdateSigns(event) {
   currentPartnerSign = newPartnerSign;
   currentRelationshipType = newRelationshipType;
   currentDistance = newDistance;
+  currentBudgetPreference = newBudgetPreference;
+  currentCity = newCity;
+  currentPostalCode = newPostalCode;
 
   alert('Signs updated successfully!');
   loadDashboard(currentUserSign, currentPartnerSign);

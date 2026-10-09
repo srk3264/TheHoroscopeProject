@@ -134,6 +134,26 @@
           <label class="onboarding-option"><input type="radio" name="distance" value="nearby">Nearby</label>
           <label class="onboarding-option"><input type="radio" name="distance" value="long-distance">Long-distance</label>
         </div>
+        <button class="onboarding-next" onclick="nextOnboardingStep('onboarding-distance', 'onboarding-budget', 'distance')">Next</button>
+      </div>
+
+      <div id="onboarding-budget" class="onboarding-screen">
+        <h2 style="font-family: 'Averia Serif Libre', serif; font-size: 28px; margin-bottom: 8px;">What feels right for your budget?</h2>
+        <p>We will use this to shape practical suggestions.</p>
+        <div class="onboarding-options">
+          <label class="onboarding-option"><input type="radio" name="budget-preference" value="cheap">Keep it cheap</label>
+          <label class="onboarding-option"><input type="radio" name="budget-preference" value="reasonable">Reasonable spend</label>
+          <label class="onboarding-option"><input type="radio" name="budget-preference" value="expensive">Open to spending more</label>
+          <label class="onboarding-option"><input type="radio" name="budget-preference" value="discounts">Look for discounts</label>
+        </div>
+        <button class="onboarding-next" onclick="nextOnboardingStep('onboarding-budget', 'onboarding-location', 'budget-preference')">Next</button>
+      </div>
+
+      <div id="onboarding-location" class="onboarding-screen">
+        <h2 style="font-family: 'Averia Serif Libre', serif; font-size: 28px; margin-bottom: 8px;">Where are you based?</h2>
+        <p>We will use your location for nearby ideas.</p>
+        <input type="text" id="onboarding-city" placeholder="City" autocomplete="address-level2" required />
+        <input type="text" id="onboarding-postal-code" placeholder="ZIP or postal code" autocomplete="postal-code" required />
         <button class="onboarding-next" onclick="savePreferences()">Continue</button>
       </div>
     </div>
@@ -250,6 +270,20 @@
           <label class="onboarding-option"><input type="radio" name="settings-distance" value="nearby">Nearby</label>
           <label class="onboarding-option"><input type="radio" name="settings-distance" value="long-distance">Long-distance</label>
         </div>
+
+        <label class="settings-label">Budget preference</label>
+        <div class="onboarding-options">
+          <label class="onboarding-option"><input type="radio" name="settings-budget-preference" value="cheap">Keep it cheap</label>
+          <label class="onboarding-option"><input type="radio" name="settings-budget-preference" value="reasonable">Reasonable spend</label>
+          <label class="onboarding-option"><input type="radio" name="settings-budget-preference" value="expensive">Open to spending more</label>
+          <label class="onboarding-option"><input type="radio" name="settings-budget-preference" value="discounts">Look for discounts</label>
+        </div>
+
+        <label class="settings-label" for="settings-city">City</label>
+        <input id="settings-city" type="text" placeholder="City" autocomplete="address-level2" required />
+
+        <label class="settings-label" for="settings-postal-code">ZIP or postal code</label>
+        <input id="settings-postal-code" type="text" placeholder="ZIP or postal code" autocomplete="postal-code" required />
 
         <button class="settings-save" type="submit">Save Changes</button>
       </form>
