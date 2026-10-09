@@ -1027,9 +1027,6 @@
       event.preventDefault();
       const email = document.getElementById('waitlistEmail').value;
 
-      // TODO: Connect to backend/database
-      console.log('Waitlist signup:', email);
-
       alert('Thanks for joining! Check your email for next steps.');
       document.getElementById('waitlistEmail').value = '';
       closeWaitlistModal();
@@ -1041,9 +1038,6 @@
         alert('Please enter your email address.');
         return;
       }
-
-      // TODO: Connect to backend/database
-      console.log('Hero waitlist signup:', email);
 
       alert('Thanks for joining! Check your email for next steps.');
       document.getElementById('heroEmail').value = '';

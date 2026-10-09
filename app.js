@@ -12,6 +12,8 @@ let currentDistance = '';
 let currentBudgetPreference = '';
 let currentCity = '';
 let currentPostalCode = '';
+let currentActions = [];
+let rewrittenActionIndexes = new Set();
 
 
 
@@ -275,16 +277,21 @@ if (currentDateEl) {
 
   // Render Action Cards with embedded SVG Header
   const actionContainer = document.getElementById('actions-container');
-  actionContainer.innerHTML = data.actions.map((act, idx) => `
+  currentActions = data.actions;
+  actionContainer.innerHTML = data.actions.map((act, idx) => {
+    const wasRewritten = rewrittenActionIndexes.has(idx);
+    return `
       <div class="action-card" style="height: 100vh; width: 100vw; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; ${getRandomCardGradient()} cursor: pointer;">
       ${zodiacHeaderHTML}
       <div style="font-size: 28px; font-family: 'Averia Serif Libre', serif; color: white; margin-bottom: 12px;">#${idx + 1}/${data.actions.length}</div>
       <div style="display: flex; flex-direction: column; gap: 12px; text-align: center; color: white;">
-        <div style="font-size: 22px; font-family: 'Averia Serif Libre', serif; font-weight: 300;">${act.title}</div>
-        <div style="font-size: 15px; opacity: 0.9;">${act.subtitle}</div>
+        <div class="action-title" style="font-size: 22px; font-family: 'Averia Serif Libre', serif; font-weight: 300;">${act.title}</div>
+        <div class="action-reason" style="font-size: 15px; opacity: 0.9;">${act.subtitle}</div>
       </div>
+      <button type="button" class="action-rewrite-btn" onclick="rewriteAction(${idx}, this)"${wasRewritten ? ' disabled' : ''}>${wasRewritten ? 'Already rewritten' : 'Make it fit me'}</button>
     </div>
-  `).join('');
+  `;
+  }).join('');
 
   setupUnifiedTapCards(quickContainer, actionContainer);
 
@@ -294,6 +301,68 @@ if (currentDateEl) {
   if (window.lucide) {
     lucide.createIcons();
   }
+}
+
+async function loadRewrittenActionIndexes() {
+  rewrittenActionIndexes = new Set();
+  const { data: { user } } = await supabaseClient.auth.getUser();
+  if (!user || !currentUserSign || !currentPartnerSign) return;
+
+  const { data: rewrites } = await supabaseClient
+    .from('rewritten_actions')
+    .select('action_index')
+    .eq('user_id', user.id)
+    .eq('date', getLocalDateString())
+    .eq('pair_key', `${currentUserSign.toLowerCase()}_${currentPartnerSign.toLowerCase()}`);
+
+  (rewrites || []).forEach(({ action_index }) => rewrittenActionIndexes.add(action_index));
+}
+
+async function rewriteAction(actionIndex, button) {
+  const action = currentActions[actionIndex];
+  if (!action || !button) return;
+
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (!session) {
+    showView('view-login');
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = 'Rewriting...';
+
+  try {
+    const response = await fetch('/.netlify/functions/rewrite-action', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session.access_token}`
+      },
+      body: JSON.stringify({
+        actionTitle: action.title,
+        actionReason: action.subtitle,
+        pairKey: `${currentUserSign.toLowerCase()}_${currentPartnerSign.toLowerCase()}`,
+        date: getLocalDateString(),
+        actionIndex
+      })
+    });
+    const result = await response.json();
+
+    if (!response.ok) {
+      alert(result.error || 'Unable to rewrite this action.');
+      return;
+    }
+
+    action.title = result.title;
+    action.subtitle = result.reason;
+    const card = button.closest('.action-card');
+    card.querySelector('.action-title').textContent = result.title;
+    card.querySelector('.action-reason').textContent = result.reason;
+  } catch (error) {
+    alert('Unable to rewrite this action right now.');
+  }
+
+  button.textContent = 'Already rewritten';
 }
 
 // Helper to get local YYYY-MM-DD date string
@@ -508,6 +577,7 @@ async function loadDashboard(userSign, partnerSign) {
     }))
   };
 
+  await loadRewrittenActionIndexes();
   renderDashboard(userSign, partnerSign, dashboardData);
 }
 
