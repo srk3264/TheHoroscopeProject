@@ -45,7 +45,7 @@ exports.handler = async (event) => {
 
     const { data: existingRewrite, error: existingRewriteError } = await supabase
       .from('rewritten_actions')
-      .select('rewritten_title, rewritten_reason')
+      .select('rewritten_title, original_reason')
       .eq('user_id', user.id)
       .eq('date', date)
       .eq('pair_key', pairKey)
@@ -57,7 +57,7 @@ exports.handler = async (event) => {
       return {
         statusCode: 200,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: existingRewrite.rewritten_title, reason: existingRewrite.rewritten_reason, alreadyRewritten: true })
+        body: JSON.stringify({ title: existingRewrite.rewritten_title, reason: existingRewrite.original_reason, alreadyRewritten: true })
       };
     }
 
@@ -70,10 +70,10 @@ exports.handler = async (event) => {
     if (profileError) throw profileError;
 
     const prompt = `
-Rewrite this couple action to be more specific and useful for today.
-
 Original action: ${actionTitle}
 Original reason: ${actionReason}
+
+
 
 Couple context:
 - Relationship: ${profile.relationship_type || 'unspecified'}
@@ -82,8 +82,8 @@ Couple context:
 - City: ${profile.city || 'unspecified'}
 - Postal code: ${profile.postal_code || 'unspecified'}
 
-Tell only the user exactly what to do. Keep it realistic for their distance, budget, and city. Avoid generic advice. Return valid JSON only with this shape:
-{"title":"A concise action, maximum 24 words","reason":"Why it fits, maximum 15 words"}`;
+Rewrite this couple action to be more specific and useful for today. Tell only the user exactly what to do. Keep it realistic for their distance, budget, and city. Avoid generic advice. Make it oddly specific: name a concrete place, object, time, route, menu item, tiny ritual, or playful constraint when possible. Never write vague advice such as "spend quality time" or "communicate more". Return valid JSON only with this shape:
+{"title":"An oddly specific action, maximum 24 words"}`;
 
     const aiResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
@@ -95,7 +95,7 @@ Tell only the user exactly what to do. Keep it realistic for their distance, bud
         model: 'openai/gpt-4o-mini',
         response_format: { type: 'json_object' },
         messages: [
-          { role: 'system', content: 'You rewrite relationship actions as concise, practical JSON.' },
+          { role: 'system', content: 'You rewrite relationship actions as vivid, oddly specific, practical JSON. Return only the requested title.' },
           { role: 'user', content: prompt }
         ]
       })
@@ -109,7 +109,7 @@ Tell only the user exactly what to do. Keep it realistic for their distance, bud
     const content = aiData.choices?.[0]?.message?.content || '{}';
     const rewritten = JSON.parse(content);
 
-    if (!rewritten.title || !rewritten.reason) {
+    if (!rewritten.title) {
       throw new Error('The AI returned an incomplete action.');
     }
 
@@ -122,8 +122,7 @@ Tell only the user exactly what to do. Keep it realistic for their distance, bud
         action_index: actionIndex,
         original_title: actionTitle,
         original_reason: actionReason,
-        rewritten_title: rewritten.title,
-        rewritten_reason: rewritten.reason
+        rewritten_title: rewritten.title
       });
 
     if (insertError) throw insertError;
@@ -131,7 +130,7 @@ Tell only the user exactly what to do. Keep it realistic for their distance, bud
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title: rewritten.title, reason: rewritten.reason })
+      body: JSON.stringify({ title: rewritten.title, reason: actionReason })
     };
   } catch (error) {
     return { statusCode: 500, body: JSON.stringify({ error: error.message }) };

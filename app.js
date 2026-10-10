@@ -13,7 +13,7 @@ let currentBudgetPreference = '';
 let currentCity = '';
 let currentPostalCode = '';
 let currentActions = [];
-let rewrittenActionIndexes = new Set();
+let rewrittenActionIndexes = new Map();
 
 
 
@@ -279,13 +279,15 @@ if (currentDateEl) {
   const actionContainer = document.getElementById('actions-container');
   currentActions = data.actions;
   actionContainer.innerHTML = data.actions.map((act, idx) => {
-    const wasRewritten = rewrittenActionIndexes.has(idx);
+    const savedRewrite = rewrittenActionIndexes.get(idx);
+    const wasRewritten = Boolean(savedRewrite);
+    const displayedTitle = savedRewrite?.title || act.title;
     return `
       <div class="action-card" style="height: 100vh; width: 100vw; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; ${getRandomCardGradient()} cursor: pointer;">
       ${zodiacHeaderHTML}
       <div style="font-size: 28px; font-family: 'Averia Serif Libre', serif; color: white; margin-bottom: 12px;">#${idx + 1}/${data.actions.length}</div>
       <div style="display: flex; flex-direction: column; gap: 12px; text-align: center; color: white;">
-        <div class="action-title" style="font-size: 22px; font-family: 'Averia Serif Libre', serif; font-weight: 300;">${act.title}</div>
+        <div class="action-title" style="font-size: 22px; font-family: 'Averia Serif Libre', serif; font-weight: 300;">${displayedTitle}</div>
         <div class="action-reason" style="font-size: 15px; opacity: 0.9;">${act.subtitle}</div>
       </div>
       <button type="button" class="action-rewrite-btn" onclick="rewriteAction(${idx}, this)"${wasRewritten ? ' disabled' : ''}>${wasRewritten ? 'Already rewritten' : 'Make it fit me'}</button>
@@ -304,18 +306,21 @@ if (currentDateEl) {
 }
 
 async function loadRewrittenActionIndexes() {
-  rewrittenActionIndexes = new Set();
+  rewrittenActionIndexes = new Map();
   const { data: { user } } = await supabaseClient.auth.getUser();
   if (!user || !currentUserSign || !currentPartnerSign) return;
 
   const { data: rewrites } = await supabaseClient
     .from('rewritten_actions')
-    .select('action_index')
+    .select('action_index, rewritten_title, original_reason')
     .eq('user_id', user.id)
     .eq('date', getLocalDateString())
     .eq('pair_key', `${currentUserSign.toLowerCase()}_${currentPartnerSign.toLowerCase()}`);
 
-  (rewrites || []).forEach(({ action_index }) => rewrittenActionIndexes.add(action_index));
+  (rewrites || []).forEach((rewrite) => rewrittenActionIndexes.set(rewrite.action_index, {
+    title: rewrite.rewritten_title,
+    reason: rewrite.original_reason
+  }));
 }
 
 async function rewriteAction(actionIndex, button) {
@@ -354,10 +359,10 @@ async function rewriteAction(actionIndex, button) {
     }
 
     action.title = result.title;
-    action.subtitle = result.reason;
+    rewrittenActionIndexes.set(actionIndex, { title: result.title, reason: action.subtitle });
     const card = button.closest('.action-card');
     card.querySelector('.action-title').textContent = result.title;
-    card.querySelector('.action-reason').textContent = result.reason;
+    button.textContent = 'Already rewritten';
   } catch (error) {
     alert('Unable to rewrite this action right now.');
   }

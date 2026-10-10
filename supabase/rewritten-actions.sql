@@ -7,10 +7,12 @@ create table if not exists public.rewritten_actions (
   original_title text not null,
   original_reason text not null,
   rewritten_title text not null,
-  rewritten_reason text not null,
   created_at timestamptz not null default now(),
   unique (user_id, date, pair_key, action_index)
 );
+
+alter table public.rewritten_actions
+  drop column if exists rewritten_reason;
 
 alter table public.rewritten_actions enable row level security;
 
