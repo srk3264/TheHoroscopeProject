@@ -49,7 +49,8 @@ exports.handler = async function (event, context) {
     const tzParam = encodeURIComponent(timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone);
     const origin = event.headers.origin || `https://${event.headers.host}`;
     
-    await fetch(`${origin}/.netlify/functions/sync-horoscopes?timeZone=${tzParam}`);
+    const signsParam = encodeURIComponent(`${sign1},${sign2}`);
+    await fetch(`${origin}/.netlify/functions/sync-horoscopes?timeZone=${tzParam}&signs=${signsParam}`);
 
     const { data: horoscopes, error: fetchErr } = await supabase
       .from('daily_horoscopes')
@@ -92,7 +93,7 @@ Generate daily pair insights strictly in this JSON format:
     { "title": "
     - Start from a likely emotional pattern ${sign1} may be experiencing today, using a recognizable detail from ${sign1}'s horoscope.
     - Gently contradict the obvious interpretation in plain language: "You are not ___; you are ___, so ___."
-    - Turn that reframe into one concrete action ${sign1} can take with ${sign2} today.
+    - Turn that reframe into one concrete action ${sign1} can take with ${sign2} today satisying both the horoscopes.
     - Make the action oddly specific with a real time, place, object, food, route, song, mutual friend, or playful rule when supported by the context.
     - Make it feel like a surprising screenshot-worthy line, not therapy, a diagnosis, or a generic date plan.
     - Avoid generic advice such as "communicate," "support them," "spend quality time," "show appreciation," or "be vulnerable."

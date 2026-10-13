@@ -454,6 +454,8 @@ function setupUnifiedTapCards(...containers) {
 
 
 // Helper to fetch horoscope with on-demand fallback
+let horoscopeSyncPromise = null;
+
 async function getHoroscope(sign) {
   const today = getLocalDateString();
 
@@ -470,7 +472,12 @@ async function getHoroscope(sign) {
   // 2. If missing, trigger Netlify function with client timezone
   if (!data) {
     const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const res = await fetch(`/.netlify/functions/sync-horoscopes?timeZone=${encodeURIComponent(userTimeZone)}`);
+    const pairSigns = `${currentUserSign.toLowerCase()},${currentPartnerSign.toLowerCase()}`;
+    if (!horoscopeSyncPromise) {
+      horoscopeSyncPromise = fetch(`/.netlify/functions/sync-horoscopes?timeZone=${encodeURIComponent(userTimeZone)}&signs=${encodeURIComponent(pairSigns)}`)
+        .finally(() => { horoscopeSyncPromise = null; });
+    }
+    const res = await horoscopeSyncPromise;
     
     if (!res.ok) {
       const errText = await res.text();
