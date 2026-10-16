@@ -91,8 +91,8 @@ Generate daily pair insights strictly in this JSON format:
   },
   "actions": [
     { "title": "
-    - 1st point out one concrete tension, desire, behavior, or situation from ${sign1}'s horoscope
-    - then, propose an oddly specific date activity for ${sign1} & ${sign2} for today satisfying both the horoscopes.
+    - Start with one concrete tension, desire, behavior, or situation from ${sign1}'s horoscope
+    - then, accordingly propose an oddly specific date activity for ${sign1} & ${sign2} for today satisfying both the horoscopes.
     - Make the action oddly specific with a real time, place, object, food, route, song, mutual friend, or playful rule when supported by the context.
     - Make it feel like a surprising screenshot-worthy line, not therapy, a diagnosis, or a generic date plan.
     - Avoid generic advice such as "communicate," "support them," "spend quality time," "show appreciation," or "be vulnerable."
