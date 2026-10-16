@@ -90,14 +90,9 @@ Generate daily pair insights strictly in this JSON format:
     "vibe": { "title": "Name a song/artist (max 4 words)", "reason": "Reason (max 10 words)" }
   },
   "actions": [
-    { "title": "
-    - Start with one concrete tension, desire, behavior, or situation from ${sign1}'s horoscope
-    - then, accordingly propose an oddly specific date activity for ${sign1} & ${sign2} for today satisfying both the horoscopes.
-    - Make the action oddly specific with a real time, place, object, food, route, song, mutual friend, or playful rule when supported by the context.
-    - Make it feel like a surprising screenshot-worthy line, not therapy, a diagnosis, or a generic date plan.
-    - Avoid generic advice such as "communicate," "support them," "spend quality time," "show appreciation," or "be vulnerable."
-    (max 24 words)", 
-     "reason": "How it fits both zodiac signs, use exact lines from the horoscopes(max 15 words)" }
+    Writing
+
+{ "title": "Write one freakishly relatable, screenshot-worthy date idea for ${sign1} and ${sign2} today (max 24 words). Start with a painfully specific behavior, tiny conflict, or unspoken desire from ${sign1}'s horoscope, then turn it into an oddly specific date that satisfies both signs. Make it sound like a friend who knows their relationship a little too well. Include one vivid, concrete detail or playful rule. Prioritize recognition, humor, and emotional accuracy over astrology clichés. No generic date ideas, therapy-speak, advice, or forced sentimentality. It should feel like a TikTok comment someone screenshots because it’s TOO accurate.", "reason": "Explain the connection to both horoscopes in max 15 words, citing exact phrases from each horoscope." }
   ]
 }
 
