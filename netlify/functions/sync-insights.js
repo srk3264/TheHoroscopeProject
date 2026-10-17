@@ -97,7 +97,7 @@ Generate daily pair insights strictly in this JSON format:
 }
 
 Rules:
-- Generate upto 8 actions
+- Generate upto 8 actions maximum
 `;
 
     let insightsContent = null;
