@@ -5,6 +5,77 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
+const locationCache = new Map();
+const LOCATION_CACHE_TTL = 15 * 60 * 1000;
+const LOCATION_REQUEST_TIMEOUT = 3500;
+
+async function fetchWithTimeout(url, options = {}) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), LOCATION_REQUEST_TIMEOUT);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function getNearbyPlaces(city, postalCode) {
+  const cacheKey = `${city}|${postalCode}`.toLowerCase().trim();
+  const cached = locationCache.get(cacheKey);
+  if (cached && cached.expiresAt > Date.now()) return cached.places;
+
+  try {
+    const geocodeParams = new URLSearchParams({
+      city,
+      postalcode: postalCode,
+      format: 'jsonv2',
+      limit: '1'
+    });
+    const geocodeResponse = await fetchWithTimeout(
+      `https://nominatim.openstreetmap.org/search?${geocodeParams}`,
+      { headers: { 'User-Agent': 'TheHoroscopeProject/1.0 contact@thehoroscopeproject.com' } }
+    );
+    if (!geocodeResponse.ok) return [];
+
+    const [location] = await geocodeResponse.json();
+    if (!location?.lat || !location?.lon) return [];
+
+    const overpassQuery = `
+[out:json][timeout:3];
+(
+  nwr(around:5000,${location.lat},${location.lon})[leisure=park];
+  nwr(around:5000,${location.lat},${location.lon})[amenity=cafe];
+  nwr(around:5000,${location.lat},${location.lon})[amenity=restaurant];
+  nwr(around:5000,${location.lat},${location.lon})[amenity=cinema];
+  nwr(around:5000,${location.lat},${location.lon})[tourism=museum];
+);
+out center tags 20;
+`;
+    const overpassResponse = await fetchWithTimeout(
+      'https://overpass-api.de/api/interpreter',
+      { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: overpassQuery }
+    );
+    if (!overpassResponse.ok) return [];
+
+    const overpassData = await overpassResponse.json();
+    const places = (overpassData.elements || [])
+      .map(({ tags = {} }) => ({
+        name: tags.name,
+        type: tags.amenity || tags.leisure || tags.tourism,
+        cuisine: tags.cuisine,
+        openingHours: tags.opening_hours
+      }))
+      .filter(place => place.name)
+      .slice(0, 12);
+
+    locationCache.set(cacheKey, { places, expiresAt: Date.now() + LOCATION_CACHE_TTL });
+    console.log('[temporary location cache]', { cacheKey, placeCount: places.length });
+    return places;
+  } catch (error) {
+    return [];
+  }
+}
+
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
@@ -69,6 +140,8 @@ exports.handler = async (event) => {
 
     if (profileError) throw profileError;
 
+    const nearbyPlaces = await getNearbyPlaces(profile.city, profile.postal_code);
+
     const prompt = `
 Original action: ${actionTitle}
 Original reason: ${actionReason}
@@ -81,8 +154,9 @@ Couple context:
 - Budget: ${profile.budget_preference || 'unspecified'}
 - City: ${profile.city || 'unspecified'}
 - Postal code: ${profile.postal_code || 'unspecified'}
+- Verified nearby OpenStreetMap places: ${JSON.stringify(nearbyPlaces)}
 
-Rewrite this couple action to be more specific and useful for today. Tell only the user exactly what to do. Keep it realistic for their distance, budget, and city. Avoid generic advice. Make it oddly specific: name a concrete place, object, time, route, menu item, tiny ritual, or playful constraint when possible. Never write vague advice such as "spend quality time" or "communicate more". Return valid JSON only with this shape:
+Rewrite this couple action to be more specific. Tell only the user exactly what to do. Keep it realistic for their distance, budget, and city. Use a verified nearby place only when it genuinely fits the original action and never invent details about it. Avoid generic advice. Make it oddly specific: name a concrete place, object, time, route, menu item, tiny ritual, or playful constraint when possible. Never write vague advice such as "spend quality time" or "communicate more". Return valid JSON only with this shape:
 {"title":"An oddly specific action, maximum 24 words"}`;
 
     const aiResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
