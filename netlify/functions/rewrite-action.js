@@ -5,90 +5,51 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-const locationCache = new Map();
-const LOCATION_CACHE_TTL = 15 * 60 * 1000;
-const LOCATION_REQUEST_TIMEOUT = 5000;
+const TICKETMASTER_REQUEST_TIMEOUT = 3500;
 
-async function fetchWithTimeout(url, options = {}) {
+async function getNearbyEvents(city, postalCode) {
+  const apiKey = process.env.TICKETMASTER_API_KEY;
+  if (!apiKey || !postalCode) return [];
+
+  const params = new URLSearchParams({
+    apikey: apiKey,
+    postalCode,
+    radius: '25',
+    unit: 'miles',
+    countryCode: 'US',
+    size: '10',
+    sort: 'date,asc'
+  });
+
+  if (city) params.set('city', city);
+
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), LOCATION_REQUEST_TIMEOUT);
+  const timeout = setTimeout(() => controller.abort(), TICKETMASTER_REQUEST_TIMEOUT);
+
   try {
-    return await fetch(url, { ...options, signal: controller.signal });
+    const response = await fetch(
+      `https://app.ticketmaster.com/discovery/v2/events.json?${params}`,
+        { signal: controller.signal }
+    );
+
+    if (!response.ok) return [];
+
+    const result = await response.json();
+    return (result._embedded?.events || []).map((event) => ({
+      name: event.name,
+      date: event.dates?.start?.localDate,
+      time: event.dates?.start?.localTime,
+      venue: event._embedded?.venues?.[0]?.name,
+      city: event._embedded?.venues?.[0]?.city?.name,
+      url: event.url,
+      priceRange: event.priceRanges?.[0]
+        ? `${event.priceRanges[0].min}-${event.priceRanges[0].max} ${event.priceRanges[0].currency || ''}`.trim()
+        : undefined
+    }));
+  } catch (error) {
+    return [];
   } finally {
     clearTimeout(timeout);
-  }
-}
-
-async function getNearbyPlaces(city, postalCode) {
-  const cacheKey = `${city}|${postalCode}`.toLowerCase().trim();
-  const cached = locationCache.get(cacheKey);
-  if (cached && cached.expiresAt > Date.now()) {
-    return { places: cached.places, status: 'cache', placeCount: cached.places.length };
-  }
-
-  try {
-    const geocodeParams = new URLSearchParams({
-      city,
-      postalcode: postalCode,
-      format: 'jsonv2',
-      limit: '1'
-    });
-    const geocodeResponse = await fetchWithTimeout(
-      `https://nominatim.openstreetmap.org/search?${geocodeParams}`,
-      { headers: { 'User-Agent': 'TheHoroscopeProject/1.0 contact@thehoroscopeproject.com' } }
-    );
-    if (!geocodeResponse.ok) return { places: [], status: `geocode_http_${geocodeResponse.status}`, placeCount: 0 };
-
-    const [location] = await geocodeResponse.json();
-    if (!location?.lat || !location?.lon) return { places: [], status: 'geocode_no_match', placeCount: 0 };
-
-    const overpassQuery = `
-[out:json][timeout:3];
-(
-  nwr(around:5000,${location.lat},${location.lon})[leisure=park];
-  nwr(around:5000,${location.lat},${location.lon})[amenity=cafe];
-  nwr(around:5000,${location.lat},${location.lon})[amenity=restaurant];
-  nwr(around:5000,${location.lat},${location.lon})[amenity=cinema];
-  nwr(around:5000,${location.lat},${location.lon})[tourism=museum];
-);
-out center tags 20;
-`;
-    const overpassEndpoints = [
-      'https://overpass-api.de/api/interpreter',
-      'https://overpass.kumi.systems/api/interpreter'
-    ];
-    let overpassResponse;
-    for (const endpoint of overpassEndpoints) {
-      try {
-        const response = await fetchWithTimeout(
-          endpoint,
-          { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: overpassQuery }
-        );
-        if (response.ok) {
-          overpassResponse = response;
-          break;
-        }
-      } catch (error) {
-        // Try the next public Overpass endpoint.
-      }
-    }
-    if (!overpassResponse) return { places: [], status: 'overpass_unavailable', placeCount: 0 };
-
-    const overpassData = await overpassResponse.json();
-    const places = (overpassData.elements || [])
-      .map(({ tags = {} }) => ({
-        name: tags.name,
-        type: tags.amenity || tags.leisure || tags.tourism,
-        cuisine: tags.cuisine,
-        openingHours: tags.opening_hours
-      }))
-      .filter(place => place.name)
-      .slice(0, 12);
-
-    locationCache.set(cacheKey, { places, expiresAt: Date.now() + LOCATION_CACHE_TTL });
-    return { places, status: 'fetched', placeCount: places.length };
-  } catch (error) {
-    return { places: [], status: 'lookup_error', placeCount: 0 };
   }
 }
 
@@ -148,7 +109,6 @@ exports.handler = async (event) => {
           title: existingRewrite.rewritten_title,
           reason: existingRewrite.original_reason,
           alreadyRewritten: true,
-          locationLookup: { status: 'already_rewritten', placeCount: 0, places: [] }
         })
       };
     }
@@ -161,8 +121,7 @@ exports.handler = async (event) => {
 
     if (profileError) throw profileError;
 
-    const locationLookup = await getNearbyPlaces(profile.city, profile.postal_code);
-    const nearbyPlaces = locationLookup.places;
+    const nearbyEvents = await getNearbyEvents(profile.city, profile.postal_code);
 
     const prompt = `
 Original action: ${actionTitle}
@@ -176,9 +135,9 @@ Couple context:
 - Budget: ${profile.budget_preference || 'unspecified'}
 - City: ${profile.city || 'unspecified'}
 - Postal code: ${profile.postal_code || 'unspecified'}
-- Verified nearby OpenStreetMap places: ${JSON.stringify(nearbyPlaces)}
+- Ticketmaster events nearby: ${JSON.stringify(nearbyEvents)}
 
-Rewrite this couple action to be more specific. Tell only the user exactly what to do. Keep it realistic for their distance, budget, and city. Use a verified nearby place only when it genuinely fits the original action and never invent details about it. Avoid generic advice. Make it oddly specific: name a concrete place, object, time, route, menu item, tiny ritual, or playful constraint when possible. Never write vague advice such as "spend quality time" or "communicate more". Return valid JSON only with this shape:
+Rewrite this couple action to be more specific. Tell only the user exactly what to do. Keep it realistic for their distance, budget, and city. Use a Ticketmaster event only if it genuinely fits the budget and relationship context; do not invent event details, availability, or prices, and do not imply attendance is possible unless the event data supports it. Avoid generic advice. Make it oddly specific using a concrete object, time, route, menu item, tiny ritual, or playful constraint when possible. Never write vague advice such as "spend quality time" or "communicate more". Return valid JSON only with this shape:
 {"title":"An oddly specific action, maximum 24 words"}`;
 
     const aiResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -226,7 +185,7 @@ Rewrite this couple action to be more specific. Tell only the user exactly what 
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title: rewritten.title, reason: actionReason, locationLookup })
+      body: JSON.stringify({ title: rewritten.title, reason: actionReason })
     };
   } catch (error) {
     return { statusCode: 500, body: JSON.stringify({ error: error.message }) };
