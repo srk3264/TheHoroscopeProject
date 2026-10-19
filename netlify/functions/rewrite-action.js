@@ -22,7 +22,9 @@ async function fetchWithTimeout(url, options = {}) {
 async function getNearbyPlaces(city, postalCode) {
   const cacheKey = `${city}|${postalCode}`.toLowerCase().trim();
   const cached = locationCache.get(cacheKey);
-  if (cached && cached.expiresAt > Date.now()) return cached.places;
+  if (cached && cached.expiresAt > Date.now()) {
+    return { places: cached.places, status: 'cache', placeCount: cached.places.length };
+  }
 
   try {
     const geocodeParams = new URLSearchParams({
@@ -35,10 +37,10 @@ async function getNearbyPlaces(city, postalCode) {
       `https://nominatim.openstreetmap.org/search?${geocodeParams}`,
       { headers: { 'User-Agent': 'TheHoroscopeProject/1.0 contact@thehoroscopeproject.com' } }
     );
-    if (!geocodeResponse.ok) return [];
+    if (!geocodeResponse.ok) return { places: [], status: 'unavailable', placeCount: 0 };
 
     const [location] = await geocodeResponse.json();
-    if (!location?.lat || !location?.lon) return [];
+    if (!location?.lat || !location?.lon) return { places: [], status: 'unavailable', placeCount: 0 };
 
     const overpassQuery = `
 [out:json][timeout:3];
@@ -55,7 +57,7 @@ out center tags 20;
       'https://overpass-api.de/api/interpreter',
       { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: overpassQuery }
     );
-    if (!overpassResponse.ok) return [];
+    if (!overpassResponse.ok) return { places: [], status: 'unavailable', placeCount: 0 };
 
     const overpassData = await overpassResponse.json();
     const places = (overpassData.elements || [])
@@ -69,10 +71,9 @@ out center tags 20;
       .slice(0, 12);
 
     locationCache.set(cacheKey, { places, expiresAt: Date.now() + LOCATION_CACHE_TTL });
-    console.log('[temporary location cache]', { cacheKey, placeCount: places.length });
-    return places;
+    return { places, status: 'fetched', placeCount: places.length };
   } catch (error) {
-    return [];
+    return { places: [], status: 'unavailable', placeCount: 0 };
   }
 }
 
@@ -128,7 +129,12 @@ exports.handler = async (event) => {
       return {
         statusCode: 200,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: existingRewrite.rewritten_title, reason: existingRewrite.original_reason, alreadyRewritten: true })
+        body: JSON.stringify({
+          title: existingRewrite.rewritten_title,
+          reason: existingRewrite.original_reason,
+          alreadyRewritten: true,
+          locationLookup: { status: 'already_rewritten', placeCount: 0, places: [] }
+        })
       };
     }
 
@@ -140,7 +146,8 @@ exports.handler = async (event) => {
 
     if (profileError) throw profileError;
 
-    const nearbyPlaces = await getNearbyPlaces(profile.city, profile.postal_code);
+    const locationLookup = await getNearbyPlaces(profile.city, profile.postal_code);
+    const nearbyPlaces = locationLookup.places;
 
     const prompt = `
 Original action: ${actionTitle}
@@ -204,7 +211,7 @@ Rewrite this couple action to be more specific. Tell only the user exactly what 
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title: rewritten.title, reason: actionReason })
+      body: JSON.stringify({ title: rewritten.title, reason: actionReason, locationLookup })
     };
   } catch (error) {
     return { statusCode: 500, body: JSON.stringify({ error: error.message }) };
