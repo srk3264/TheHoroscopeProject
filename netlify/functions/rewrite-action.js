@@ -7,7 +7,7 @@ const supabase = createClient(
 
 const locationCache = new Map();
 const LOCATION_CACHE_TTL = 15 * 60 * 1000;
-const LOCATION_REQUEST_TIMEOUT = 3500;
+const LOCATION_REQUEST_TIMEOUT = 5000;
 
 async function fetchWithTimeout(url, options = {}) {
   const controller = new AbortController();
@@ -37,10 +37,10 @@ async function getNearbyPlaces(city, postalCode) {
       `https://nominatim.openstreetmap.org/search?${geocodeParams}`,
       { headers: { 'User-Agent': 'TheHoroscopeProject/1.0 contact@thehoroscopeproject.com' } }
     );
-    if (!geocodeResponse.ok) return { places: [], status: 'unavailable', placeCount: 0 };
+    if (!geocodeResponse.ok) return { places: [], status: `geocode_http_${geocodeResponse.status}`, placeCount: 0 };
 
     const [location] = await geocodeResponse.json();
-    if (!location?.lat || !location?.lon) return { places: [], status: 'unavailable', placeCount: 0 };
+    if (!location?.lat || !location?.lon) return { places: [], status: 'geocode_no_match', placeCount: 0 };
 
     const overpassQuery = `
 [out:json][timeout:3];
@@ -53,11 +53,26 @@ async function getNearbyPlaces(city, postalCode) {
 );
 out center tags 20;
 `;
-    const overpassResponse = await fetchWithTimeout(
+    const overpassEndpoints = [
       'https://overpass-api.de/api/interpreter',
-      { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: overpassQuery }
-    );
-    if (!overpassResponse.ok) return { places: [], status: 'unavailable', placeCount: 0 };
+      'https://overpass.kumi.systems/api/interpreter'
+    ];
+    let overpassResponse;
+    for (const endpoint of overpassEndpoints) {
+      try {
+        const response = await fetchWithTimeout(
+          endpoint,
+          { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: overpassQuery }
+        );
+        if (response.ok) {
+          overpassResponse = response;
+          break;
+        }
+      } catch (error) {
+        // Try the next public Overpass endpoint.
+      }
+    }
+    if (!overpassResponse) return { places: [], status: 'overpass_unavailable', placeCount: 0 };
 
     const overpassData = await overpassResponse.json();
     const places = (overpassData.elements || [])
@@ -73,7 +88,7 @@ out center tags 20;
     locationCache.set(cacheKey, { places, expiresAt: Date.now() + LOCATION_CACHE_TTL });
     return { places, status: 'fetched', placeCount: places.length };
   } catch (error) {
-    return { places: [], status: 'unavailable', placeCount: 0 };
+    return { places: [], status: 'lookup_error', placeCount: 0 };
   }
 }
 

@@ -422,10 +422,15 @@ function setupUnifiedTapCards(...containers) {
   const showCard = (index) => {
     activeIndex = (index + cards.length) % cards.length;
     cards.forEach((card, cardIndex) => {
+      const isHidden = cardIndex !== activeIndex;
+      if (isHidden && card.contains(document.activeElement)) {
+        document.activeElement.blur();
+      }
       card.style.display = 'flex';
-      card.style.opacity = cardIndex === activeIndex ? '1' : '0';
-      card.style.pointerEvents = cardIndex === activeIndex ? 'auto' : 'none';
-      card.setAttribute('aria-hidden', cardIndex === activeIndex ? 'false' : 'true');
+      card.style.opacity = isHidden ? '0' : '1';
+      card.style.pointerEvents = isHidden ? 'none' : 'auto';
+      card.inert = isHidden;
+      card.setAttribute('aria-hidden', isHidden ? 'true' : 'false');
     });
   };
 
