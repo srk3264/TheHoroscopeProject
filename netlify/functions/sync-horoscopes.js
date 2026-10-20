@@ -15,11 +15,6 @@ exports.handler = async function (event, context) {
 
   const supabase = createClient(supabaseUrl, supabaseKey);
   const userTimeZone = event.queryStringParameters?.timeZone || 'America/Los_Angeles';
-  const requestedSigns = (event.queryStringParameters?.signs || '')
-    .split(',')
-    .map(sign => sign.trim().toLowerCase())
-    .filter(sign => SIGNS.includes(sign));
-  const signsToSync = requestedSigns.length ? [...new Set(requestedSigns)] : SIGNS;
 
   const now = new Date();
   const today = new Intl.DateTimeFormat('en-CA', { timeZone: userTimeZone }).format(now);
@@ -36,15 +31,15 @@ exports.handler = async function (event, context) {
 
     // If all 12 signs exist for today, exit early
     const existingSigns = new Set(existing ? existing.map(item => item.sign) : []);
-    if (signsToSync.every(sign => existingSigns.has(sign))) {
+    if (SIGNS.every(sign => existingSigns.has(sign))) {
       return {
         statusCode: 200,
         body: JSON.stringify({ message: `Horoscopes for ${today} are already cached. No API calls made.` })
       };
     }
 
-    // Only fetch signs that are missing from today's cache
-    const missingSigns = signsToSync.filter(sign => !existingSigns.has(sign));
+    // Fetch every sign when today's cache is incomplete
+    const missingSigns = SIGNS;
 
     const promises = missingSigns.map(async (sign) => {
       const response = await fetch(`https://api.astrojson.com/v1/horoscopes?sign=${sign}&lang=en&date=${today}&period=daily`, {
