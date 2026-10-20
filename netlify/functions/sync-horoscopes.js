@@ -51,7 +51,12 @@ if (!/^\d{4}-\d{2}-\d{2}$/.test(today)) {
     }
 
     // Fetch Zodiac Timeline's RSS feed and select the requested date.
-const response = await fetch('https://zodiactimeline.com/feed.xml');
+const response = await fetch('https://zodiactimeline.com/feed.xml', {
+  headers: {
+    'User-Agent': 'TheHoroscopeProject/1.0 (+https://thehoroscopeproject.netlify.app/)',
+    'Accept': 'application/rss+xml, application/xml, text/xml'
+  }
+});
 
 if (!response.ok) {
   const errorBody = await response.text();
