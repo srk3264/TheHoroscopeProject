@@ -42,12 +42,13 @@ exports.handler = async function (event, context) {
     const missingSigns = SIGNS;
 
     const promises = missingSigns.map(async (sign) => {
-      const response = await fetch(`https://api.astrojson.com/v1/horoscopes?sign=${sign}&lang=en&date=${today}&period=daily`, {
+      const response = await fetch(`https://api.astrojson.com/v1/horoscopes?sign=${sign}&lang=en&date=today&period=daily`, {
         headers: { 'X-API-KEY': process.env.ASTRO_JSON_API_KEY || '' }
       });
       
       if (!response.ok) {
-        throw new Error(`AstroJSON API error for ${sign}: ${response.statusText}`);
+        const errorBody = await response.text();
+        throw new Error(`AstroJSON API error for ${sign}: ${response.status} ${response.statusText} ${errorBody}`);
       }
 
       const json = await response.json();

@@ -486,8 +486,7 @@ async function getHoroscope(sign) {
     const res = await horoscopeSyncPromise;
     
     if (!res.ok) {
-      const errText = await res.text();
-      console.error('Failed to trigger sync function:', errText);
+      console.error('Failed to trigger sync function:', await res.text());
       return null;
     }
 
