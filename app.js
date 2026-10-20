@@ -478,11 +478,15 @@ async function getHoroscope(sign) {
   // 2. If missing, trigger Netlify function with client timezone
   if (!data) {
     const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const pairSigns = `${currentUserSign.toLowerCase()},${currentPartnerSign.toLowerCase()}`;
-    if (!horoscopeSyncPromise) {
-      horoscopeSyncPromise = fetch(`/.netlify/functions/sync-horoscopes?timeZone=${encodeURIComponent(userTimeZone)}&signs=${encodeURIComponent(pairSigns)}`)
-        .finally(() => { horoscopeSyncPromise = null; });
-    }
+const pairSigns = `${currentUserSign.toLowerCase()},${currentPartnerSign.toLowerCase()}`;
+
+if (!horoscopeSyncPromise) {
+  horoscopeSyncPromise = fetch(
+    `/.netlify/functions/sync-horoscopes?date=${encodeURIComponent(today)}&timeZone=${encodeURIComponent(userTimeZone)}&signs=${encodeURIComponent(pairSigns)}`
+  ).finally(() => {
+    horoscopeSyncPromise = null;
+  });
+}
     const res = await horoscopeSyncPromise;
     
     if (!res.ok) {

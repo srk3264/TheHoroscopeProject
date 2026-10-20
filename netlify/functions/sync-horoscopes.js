@@ -14,10 +14,22 @@ exports.handler = async function (event, context) {
   }
 
   const supabase = createClient(supabaseUrl, supabaseKey);
-  const userTimeZone = event.queryStringParameters?.timeZone || 'America/Los_Angeles';
+  const userTimeZone =
+  event.queryStringParameters?.timeZone || 'America/Los_Angeles';
 
-  const now = new Date();
-  const today = new Intl.DateTimeFormat('en-CA', { timeZone: userTimeZone }).format(now);
+const requestedDate = event.queryStringParameters?.date;
+const now = new Date();
+
+const today = requestedDate || new Intl.DateTimeFormat('en-CA', {
+  timeZone: userTimeZone
+}).format(now);
+
+if (!/^\d{4}-\d{2}-\d{2}$/.test(today)) {
+  return {
+    statusCode: 400,
+    body: JSON.stringify({ error: 'Invalid date. Expected YYYY-MM-DD.' })
+  };
+}
 
   // NEW CODE
   try {
@@ -38,28 +50,69 @@ exports.handler = async function (event, context) {
       };
     }
 
-    // Fetch every sign when today's cache is incomplete
-    const missingSigns = SIGNS;
+    // Fetch Zodiac Timeline's RSS feed and select the requested date.
+const response = await fetch('https://zodiactimeline.com/feed.xml');
 
-    const promises = missingSigns.map(async (sign) => {
-      const response = await fetch(`https://api.astrojson.com/v1/horoscopes?sign=${sign}&lang=en&date=today&period=daily`, {
-        headers: { 'X-API-KEY': process.env.ASTRO_JSON_API_KEY || '' }
-      });
-      
-      if (!response.ok) {
-        const errorBody = await response.text();
-        throw new Error(`AstroJSON API error for ${sign}: ${response.status} ${response.statusText} ${errorBody}`);
-      }
+if (!response.ok) {
+  const errorBody = await response.text();
+  throw new Error(
+    `Zodiac Timeline feed error: ${response.status} ${errorBody}`
+  );
+}
 
-      const json = await response.json();
-      return {
-        sign: sign,
-        date: today,
-        raw_data: json
-      };
-    });
+const xml = await response.text();
 
-    const horoscopes = await Promise.all(promises);
+function decodeXml(value) {
+  return value
+    .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'");
+}
+
+function getXmlTag(item, tag) {
+  const escapedTag = tag.replace(':', '\\:');
+  const regex = new RegExp(
+    `<${escapedTag}\\b[^>]*>([\\s\\S]*?)<\\/${escapedTag}>`
+  );
+  const match = item.match(regex);
+  return match ? decodeXml(match[1].trim()) : '';
+}
+
+const items = xml.match(/<item\b[^>]*>[\s\S]*?<\/item>/g) || [];
+const horoscopeMap = new Map();
+
+for (const item of items) {
+  const sign = getXmlTag(item, 'zt:sign').toLowerCase();
+  const date = getXmlTag(item, 'zt:date');
+
+  if (!SIGNS.includes(sign) || date !== today) continue;
+
+  horoscopeMap.set(sign, {
+    sign,
+    date,
+    title: getXmlTag(item, 'title'),
+    description: getXmlTag(item, 'description'),
+    score: Number(getXmlTag(item, 'zt:score')),
+    link: getXmlTag(item, 'link')
+  });
+}
+
+const missingSigns = SIGNS.filter(sign => !horoscopeMap.has(sign));
+
+if (missingSigns.length > 0) {
+  throw new Error(
+    `Zodiac Timeline feed has no ${today} horoscope for: ${missingSigns.join(', ')}`
+  );
+}
+
+const horoscopes = SIGNS.map(sign => ({
+  sign,
+  date: today,
+  raw_data: horoscopeMap.get(sign)
+}));
 
     const { error: dbError } = await supabase
       .from('daily_horoscopes')

@@ -68,17 +68,29 @@ exports.handler = async function (event, context) {
     const userPrompt = `
     Refer to ${sign1} as 'You' & ${sign2} as 'Your Partner'
 
-${sign1} Horoscope: ${JSON.stringify(sign1Data)}
-${sign2} Horoscope: ${JSON.stringify(sign2Data)}
+${sign1} Horoscope:
+Description: ${sign1Data.description || 'Not available'}
+Overall score: ${sign1Data.score ?? 'Not available'}
 
-For themes ["general","career","finance","health","romance"], compare horoscopeScore values:
-A = ${sign1}'s score, B = ${sign2}'s score, Δ = A - B.
+${sign2} Horoscope:
+Description: ${sign2Data.description || 'Not available'}
+Overall score: ${sign2Data.score ?? 'Not available'}
+
+Compare the overall horoscope scores:
+A = ${sign1}'s overall score.
+B = ${sign2}'s overall score.
+Δ = A - B.
 
 Interpretation:
-- Δ >= 2: ${sign1} has more energy; direct that energy toward ${sign2}.
-- Δ <= -2: ${sign2} has more energy; ${sign1} should follow, protect, or amplify it.
-- Δ = 0 and A >= 4: shared opportunity; create a memorable joint experience.
-- A <= 2 and B <= 2: fragile theme; make the action gentle and low-pressure.
+- Δ >= 1: ${sign1} has the higher overall score; use that energy
+  constructively to support ${sign2}.
+- Δ <= -1: ${sign2} has the higher overall score; use that energy
+  constructively to support ${sign1}.
+- Equal scores: look for shared opportunities or complementary
+  themes in both horoscope descriptions.
+- If both scores are low (3 or below), suggest gentle, low-pressure
+  activities.
+
 
 
 Generate daily pair insights strictly in this JSON format:
