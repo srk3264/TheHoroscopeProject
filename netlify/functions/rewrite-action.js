@@ -5,11 +5,19 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
+const ticketmasterCache = new Map();
+const TICKETMASTER_CACHE_TTL = 15 * 60 * 1000;
 const TICKETMASTER_REQUEST_TIMEOUT = 3500;
 
 async function getNearbyEvents(city, postalCode) {
   const apiKey = process.env.TICKETMASTER_API_KEY;
-  if (!apiKey || !postalCode) return [];
+  if (!apiKey || !postalCode) return { events: [], status: 'unavailable', placeCount: 0 };
+
+  const cacheKey = `${city || ''}|${postalCode}`.toLowerCase().trim();
+  const cached = ticketmasterCache.get(cacheKey);
+  if (cached && cached.expiresAt > Date.now()) {
+    return { events: cached.events, status: 'cache', eventCount: cached.events.length, eventNames: cached.events.map(event => event.name) };
+  }
 
   const params = new URLSearchParams({
     apikey: apiKey,
@@ -32,10 +40,10 @@ async function getNearbyEvents(city, postalCode) {
         { signal: controller.signal }
     );
 
-    if (!response.ok) return [];
+    if (!response.ok) return { events: [], status: `http_${response.status}`, eventCount: 0, eventNames: [] };
 
     const result = await response.json();
-    return (result._embedded?.events || []).map((event) => ({
+    const events = (result._embedded?.events || []).map((event) => ({
       name: event.name,
       date: event.dates?.start?.localDate,
       time: event.dates?.start?.localTime,
@@ -46,8 +54,10 @@ async function getNearbyEvents(city, postalCode) {
         ? `${event.priceRanges[0].min}-${event.priceRanges[0].max} ${event.priceRanges[0].currency || ''}`.trim()
         : undefined
     }));
+    ticketmasterCache.set(cacheKey, { events, expiresAt: Date.now() + TICKETMASTER_CACHE_TTL });
+    return { events, status: 'fetched', eventCount: events.length, eventNames: events.map(event => event.name) };
   } catch (error) {
-    return [];
+    return { events: [], status: 'unavailable', eventCount: 0, eventNames: [] };
   } finally {
     clearTimeout(timeout);
   }
@@ -121,7 +131,8 @@ exports.handler = async (event) => {
 
     if (profileError) throw profileError;
 
-    const nearbyEvents = await getNearbyEvents(profile.city, profile.postal_code);
+    const ticketmasterLookup = await getNearbyEvents(profile.city, profile.postal_code);
+    const nearbyEvents = ticketmasterLookup.events;
 
     const prompt = `
 Original action: ${actionTitle}
@@ -185,7 +196,7 @@ Rewrite this couple action to be more specific. Tell only the user exactly what 
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title: rewritten.title, reason: actionReason })
+      body: JSON.stringify({ title: rewritten.title, reason: actionReason, ticketmasterLookup })
     };
   } catch (error) {
     return { statusCode: 500, body: JSON.stringify({ error: error.message }) };

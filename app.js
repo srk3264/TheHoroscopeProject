@@ -358,6 +358,7 @@ async function rewriteAction(actionIndex, button) {
       return;
     }
 
+    console.log('[temporary Ticketmaster lookup]', result.ticketmasterLookup);
     action.title = result.title;
     rewrittenActionIndexes.set(actionIndex, { title: result.title, reason: action.subtitle });
     const card = button.closest('.action-card');
