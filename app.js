@@ -605,13 +605,19 @@ async function getPairInsights(userSign, partnerSign) {
       });
 
 
+     
+      const result = await res.json();
+
       if (!res.ok) {
-        console.error('Failed to trigger sync-insights:', await res.text());
+        console.error(
+          'Failed to trigger sync-insights:',
+          result.error || result
+        );
         return null;
       }
 
-      const result = await res.json();
       return result.data?.content || null;
+
     } finally {
       pairInsightPromise = null;
     }
