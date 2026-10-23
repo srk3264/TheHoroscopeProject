@@ -145,12 +145,18 @@ exports.handler = async function (event) {
     });
 
     if (!feedResponse.ok) {
-      console.error('Horoscope feed HTTP error:', feedResponse.status);
+  console.error('Horoscope feed diagnostic:', {
+    status: feedResponse.status,
+    statusText: feedResponse.statusText,
+    url: FEED_URL,
+    headers: Object.fromEntries(feedResponse.headers.entries()),
+    body: (await feedResponse.text()).slice(0, 1000)
+  });
 
-      return jsonResponse(502, {
-        error: 'The horoscope publisher could not be reached.'
-      });
-    }
+  return jsonResponse(502, {
+    error: 'The horoscope publisher could not be reached.'
+  });
+}
 
     const contentType = feedResponse.headers.get('content-type') || '';
 
