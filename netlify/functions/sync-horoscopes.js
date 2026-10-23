@@ -138,11 +138,13 @@ exports.handler = async function (event) {
     // Fetch the publisher's feed directly. Never trust horoscope
     // content submitted by the browser.
     const feedResponse = await fetch(FEED_URL, {
-      headers: {
-        Accept: 'application/rss+xml, application/xml, text/xml'
-      },
-      signal: AbortSignal.timeout(15000)
-    });
+  headers: {
+    Accept: 'application/xml',
+    'User-Agent':
+      'TheHoroscopeProject/1.0 (+https://thehoroscopeproject.netlify.app/)'
+  },
+  signal: AbortSignal.timeout(15000)
+});
 
     if (!feedResponse.ok) {
   console.error('Horoscope feed diagnostic:', {
