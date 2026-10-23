@@ -458,55 +458,107 @@ function setupUnifiedTapCards(...containers) {
 
 
 
+const HOROSCOPE_SIGNS = [
+  'aries', 'taurus', 'gemini', 'cancer', 'leo', 'virgo',
+  'libra', 'scorpio', 'sagittarius', 'capricorn',
+  'aquarius', 'pisces'
+];
 
-// Helper to fetch horoscope with on-demand fallback
+
+
+
+
+
 let horoscopeSyncPromise = null;
 
 async function getHoroscope(sign) {
   const today = getLocalDateString();
+  const normalizedSign = sign.toLowerCase();
 
-  // 1. Check Supabase cache using .maybeSingle() instead of .single()
-  let { data } = await supabaseClient
+  // 1. Check Supabase cache first.
+  const { data: cached, error: cacheError } = await supabaseClient
     .from('daily_horoscopes')
     .select('raw_data')
-    .eq('sign', sign.toLowerCase())
+    .eq('sign', normalizedSign)
     .eq('date', today)
-    .maybeSingle(); // Prevents 406 error on empty cache
+    .maybeSingle();
 
-  
-
-  // 2. If missing, trigger Netlify function with client timezone
-  if (!data) {
-    const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-const pairSigns = `${currentUserSign.toLowerCase()},${currentPartnerSign.toLowerCase()}`;
-
-if (!horoscopeSyncPromise) {
-  horoscopeSyncPromise = fetch(
-    `/.netlify/functions/sync-horoscopes?date=${encodeURIComponent(today)}&timeZone=${encodeURIComponent(userTimeZone)}&signs=${encodeURIComponent(pairSigns)}`
-  ).finally(() => {
-    horoscopeSyncPromise = null;
-  });
-}
-    const res = await horoscopeSyncPromise;
-    
-    if (!res.ok) {
-      console.error('Failed to trigger sync function:', await res.text());
-      return null;
-    }
-
-    // 3. Re-query Supabase
-    const { data: syncedData } = await supabaseClient
-      .from('daily_horoscopes')
-      .select('raw_data')
-      .eq('sign', sign.toLowerCase())
-      .eq('date', today)
-      .maybeSingle();
-
-    data = syncedData;
+  if (cacheError) {
+    console.error('Horoscope cache lookup failed:', cacheError);
+    return null;
   }
 
-  return data?.raw_data;
+  if (cached?.raw_data) {
+    return cached.raw_data;
+  }
+
+  
+  // 2. Ask the server to fetch, verify, and cache the official feed.
+  // Share one in-flight sync request between both signs.
+  if (!horoscopeSyncPromise) {
+    horoscopeSyncPromise = (async () => {
+      const userTimeZone =
+        Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+      const { data: { session } } =
+        await supabaseClient.auth.getSession();
+
+      if (!session) {
+        throw new Error('You must be signed in to sync horoscopes.');
+      }
+
+      const response = await fetch(
+        '/.netlify/functions/sync-horoscopes',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${session.access_token}`
+          },
+          body: JSON.stringify({
+            date: today,
+            timeZone: userTimeZone
+          })
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          result.error || 'Failed to sync horoscopes.'
+        );
+      }
+
+      return result;
+    })().finally(() => {
+      horoscopeSyncPromise = null;
+    });
+  }
+
+  try {
+    await horoscopeSyncPromise;
+  } catch (error) {
+    console.error('Horoscope sync failed:', error);
+    return null;
+  }
+
+  // 3. Read the verified horoscope back from Supabase.
+  const { data: synced, error: syncedError } = await supabaseClient
+    .from('daily_horoscopes')
+    .select('raw_data')
+    .eq('sign', normalizedSign)
+    .eq('date', today)
+    .maybeSingle();
+
+  if (syncedError) {
+    console.error('Failed to read synced horoscope:', syncedError);
+  }
+
+  return synced?.raw_data || null;
+
 }
+
 
 // Helper to fetch pair insights with Netlify/Supabase integration
 let pairInsightPromise = null;
@@ -535,12 +587,23 @@ async function getPairInsights(userSign, partnerSign) {
 
   pairInsightPromise = (async () => {
     try {
+      
+      const { data: { session } } = await supabaseClient.auth.getSession();
+
+      if (!session) {
+        throw new Error('You must be signed in to load daily insights.');
+      }
+
       const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
       const res = await fetch('/.netlify/functions/sync-insights', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`
+        },
         body: JSON.stringify({ pairKey, date: today, timeZone: userTimeZone })
       });
+
 
       if (!res.ok) {
         console.error('Failed to trigger sync-insights:', await res.text());
@@ -572,13 +635,17 @@ async function loadDashboard(userSign, partnerSign) {
   if (quickContainer) quickContainer.innerHTML = '<div style="color: white; text-align: center; padding: 20px;">Generating daily insights...</div>';
   if (actionContainer) actionContainer.innerHTML = '';
 
-  // Wait for both horoscopes to be completely fetched/synced first
-  await Promise.all([
-    getHoroscope(userSign),
-    getHoroscope(partnerSign)
-  ]);
+  const [userHoroscope, partnerHoroscope] = await Promise.all([
+  getHoroscope(userSign),
+  getHoroscope(partnerSign)
+]);
 
-  const aiContent = await getPairInsights(userSign, partnerSign);
+if (!userHoroscope || !partnerHoroscope) {
+  alert('Unable to load both horoscopes for today. Please try again.');
+  return;
+}
+
+const aiContent = await getPairInsights(userSign, partnerSign);
 
   if (!aiContent) {
     alert('Unable to load daily insights. Please try refreshing.');

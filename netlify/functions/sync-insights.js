@@ -16,18 +16,138 @@ exports.handler = async function (event, context) {
     };
   }
 
-  const { pairKey, date, timeZone } = JSON.parse(event.body || '{}');
+  
+  let body;
 
-  if (!pairKey || !date) {
+  try {
+    body = JSON.parse(event.body || '{}');
+  } catch {
     return {
       statusCode: 400,
-      body: JSON.stringify({ error: 'Missing pairKey or date parameter.' })
+      body: JSON.stringify({ error: 'Invalid JSON request body.' })
     };
   }
 
-  const supabase = createClient(supabaseUrl, supabaseKey);
+  const { pairKey, date, timeZone } = body;
+
+  const SIGNS = [
+    'aries', 'taurus', 'gemini', 'cancer', 'leo', 'virgo',
+    'libra', 'scorpio', 'sagittarius', 'capricorn',
+    'aquarius', 'pisces'
+  ];
+
+  if (
+    typeof pairKey !== 'string' ||
+    typeof date !== 'string' ||
+    !/^\d{4}-\d{2}-\d{2}$/.test(date) ||
+    typeof timeZone !== 'string' ||
+    timeZone.length > 100
+  ) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({
+        error: 'Valid pairKey, date, and timeZone are required.'
+      })
+    };
+  }
+
+  const parsedDate = new Date(`${date}T00:00:00Z`);
+
+  if (
+    Number.isNaN(parsedDate.getTime()) ||
+    parsedDate.toISOString().slice(0, 10) !== date
+  ) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ error: 'Invalid calendar date.' })
+    };
+  }
+
+  const pairSigns = pairKey.split('_');
+
+  if (
+    pairSigns.length !== 2 ||
+    pairSigns.some(sign => !SIGNS.includes(sign))
+  ) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ error: 'Invalid zodiac pairKey.' })
+    };
+  }
+
+  let expectedDate;
 
   try {
+    expectedDate = new Intl.DateTimeFormat('en-CA', {
+      timeZone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).format(new Date());
+
+    // Normalize the formatted date to YYYY-MM-DD.
+    const dateParts = new Intl.DateTimeFormat('en-US', {
+      timeZone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).formatToParts(new Date());
+
+    const dateValues = Object.fromEntries(
+      dateParts
+        .filter(part => part.type !== 'literal')
+        .map(part => [part.type, part.value])
+    );
+
+    expectedDate =
+      `${dateValues.year}-${dateValues.month}-${dateValues.day}`;
+  } catch {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ error: 'Invalid timeZone.' })
+    };
+  }
+
+  if (date !== expectedDate) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({
+        error: 'Date must match today in the supplied timeZone.',
+        expectedDate
+      })
+    };
+  }
+
+
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+  const authorization =
+    event.headers?.authorization ||
+    event.headers?.Authorization ||
+    '';
+
+  const tokenMatch = authorization.match(/^Bearer\s+(.+)$/i);
+
+  if (!tokenMatch) {
+    return {
+      statusCode: 401,
+      body: JSON.stringify({ error: 'Authentication required.' })
+    };
+  }
+
+  try {
+    const {
+      data: { user },
+      error: authError
+    } = await supabase.auth.getUser(tokenMatch[1]);
+
+    if (authError || !user) {
+      return {
+        statusCode: 401,
+        body: JSON.stringify({ error: 'Invalid or expired session.' })
+      };
+    }
+
     // 1. Inline cache verification before hitting OpenRouter
     const { data: existing } = await supabase
       .from('daily_pair_insights')
@@ -43,14 +163,14 @@ exports.handler = async function (event, context) {
       };
     }
 
-    const [sign1, sign2] = pairKey.split('_');
-
-    // Sync missing horoscopes using timeZone before fetching
-    const tzParam = encodeURIComponent(timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone);
-    const origin = event.headers.origin || `https://${event.headers.host}`;
     
-    const signsParam = encodeURIComponent(`${sign1},${sign2}`);
-    await fetch(`${origin}/.netlify/functions/sync-horoscopes?timeZone=${tzParam}&signs=${signsParam}`);
+    const [sign1, sign2] = pairSigns;
+
+
+    
+    // Horoscopes must already be synced by app.js.
+    // This function only reads saved horoscope data.
+
 
     const { data: horoscopes, error: fetchErr } = await supabase
       .from('daily_horoscopes')
@@ -60,8 +180,22 @@ exports.handler = async function (event, context) {
 
     if (fetchErr) throw fetchErr;
 
-    const sign1Data = horoscopes?.find((h) => h.sign === sign1)?.raw_data || {};
-    const sign2Data = horoscopes?.find((h) => h.sign === sign2)?.raw_data || {};
+        const sign1Data = horoscopes?.find((h) => h.sign === sign1)?.raw_data;
+    const sign2Data = horoscopes?.find((h) => h.sign === sign2)?.raw_data;
+
+    if (
+      !sign1Data?.description ||
+      !sign2Data?.description ||
+      !Number.isFinite(sign1Data.score) ||
+      !Number.isFinite(sign2Data.score)
+    ) {
+      return {
+        statusCode: 409,
+        body: JSON.stringify({
+          error: 'Both valid horoscope records must be synced before generating insights.'
+        })
+      };
+    }
 
     const systemPrompt = "You are a JSON-only API. You output raw, valid JSON objects. Never output conversation, greetings, or explanations.";
     
