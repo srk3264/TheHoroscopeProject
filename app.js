@@ -522,15 +522,27 @@ async function getHoroscope(sign) {
         }
       );
 
-      const result = await response.json();
+      
+      const responseText = await response.text();
+
+      let result;
+      try {
+        result = JSON.parse(responseText);
+      } catch {
+        throw new Error(
+          `sync-horoscopes returned invalid JSON (HTTP ${response.status}): ` +
+          responseText.slice(0, 300)
+        );
+      }
 
       if (!response.ok) {
         throw new Error(
-          result.error || 'Failed to sync horoscopes.'
+          result.error || `Failed to sync horoscopes (HTTP ${response.status}).`
         );
       }
 
       return result;
+
     })().finally(() => {
       horoscopeSyncPromise = null;
     });
