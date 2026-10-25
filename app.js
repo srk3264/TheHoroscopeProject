@@ -459,6 +459,7 @@ function setupUnifiedTapCards(...containers) {
 
 
 
+
 async function getHoroscope(sign) {
   const today = getLocalDateString();
   const normalizedSign = sign.toLowerCase();
@@ -475,8 +476,16 @@ async function getHoroscope(sign) {
     return null;
   }
 
-  return data?.raw_data || null;
+  if (!data?.raw_data) {
+    console.error(
+      `No horoscope found in Supabase for ${normalizedSign} on ${today}.`
+    );
+    return null;
+  }
+
+  return data.raw_data;
 }
+
 
 
 
