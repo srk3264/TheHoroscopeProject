@@ -458,118 +458,26 @@ function setupUnifiedTapCards(...containers) {
 
 
 
-const HOROSCOPE_SIGNS = [
-  'aries', 'taurus', 'gemini', 'cancer', 'leo', 'virgo',
-  'libra', 'scorpio', 'sagittarius', 'capricorn',
-  'aquarius', 'pisces'
-];
-
-
-
-
-
-
-let horoscopeSyncPromise = null;
 
 async function getHoroscope(sign) {
   const today = getLocalDateString();
   const normalizedSign = sign.toLowerCase();
 
-  // 1. Check Supabase cache first.
-  const { data: cached, error: cacheError } = await supabaseClient
+  const { data, error } = await supabaseClient
     .from('daily_horoscopes')
     .select('raw_data')
     .eq('sign', normalizedSign)
     .eq('date', today)
     .maybeSingle();
 
-  if (cacheError) {
-    console.error('Horoscope cache lookup failed:', cacheError);
+  if (error) {
+    console.error('Horoscope lookup failed:', error);
     return null;
   }
 
-  if (cached?.raw_data) {
-    return cached.raw_data;
-  }
-
-  
-  // 2. Ask the server to fetch, verify, and cache the official feed.
-  // Share one in-flight sync request between both signs.
-  if (!horoscopeSyncPromise) {
-    horoscopeSyncPromise = (async () => {
-      const userTimeZone =
-        Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-      const { data: { session } } =
-        await supabaseClient.auth.getSession();
-
-      if (!session) {
-        throw new Error('You must be signed in to sync horoscopes.');
-      }
-
-      const response = await fetch(
-        '/.netlify/functions/sync-horoscopes',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${session.access_token}`
-          },
-          body: JSON.stringify({
-            date: today,
-            timeZone: userTimeZone
-          })
-        }
-      );
-
-      
-      const responseText = await response.text();
-
-      let result;
-      try {
-        result = JSON.parse(responseText);
-      } catch {
-        throw new Error(
-          `sync-horoscopes returned invalid JSON (HTTP ${response.status}): ` +
-          responseText.slice(0, 300)
-        );
-      }
-
-      if (!response.ok) {
-        throw new Error(
-          result.error || `Failed to sync horoscopes (HTTP ${response.status}).`
-        );
-      }
-
-      return result;
-
-    })().finally(() => {
-      horoscopeSyncPromise = null;
-    });
-  }
-
-  try {
-    await horoscopeSyncPromise;
-  } catch (error) {
-    console.error('Horoscope sync failed:', error);
-    return null;
-  }
-
-  // 3. Read the verified horoscope back from Supabase.
-  const { data: synced, error: syncedError } = await supabaseClient
-    .from('daily_horoscopes')
-    .select('raw_data')
-    .eq('sign', normalizedSign)
-    .eq('date', today)
-    .maybeSingle();
-
-  if (syncedError) {
-    console.error('Failed to read synced horoscope:', syncedError);
-  }
-
-  return synced?.raw_data || null;
-
+  return data?.raw_data || null;
 }
+
 
 
 // Helper to fetch pair insights with Netlify/Supabase integration
