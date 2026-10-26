@@ -42,7 +42,7 @@ if (!apiKey || !postalCode) {
     sort: 'date,asc'
   });
 
-  if (city) params.set('city', city);
+//  if (city) params.set('city', city);
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), TICKETMASTER_REQUEST_TIMEOUT);
@@ -75,7 +75,16 @@ if (!apiKey || !postalCode) {
 }
 
     const result = await response.json();
-    const events = (result._embedded?.events || []).map((event) => ({
+
+console.log('Ticketmaster response:', {
+  postalCode,
+  city,
+  totalElements: result.page?.totalElements,
+  pageSize: result.page?.size,
+  eventCount: result._embedded?.events?.length || 0
+});
+
+const events = (result._embedded?.events || []).map((event) => ({
       name: event.name,
       date: event.dates?.start?.localDate,
       time: event.dates?.start?.localTime,
