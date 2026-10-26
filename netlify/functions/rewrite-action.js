@@ -10,8 +10,21 @@ const TICKETMASTER_CACHE_TTL = 15 * 60 * 1000;
 const TICKETMASTER_REQUEST_TIMEOUT = 3500;
 
 async function getNearbyEvents(city, postalCode) {
-  const apiKey = process.env.TICKETMASTER_API_KEY;
-  if (!apiKey || !postalCode) return { events: [], status: 'unavailable', placeCount: 0 };
+  const apiKey = process.env.TICKETMASTER_API_KEY?.trim();
+
+if (!apiKey || !postalCode) {
+  console.error('Ticketmaster configuration missing:', {
+    keyPresent: Boolean(apiKey),
+    postalCodePresent: Boolean(postalCode)
+  });
+
+  return {
+    events: [],
+    status: 'unavailable',
+    eventCount: 0,
+    eventNames: []
+  };
+}
 
   const cacheKey = `${city || ''}|${postalCode}`.toLowerCase().trim();
   const cached = ticketmasterCache.get(cacheKey);
@@ -40,7 +53,26 @@ async function getNearbyEvents(city, postalCode) {
         { signal: controller.signal }
     );
 
-    if (!response.ok) return { events: [], status: `http_${response.status}`, eventCount: 0, eventNames: [] };
+    if (!response.ok) {
+  const errorBody = await response.text();
+
+  console.error('Ticketmaster API error:', {
+    status: response.status,
+    body: errorBody,
+    keyPresent: Boolean(apiKey),
+    keyLength: apiKey.length,
+    postalCode,
+    city
+  });
+
+  return {
+    events: [],
+    status: `http_${response.status}`,
+    eventCount: 0,
+    eventNames: [],
+    error: errorBody
+  };
+}
 
     const result = await response.json();
     const events = (result._embedded?.events || []).map((event) => ({
