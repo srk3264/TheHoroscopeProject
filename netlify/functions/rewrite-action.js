@@ -33,14 +33,11 @@ if (!apiKey || !postalCode) {
   }
 
   const params = new URLSearchParams({
-    apikey: apiKey,
-    postalCode,
-    radius: '25',
-    unit: 'miles',
-    countryCode: 'US',
-    size: '10',
-    sort: 'date,asc'
-  });
+  apikey: apiKey,
+  countryCode: 'US',
+  size: '10',
+  sort: 'date,asc'
+});
 
 //  if (city) params.set('city', city);
 
@@ -76,12 +73,10 @@ if (!apiKey || !postalCode) {
 
     const result = await response.json();
 
-console.log('Ticketmaster response:', {
-  postalCode,
-  city,
+console.log('Ticketmaster diagnostic:', {
   totalElements: result.page?.totalElements,
-  pageSize: result.page?.size,
-  eventCount: result._embedded?.events?.length || 0
+  eventCount: result._embedded?.events?.length || 0,
+  responseKeys: Object.keys(result)
 });
 
 const events = (result._embedded?.events || []).map((event) => ({
