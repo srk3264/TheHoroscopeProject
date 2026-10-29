@@ -5,19 +5,109 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-const ticketmasterCache = new Map();
-const TICKETMASTER_CACHE_TTL = 15 * 60 * 1000;
-const TICKETMASTER_REQUEST_TIMEOUT = 3500;
 
-async function getNearbyEvents(city, postalCode) {
-  const apiKey = process.env.TICKETMASTER_API_KEY?.trim();
 
-if (!apiKey || !postalCode) {
-  console.error('Ticketmaster configuration missing:', {
-    keyPresent: Boolean(apiKey),
-    postalCodePresent: Boolean(postalCode)
-  });
 
+const FINDLOCAL_SUPPORTED_METROS = new Set([
+  'ann-arbor',
+  'atlanta',
+  'austin',
+  'baltimore',
+  'bangor',
+  'bloomington',
+  'boise',
+  'boston',
+  'brattleboro',
+  'buffalo',
+  'burlington',
+  'cape-cod',
+  'charleston',
+  'charlotte',
+  'chicago',
+  'cincinnati',
+  'cleveland',
+  'columbia-mo',
+  'columbus',
+  'dallas',
+  'denver',
+  'des-moines',
+  'detroit',
+  'duluth',
+  'fort-collins',
+  'grand-rapids',
+  'green-bay',
+  'hanover',
+  'harrisburg',
+  'hartford',
+  'hilton-head',
+  'houston',
+  'hudson-valley',
+  'indianapolis',
+  'iowa-city',
+  'jersey-shore',
+  'kansas-city',
+  'lansing',
+  'las-vegas',
+  'lincoln',
+  'london',
+  'los-angeles',
+  'madison',
+  'manchester',
+  'miami',
+  'milwaukee',
+  'minneapolis',
+  'nashville',
+  'new-haven',
+  'new-orleans',
+  'new-york',
+  'northampton',
+  'oklahoma-city',
+  'orlando',
+  'philadelphia',
+  'phoenix',
+  'pittsburgh',
+  'pittsfield',
+  'portland',
+  'portland-me',
+  'portsmouth',
+  'providence',
+  'raleigh',
+  'rochester',
+  'rockland',
+  'rutland',
+  'sacramento',
+  'salt-lake-city',
+  'san-antonio',
+  'san-diego',
+  'san-francisco',
+  'santa-barbara',
+  'seattle',
+  'sonoma',
+  'spokane',
+  'st-louis',
+  'stamford',
+  'tampa',
+  'traverse-city',
+  'tucson',
+  'washington',
+  'wenatchee',
+  'wilmington-nc',
+  'worcester'
+]);
+
+const FINDLOCAL_REQUEST_TIMEOUT = 5000;
+
+async function getNearbyEvents(city) {
+  const apiKey = process.env.FINDLOCAL_API_KEY?.trim();
+
+const citySlug = (city || '')
+  .split(',')[0]
+  .trim()
+  .toLowerCase()
+  .replace(/[^a-z0-9]+/g, '-')
+  .replace(/^-|-$/g, '');
+
+if (!apiKey || !FINDLOCAL_SUPPORTED_METROS.has(citySlug)) {
   return {
     events: [],
     status: 'unavailable',
@@ -26,78 +116,140 @@ if (!apiKey || !postalCode) {
   };
 }
 
-  const cacheKey = `${city || ''}|${postalCode}`.toLowerCase().trim();
-  const cached = ticketmasterCache.get(cacheKey);
-  if (cached && cached.expiresAt > Date.now()) {
-    return { events: cached.events, status: 'cache', eventCount: cached.events.length, eventNames: cached.events.map(event => event.name) };
-  }
+const cacheKey = citySlug;
 
-  const params = new URLSearchParams({
-  apikey: apiKey,
-  countryCode: 'US',
-  size: '10',
-  sort: 'date,asc'
-});
+const { data: cached, error: cacheError } = await supabase
+  .from('findlocal_event_cache')
+  .select('events')
+  .eq('cache_key', cacheKey)
+  .maybeSingle();
 
-//  if (city) params.set('city', city);
+if (cacheError) throw cacheError;
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), TICKETMASTER_REQUEST_TIMEOUT);
-
-  try {
-    const response = await fetch(
-      `https://app.ticketmaster.com/discovery/v2/events.json?${params}`,
-        { signal: controller.signal }
-    );
-
-    if (!response.ok) {
-  const errorBody = await response.text();
-
-  console.error('Ticketmaster API error:', {
-    status: response.status,
-    body: errorBody,
-    keyPresent: Boolean(apiKey),
-    keyLength: apiKey.length,
-    postalCode,
-    city
-  });
-
+if (cached) {
+  const events = cached.events || [];
   return {
-    events: [],
-    status: `http_${response.status}`,
-    eventCount: 0,
-    eventNames: [],
-    error: errorBody
+    events,
+    status: 'cache',
+    eventCount: events.length,
+    eventNames: events.map(event => event.name)
   };
 }
 
-    const result = await response.json();
+  if (cached && cached.expiresAt > Date.now()) {
+    return {
+      events: cached.events,
+      status: 'cache',
+      eventCount: cached.events.length,
+      eventNames: cached.events.map(event => event.name)
+    };
+  }
 
-console.log('Ticketmaster diagnostic:', {
-  totalElements: result.page?.totalElements,
-  eventCount: result._embedded?.events?.length || 0,
-  responseKeys: Object.keys(result)
+  const params = new URLSearchParams({
+  city: citySlug,
+  when: 'today',
+  limit: '10',
+  sort: 'date'
 });
 
-const events = (result._embedded?.events || []).map((event) => ({
-      name: event.name,
-      date: event.dates?.start?.localDate,
-      time: event.dates?.start?.localTime,
-      venue: event._embedded?.venues?.[0]?.name,
-      city: event._embedded?.venues?.[0]?.city?.name,
-      url: event.url,
-      priceRange: event.priceRanges?.[0]
-        ? `${event.priceRanges[0].min}-${event.priceRanges[0].max} ${event.priceRanges[0].currency || ''}`.trim()
-        : undefined
+  const controller = new AbortController();
+  const timeout = setTimeout(
+    () => controller.abort(),
+    FINDLOCAL_REQUEST_TIMEOUT
+  );
+
+  try {
+    const response = await fetch(
+      `https://findlocal.community/api/events?${params}`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          Accept: 'application/json'
+        },
+        signal: controller.signal
+      }
+    );
+
+    if (!response.ok) {
+      const errorBody = await response.text();
+
+      console.error('FindLocal API error:', {
+        status: response.status,
+        body: errorBody,
+        city: citySlug
+      });
+
+      return {
+        events: [],
+        status: `http_${response.status}`,
+        eventCount: 0,
+        eventNames: []
+      };
+    }
+
+    const result = await response.json();
+
+    // TEMP: Inspect raw FindLocal response metadata
+console.log('[FindLocal] API response:', {
+  city: citySlug,
+  totalElements: result.meta?.total,
+  returnedEvents: result.data?.length ?? 0,
+  events: result.data
+});
+
+    const events = (result.data || []).map(event => ({
+      name: event.title,
+      date: event.event_date,
+      time: event.start_time || undefined,
+      venue: event.venue_name || undefined,
+      city: event.city || city,
+      url: event.detail_page_url ||
+        `https://findlocal.community/event/${event.id}`,
+      priceRange: event.price || undefined,
+      priceAmount: event.price_amount ?? undefined,
+      category: event.category || undefined,
+      description: event.description || undefined
     }));
-    ticketmasterCache.set(cacheKey, { events, expiresAt: Date.now() + TICKETMASTER_CACHE_TTL });
-    return { events, status: 'fetched', eventCount: events.length, eventNames: events.map(event => event.name) };
+
+    console.log('FindLocal diagnostic:', {
+      city: citySlug,
+      totalElements: result.meta?.total,
+      eventCount: events.length
+    });
+
+    const { error: cacheWriteError } = await supabase
+  .from('findlocal_event_cache')
+  .upsert({
+    cache_key: cacheKey,
+    events,
+    fetched_at: new Date().toISOString()
+  }, { onConflict: 'cache_key' });
+
+if (cacheWriteError) {
+  console.error('FindLocal cache write failed:', cacheWriteError);
+}
+
+    return {
+      events,
+      status: 'fetched',
+      eventCount: events.length,
+      eventNames: events.map(event => event.name)
+    };
   } catch (error) {
-    return { events: [], status: 'unavailable', eventCount: 0, eventNames: [] };
+    console.error('FindLocal request failed:', error.message);
+
+    return {
+      events: [],
+      status: 'unavailable',
+      eventCount: 0,
+      eventNames: []
+    };
   } finally {
     clearTimeout(timeout);
   }
 }
+
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
@@ -167,8 +319,19 @@ exports.handler = async (event) => {
 
     if (profileError) throw profileError;
 
-    const ticketmasterLookup = await getNearbyEvents(profile.city, profile.postal_code);
-    const nearbyEvents = ticketmasterLookup.events;
+    const findLocalLookup = await getNearbyEvents(profile.city);
+const nearbyEvents = findLocalLookup.events;
+
+// TEMP: FindLocal event diagnostics
+console.log('[FindLocal] Lookup summary:', {
+  city: profile.city,
+  postalCode: profile.postal_code,
+  status: findLocalLookup.status,
+  eventCount: findLocalLookup.eventCount,
+  eventNames: findLocalLookup.eventNames
+});
+
+console.log('[FindLocal] Events passed to AI:', nearbyEvents);
 
     const prompt = `
 Original action: ${actionTitle}
@@ -180,11 +343,11 @@ Couple context:
 - Relationship: ${profile.relationship_type || 'unspecified'}
 - Distance: ${profile.distance || 'unspecified'}
 - Budget: ${profile.budget_preference || 'unspecified'}
-- City: ${profile.city || 'unspecified'}
-- Postal code: ${profile.postal_code || 'unspecified'}
-- Ticketmaster events nearby: ${JSON.stringify(nearbyEvents)}
+- City/metro: ${profile.city || 'unspecified'}
+- ZIP/postal code: ${profile.postal_code || 'unspecified'}
+- FindLocal events happening today: ${JSON.stringify(nearbyEvents)}
 
-Rewrite this couple action to be more specific. Tell only the user exactly what to do. Keep it realistic for their distance, budget, and city. Use a Ticketmaster event only if it genuinely fits the budget and relationship context; do not invent event details, availability, or prices, and do not imply attendance is possible unless the event data supports it. Avoid generic advice. Make it oddly specific using a concrete object, time, route, menu item, tiny ritual, or playful constraint when possible. Never write vague advice such as "spend quality time" or "communicate more". Return valid JSON only with this shape:
+Rewrite this couple action to be more specific. Tell only the user exactly what to do. Keep it realistic for their distance, budget, and city. Use a FindLocal event only if it genuinely fits the budget and relationship context; do not invent event details, availability, or prices, and do not imply attendance is possible unless the event data supports it. Avoid generic advice. Make it oddly specific using a concrete object, time, route, menu item, tiny ritual, or playful constraint when possible. Never write vague advice such as "spend quality time" or "communicate more". Return valid JSON only with this shape:
 {"title":"An oddly specific action, maximum 24 words"}`;
 
     const aiResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -232,7 +395,11 @@ Rewrite this couple action to be more specific. Tell only the user exactly what 
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title: rewritten.title, reason: actionReason, ticketmasterLookup })
+      body: JSON.stringify({
+  title: rewritten.title,
+  reason: actionReason,
+  findLocalLookup
+})
     };
   } catch (error) {
     return { statusCode: 500, body: JSON.stringify({ error: error.message }) };
