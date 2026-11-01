@@ -44,16 +44,18 @@
     .content-wrapper { position: relative; height: 100%; padding: 0; display: block; }
     .horizontal-scroll { display: flex; gap: 16px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; }
     .horizontal-scroll::-webkit-scrollbar { display: none; }
-    .card-item, .action-card { position: absolute; inset: 0; width: 100% !important; min-width: 100% !important; height: 100% !important; min-height: 100%; touch-action: manipulation; opacity: 0; transition: opacity 240ms ease-in-out; }
+    .card-item, .action-card { position: absolute; inset: 0; width: 100% !important; min-width: 100% !important; height: 100% !important; min-height: 100%; touch-action: manipulation; opacity: 0; transition: opacity 600ms ease-in-out; }
     .card-item, .action-card { isolation: isolate; }
     .card-item::before, .action-card::before { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: 0.28; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E"); mix-blend-mode: overlay; }
     .card-item { padding: 16px; border-radius: 0; display: flex; flex-direction: column; }
     .action-card { padding: 184px 22px 32px; border-radius: 0; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 16px; color: #000; }
     .action-title { font-family: 'Darumadrop One', cursive; font-size: 32px; line-height: 1.15; }
     .action-reason { font-family: 'Cascadia Mono', monospace; font-size: 15px; line-height: 1.5; max-width: 320px; }
+    @keyframes flower-bounce { 0% { transform: translateY(0); } 35% { transform: translateY(-14px); } 60% { transform: translateY(0); } 80% { transform: translateY(-4px); } 100% { transform: translateY(0); } }
+    .action-card.is-active .action-flower { animation: flower-bounce 700ms ease-out; }
     .flower-nav { position: absolute; top: 72px; left: 0; right: 0; height: 96px; z-index: 3; display: flex; align-items: center; gap: 24px; overflow-x: auto; padding: 0 22px; scrollbar-width: none; }
     .flower-nav::-webkit-scrollbar { display: none; }
-    .flower-nav-item { flex: 0 0 auto; width: 64px; height: 64px; border: none; border-radius: 50%; padding: 0; cursor: pointer; display: flex; align-items: flex-start; justify-content: center; }
+    .flower-nav-item { flex: 0 0 auto; width: 64px; height: 64px; border: none; border-radius: 50%; padding: 0; cursor: pointer; display: flex; align-items: flex-start; justify-content: center; overflow: hidden; }
     .flower-nav-item.active { outline: 2px solid var(--flower-ring); outline-offset: 3px; }
     .flower-nav-item.active .flower-nav-icon { width: 84px; height: 84px; margin-top: 0; }
     .flower-nav-icon { width: 42px; height: 42px; margin-top: 11px; mask-image: var(--flower-art); -webkit-mask-image: var(--flower-art); mask-size: contain; -webkit-mask-size: contain; mask-repeat: no-repeat; -webkit-mask-repeat: no-repeat; mask-position: center; -webkit-mask-position: center; }

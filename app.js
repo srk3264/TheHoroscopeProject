@@ -481,6 +481,7 @@ function setupUnifiedTapCards(...containers) {
       card.style.pointerEvents = isHidden ? 'none' : 'auto';
       card.inert = isHidden;
       card.setAttribute('aria-hidden', isHidden ? 'true' : 'false');
+      card.classList.toggle('is-active', !isHidden);
     });
     navButtons.forEach((button, navIndex) => {
       button.classList.toggle('active', navOffset + navIndex === activeIndex);

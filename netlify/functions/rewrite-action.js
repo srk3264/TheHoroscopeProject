@@ -181,14 +181,6 @@ if (cached) {
 
     const result = await response.json();
 
-    // TEMP: Inspect raw FindLocal response metadata
-console.log('[FindLocal] API response:', {
-  city: citySlug,
-  totalElements: result.meta?.total,
-  returnedEvents: result.data?.length ?? 0,
-  events: result.data
-});
-
     const events = (result.data || []).map(event => ({
       name: event.title,
       date: event.event_date,
@@ -202,12 +194,6 @@ console.log('[FindLocal] API response:', {
       category: event.category || undefined,
       description: event.description || undefined
     }));
-
-    console.log('FindLocal diagnostic:', {
-      city: citySlug,
-      totalElements: result.meta?.total,
-      eventCount: events.length
-    });
 
     const { error: cacheWriteError } = await supabase
   .from('findlocal_event_cache')
@@ -312,17 +298,6 @@ exports.handler = async (event) => {
 
     const findLocalLookup = await getNearbyEvents(profile.city, date);
 const nearbyEvents = findLocalLookup.events;
-
-// TEMP: FindLocal event diagnostics
-console.log('[FindLocal] Lookup summary:', {
-  city: profile.city,
-  postalCode: profile.postal_code,
-  status: findLocalLookup.status,
-  eventCount: findLocalLookup.eventCount,
-  eventNames: findLocalLookup.eventNames
-});
-
-console.log('[FindLocal] Events passed to AI:', nearbyEvents);
 
     const prompt = `
 Original action: ${actionTitle}
