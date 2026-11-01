@@ -314,7 +314,7 @@ if (currentDateEl) {
 
   const flowerNav = document.getElementById('flower-nav');
   flowerNav.innerHTML = actionThemes.map((theme, idx) => `
-    <button type="button" class="flower-nav-item" style="background-color: ${theme.background};" aria-label="Action ${idx + 1}">
+    <button type="button" class="flower-nav-item" style="background-color: ${theme.background}; --flower-ring: ${theme.flower}61;" aria-label="Action ${idx + 1}">
       <span class="flower-nav-icon" style="background-color: ${theme.flower}; --flower-art: ${theme.art};"></span>
     </button>
   `).join('');
