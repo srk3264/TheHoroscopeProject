@@ -97,7 +97,7 @@ const FINDLOCAL_SUPPORTED_METROS = new Set([
 
 const FINDLOCAL_REQUEST_TIMEOUT = 5000;
 
-async function getNearbyEvents(city) {
+async function getNearbyEvents(city, date) {
   const apiKey = process.env.FINDLOCAL_API_KEY?.trim();
 
 const citySlug = (city || '')
@@ -116,7 +116,7 @@ if (!apiKey || !FINDLOCAL_SUPPORTED_METROS.has(citySlug)) {
   };
 }
 
-const cacheKey = citySlug;
+const cacheKey = `${citySlug}:${date}`;
 
 const { data: cached, error: cacheError } = await supabase
   .from('findlocal_event_cache')
@@ -136,18 +136,9 @@ if (cached) {
   };
 }
 
-  if (cached && cached.expiresAt > Date.now()) {
-    return {
-      events: cached.events,
-      status: 'cache',
-      eventCount: cached.events.length,
-      eventNames: cached.events.map(event => event.name)
-    };
-  }
-
   const params = new URLSearchParams({
   city: citySlug,
-  when: 'today',
+  when: date,
   limit: '10',
   sort: 'date'
 });
@@ -319,7 +310,7 @@ exports.handler = async (event) => {
 
     if (profileError) throw profileError;
 
-    const findLocalLookup = await getNearbyEvents(profile.city);
+    const findLocalLookup = await getNearbyEvents(profile.city, date);
 const nearbyEvents = findLocalLookup.events;
 
 // TEMP: FindLocal event diagnostics
@@ -347,7 +338,7 @@ Couple context:
 - ZIP/postal code: ${profile.postal_code || 'unspecified'}
 - FindLocal events happening today: ${JSON.stringify(nearbyEvents)}
 
-Rewrite this couple action to be more specific. Tell only the user exactly what to do. Keep it realistic for their distance, budget, and city. Use a FindLocal event only if it genuinely fits the budget and relationship context; do not invent event details, availability, or prices, and do not imply attendance is possible unless the event data supports it. Avoid generic advice. Make it oddly specific using a concrete object, time, route, menu item, tiny ritual, or playful constraint when possible. Never write vague advice such as "spend quality time" or "communicate more". Return valid JSON only with this shape:
+Rewrite this couple action to be more specific. Tell only the user exactly what to do. Keep it realistic for their distance, budget, and city. Use a FindLocal event only if it genuinely fits the budget and relationship context; use the exact name, time, venue. Avoid generic advice. Make it oddly specific using a concrete object, time, route, menu item, tiny ritual, or playful constraint when possible. Never write vague advice such as "spend quality time" or "communicate more". Return valid JSON only with this shape:
 {"title":"An oddly specific action, maximum 24 words"}`;
 
     const aiResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
