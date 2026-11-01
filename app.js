@@ -306,8 +306,8 @@ if (currentDateEl) {
       <div class="action-card" style="background-color: ${theme.background};">
       <div class="action-title" style="color: ${theme.flower};">${displayedTitle}</div>
       <div class="action-reason">${act.subtitle}</div>
-      <div class="action-flower" style="background-color: ${theme.flower}; --flower-art: ${theme.art};"></div>
       <button type="button" class="action-rewrite-btn" style="color: ${theme.flower}; border-color: ${theme.flower};" onclick="rewriteAction(${idx}, this)"${wasRewritten ? ' disabled' : ''}>${wasRewritten ? 'Already rewritten' : 'Make it fit me'}</button>
+      <div class="action-flower" style="background-color: ${theme.flower}; --flower-art: ${theme.art};"></div>
     </div>
   `;
   }).join('');
