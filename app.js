@@ -312,6 +312,13 @@ if (currentDateEl) {
   `;
   }).join('');
 
+  const flowerNav = document.getElementById('flower-nav');
+  flowerNav.innerHTML = actionThemes.map((theme, idx) => `
+    <button type="button" class="flower-nav-item" style="background-color: ${theme.background};" aria-label="Action ${idx + 1}">
+      <span class="flower-nav-icon" style="background-color: ${theme.flower}; --flower-art: ${theme.art};"></span>
+    </button>
+  `).join('');
+
   setupUnifiedTapCards(quickContainer, actionContainer);
 
   showView('view-dashboard');
@@ -434,6 +441,10 @@ function setupUnifiedTapCards(...containers) {
   const cards = containers.flatMap(container => Array.from(container.children));
   if (!cards.length) return;
 
+  // Flower circles map to the last container's cards (the actions)
+  const navButtons = Array.from(document.querySelectorAll('#flower-nav .flower-nav-item'));
+  const navOffset = cards.length - navButtons.length;
+
   let activeIndex = 0;
   const showCard = (index) => {
     activeIndex = (index + cards.length) % cards.length;
@@ -448,8 +459,14 @@ function setupUnifiedTapCards(...containers) {
       card.inert = isHidden;
       card.setAttribute('aria-hidden', isHidden ? 'true' : 'false');
     });
+    navButtons.forEach((button, navIndex) => {
+      button.classList.toggle('active', navOffset + navIndex === activeIndex);
+    });
   };
 
+  navButtons.forEach((button, navIndex) => {
+    button.addEventListener('click', () => showCard(navOffset + navIndex));
+  });
   showCard(activeIndex);
   const deck = containers[0].parentElement;
 

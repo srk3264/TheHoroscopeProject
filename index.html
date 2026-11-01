@@ -51,7 +51,12 @@
     .action-card { padding: 32px 22px; border-radius: 0; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 16px; color: #000; }
     .action-title { font-family: 'Darumadrop One', cursive; font-size: 40px; line-height: 1.15; }
     .action-reason { font-family: 'Cascadia Mono', monospace; font-size: 15px; line-height: 1.5; max-width: 320px; }
-    .action-flower { width: 100%; max-width: 260px; flex: 1; min-height: 0; margin-top: 8px; mask-image: var(--flower-art); -webkit-mask-image: var(--flower-art); mask-size: contain; -webkit-mask-size: contain; mask-repeat: no-repeat; -webkit-mask-repeat: no-repeat; mask-position: center bottom; -webkit-mask-position: center bottom; }
+    .flower-nav { position: absolute; top: 96px; left: 0; right: 0; z-index: 3; display: flex; gap: 24px; overflow-x: auto; padding: 0 22px; scrollbar-width: none; }
+    .flower-nav::-webkit-scrollbar { display: none; }
+    .flower-nav-item { flex: 0 0 auto; width: 56px; height: 56px; border: none; border-radius: 50%; padding: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; outline: 2px solid transparent; outline-offset: 3px; }
+    .flower-nav-item.active { outline-color: #000; }
+    .flower-nav-icon { width: 28px; height: 28px; mask-image: var(--flower-art); -webkit-mask-image: var(--flower-art); mask-size: contain; -webkit-mask-size: contain; mask-repeat: no-repeat; -webkit-mask-repeat: no-repeat; mask-position: center; -webkit-mask-position: center; }
+    .action-flower { width: 200%; max-width: none; flex: 1; min-height: 0; margin-top: 8px; mask-image: var(--flower-art); -webkit-mask-image: var(--flower-art); mask-size: contain; -webkit-mask-size: contain; mask-repeat: no-repeat; -webkit-mask-repeat: no-repeat; mask-position: center bottom; -webkit-mask-position: center bottom; }
     .action-rewrite-btn { margin-top: auto; padding: 12px 18px; border: 1px solid #000; border-radius: 999px; background: transparent; color: #000; font-family: 'Cascadia Mono', monospace; font-size: 13px; cursor: pointer; }
     .action-rewrite-btn:disabled { opacity: 0.65; cursor: wait; }
     .bg-blue { background: linear-gradient(180deg, #1E87E8 0%, #1EE1E8 100%); }
@@ -193,7 +198,7 @@
         
         <!-- Header -->
         <div style="position: absolute; top: 24px; left: 16px; right: 16px; z-index: 3; display: flex; justify-content: space-between; align-items: center;">
-          <div id="current-day" style="font-family: 'Averia Serif Libre', serif; font-size: 24px; color: #000;">Today</div>
+          <div id="current-day" style="font-family: 'Cascadia Mono', monospace; font-size: 24px; color: #000;">Today</div>
           
           <div style="display: flex; align-items: center; gap: 16px;">
           <button onclick="openSettingsView()" style="background: none; border: none; cursor: pointer; padding: 4px;" title="Settings">
@@ -208,6 +213,9 @@
         </div>
 
        
+
+        <!-- Flower circles, one per action card (filled from JS) -->
+        <div id="flower-nav" class="flower-nav"></div>
 
         <!-- Horizontal Cards (Wear, Binge, Cook, Vibe) -->
         <div id="quick-insights-container" style="position: absolute; inset: 0; display: block; overflow: hidden; height: 100%;">
