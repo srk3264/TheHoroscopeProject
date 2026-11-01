@@ -230,6 +230,24 @@ async function savePreferences() {
   }
 }
 
+// Action card themes: flower color is used for the headline, background for the card
+const ACTION_THEMES = [
+  { flower: '#F26522', background: '#FFD9A5', art: "url('assets/Flowers/Flower01.svg')" },
+  { flower: '#1EACE8', background: '#DDDCC3', art: "url('assets/Flowers/Flower02.svg')" },
+  { flower: '#405D11', background: '#D3C694', art: "url('assets/Flowers/Flower03.svg')" },
+  { flower: '#FF83B4', background: '#FFD9B9', art: "url('assets/Flowers/Flower04.svg')" },
+  { flower: '#F2994A', background: '#FFE0AC', art: "url('assets/Flowers/Flower05.svg')" },
+  { flower: '#EDD051', background: '#FEE8AC', art: "url('assets/Flowers/Flower06.svg')" },
+  { flower: '#7A3BFC', background: '#EFCEC6', art: "url('assets/Flowers/Flower07.svg')" },
+  { flower: '#5573A8', background: '#DFCFB3', art: "url('assets/Flowers/Flower08.svg')" }
+];
+
+// Picks a random, non-repeating theme per action (cycles if there are more actions than themes)
+function pickActionThemes(count) {
+  const shuffled = [...ACTION_THEMES].sort(() => Math.random() - 0.5);
+  return Array.from({ length: count }, (_, index) => shuffled[index % shuffled.length]);
+}
+
 // 5. Render Mock Insights to Figma Cards
 function renderDashboard(userSign, partnerSign, data) {
   // Safely normalize sign keys and set emojis
@@ -278,19 +296,18 @@ if (currentDateEl) {
   // Render Action Cards with embedded SVG Header
   const actionContainer = document.getElementById('actions-container');
   currentActions = data.actions;
+  const actionThemes = pickActionThemes(data.actions.length);
   actionContainer.innerHTML = data.actions.map((act, idx) => {
     const savedRewrite = rewrittenActionIndexes.get(idx);
     const wasRewritten = Boolean(savedRewrite);
     const displayedTitle = savedRewrite?.title || act.title;
+    const theme = actionThemes[idx];
     return `
-      <div class="action-card" style="height: 100vh; width: 100vw; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; ${getRandomCardGradient()} cursor: pointer;">
-      ${zodiacHeaderHTML}
-      <div style="font-size: 28px; font-family: 'Averia Serif Libre', serif; color: white; margin-bottom: 12px;">#${idx + 1}/${data.actions.length}</div>
-      <div style="display: flex; flex-direction: column; gap: 12px; text-align: center; color: white;">
-        <div class="action-title" style="font-size: 22px; font-family: 'Averia Serif Libre', serif; font-weight: 300;">${displayedTitle}</div>
-        <div class="action-reason" style="font-size: 15px; opacity: 0.9;">${act.subtitle}</div>
-      </div>
-      <button type="button" class="action-rewrite-btn" onclick="rewriteAction(${idx}, this)"${wasRewritten ? ' disabled' : ''}>${wasRewritten ? 'Already rewritten' : 'Make it fit me'}</button>
+      <div class="action-card" style="background-color: ${theme.background};">
+      <div class="action-title" style="color: ${theme.flower};">${displayedTitle}</div>
+      <div class="action-reason">${act.subtitle}</div>
+      <div class="action-flower" style="background-color: ${theme.flower}; --flower-art: ${theme.art};"></div>
+      <button type="button" class="action-rewrite-btn" style="color: ${theme.flower}; border-color: ${theme.flower};" onclick="rewriteAction(${idx}, this)"${wasRewritten ? ' disabled' : ''}>${wasRewritten ? 'Already rewritten' : 'Make it fit me'}</button>
     </div>
   `;
   }).join('');
