@@ -242,9 +242,32 @@ const ACTION_THEMES = [
   { flower: '#5573A8', background: '#DFCFB3', art: "url('assets/Flowers/Flower08.svg')" }
 ];
 
-// Picks a random, non-repeating theme per action (cycles if there are more actions than themes)
-function pickActionThemes(count) {
-  const shuffled = [...ACTION_THEMES].sort(() => Math.random() - 0.5);
+// Hashes a string to a 32-bit seed so the same seed always gives the same shuffle
+function hashString(text) {
+  let hash = 2166136261;
+  for (const char of text) {
+    hash ^= char.charCodeAt(0);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0;
+}
+
+// Picks a non-repeating theme per action (cycles if there are more actions than themes).
+// The same seed always returns the same themes, so an action keeps its flower on refresh.
+function pickActionThemes(count, seed) {
+  let state = hashString(seed);
+  const random = () => {
+    state = (state + 0x6d2b79f5) | 0;
+    let t = Math.imul(state ^ (state >>> 15), 1 | state);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+
+  const shuffled = [...ACTION_THEMES];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
   return Array.from({ length: count }, (_, index) => shuffled[index % shuffled.length]);
 }
 
@@ -296,7 +319,7 @@ if (currentDateEl) {
   // Render Action Cards with embedded SVG Header
   const actionContainer = document.getElementById('actions-container');
   currentActions = data.actions;
-  const actionThemes = pickActionThemes(data.actions.length);
+  const actionThemes = pickActionThemes(data.actions.length, `${getLocalDateString()}|${userSign}|${partnerSign}`);
   actionContainer.innerHTML = data.actions.map((act, idx) => {
     const savedRewrite = rewrittenActionIndexes.get(idx);
     const wasRewritten = Boolean(savedRewrite);
@@ -306,7 +329,7 @@ if (currentDateEl) {
       <div class="action-card" style="background-color: ${theme.background};">
       <div class="action-title" style="color: ${theme.flower};">${displayedTitle}</div>
       <div class="action-reason">${act.subtitle}</div>
-      <button type="button" class="action-rewrite-btn" style="color: ${theme.flower}; border-color: ${theme.flower};" onclick="rewriteAction(${idx}, this)"${wasRewritten ? ' disabled' : ''}>${wasRewritten ? 'Already rewritten' : 'Make it fit me'}</button>
+      <button type="button" class="action-rewrite-btn" style="background-color: ${theme.flower}; border-color: ${theme.flower}; color: ${theme.background};" onclick="rewriteAction(${idx}, this)"${wasRewritten ? ' disabled' : ''}>${wasRewritten ? 'Already rewritten' : 'Make it fit me'}</button>
       <div class="action-flower" style="background-color: ${theme.flower}; --flower-art: ${theme.art};"></div>
     </div>
   `;
