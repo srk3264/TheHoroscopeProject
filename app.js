@@ -620,7 +620,13 @@ async function loadDashboard(userSign, partnerSign) {
   const actionContainer = document.getElementById('actions-container');
   
   // Show loading skeleton while waiting for API response
-  if (quickContainer) quickContainer.innerHTML = '<div style="color: white; text-align: center; padding: 20px;">Generating daily insights...</div>';
+  if (quickContainer) quickContainer.innerHTML = `
+    <div class="loading-state">
+      <div class="loading-flower"></div>
+      <div class="loading-title">Reading the stars</div>
+      <div>Generating today's insights for you both</div>
+    </div>
+  `;
   if (actionContainer) actionContainer.innerHTML = '';
 
   const [userHoroscope, partnerHoroscope] = await Promise.all([
