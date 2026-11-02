@@ -99,23 +99,6 @@ async function routeAuthenticatedUser(profile) {
   }
 }
 
-function getRandomCardGradient() {
-  const mainColor = [
-    Math.floor(Math.random() * 256),
-    Math.floor(Math.random() * 256),
-    Math.floor(Math.random() * 256)
-  ];
-  const edgeColor = [
-    mainColor[0],
-    Math.min(255, mainColor[1] + 180),
-    Math.min(255, mainColor[2] + 166)
-  ];
-  const toHex = (channel) => channel.toString(16).padStart(2, '0');
-  const color = (channels) => `#${channels.map(toHex).join('')}`;
-  const gradient = `linear-gradient(180deg, ${color(edgeColor)} 0%, ${color(mainColor)} 53%, ${color(edgeColor)} 99%)`;
-
-  return `background: ${gradient};`;
-}
 
 // 4. Onboarding Handler
 function getSelectedValue(name) {
@@ -242,6 +225,15 @@ const ACTION_THEMES = [
   { flower: '#5573A8', background: '#DFCFB3', art: "url('assets/Flowers/Flower08.svg')" }
 ];
 
+// Quick insight themes, keyed by the card title. Icons are SVG files in assets/quick-insights/.
+// flower = the color inside each SVG file. background = the table's background for that same color.
+const QUICK_THEMES = {
+  Wear: { flower: '#C522F2', background: '#F5D3FF', art: "url('assets/quick-insights/Wear.svg')" },
+  Binge: { flower: '#00539B', background: '#B1DAFE', art: "url('assets/quick-insights/Binge.svg')" },
+  Cook: { flower: '#AE4300', background: '#FFD4B8', art: "url('assets/quick-insights/Cook.svg')" },
+  Vibe: { flower: '#FF2234', background: '#F2CFD2', art: "url('assets/quick-insights/Vibe.svg')" }
+};
+
 // Hashes a string to a 32-bit seed so the same seed always gives the same shuffle
 function hashString(text) {
   let hash = 2166136261;
@@ -273,17 +265,6 @@ function pickActionThemes(count, seed) {
 
 // 5. Render Mock Insights to Figma Cards
 function renderDashboard(userSign, partnerSign, data) {
-  // Safely normalize sign keys and set emojis
-  const uKey = userSign ? userSign.toLowerCase() : '';
-  const pKey = partnerSign ? partnerSign.toLowerCase() : '';
-
-  // NEW
-const zodiacHeaderHTML = `
-  <div class="zodiac-card-header" style="display: flex; justify-content: center; align-items: center; gap: 12px; margin-bottom: 24px;">
-    <img src="assets/${uKey}.svg" alt="${uKey}" style="width: 48px; height: 48px; filter: brightness(0) invert(1);" />
-    <img src="assets/${pKey}.svg" alt="${pKey}" style="width: 48px; height: 48px; filter: brightness(0) invert(1);" />
-  </div>
-`;
   
   const now = new Date();
 
@@ -303,18 +284,20 @@ if (currentDateEl) {
   });
 }
 
-// Render Quick Cards with embedded SVG Header
+// Render Quick Cards
   const quickContainer = document.getElementById('quick-insights-container');
-  quickContainer.innerHTML = data.quick.map(item => `
-    <div class="card-item" style="height: 100vh; width: 100vw; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 16px; padding: 20px; box-sizing: border-box; ${getRandomCardGradient()} cursor: pointer;">
-      ${zodiacHeaderHTML}
-      <div style="text-align: center; color: white; font-size: 40px; font-family: 'Averia Serif Libre', serif;">${item.title}</div>
-      <div style="display: flex; flex-direction: column; align-items: center; gap: 16px; margin-top: 0;">
-        <div style="text-align: center; color: white; font-size: 16px; font-weight: 600;">${item.headline}</div>
-        <div style="text-align: center; color: rgba(255, 255, 255, 0.60); font-size: 13px; font-style: italic;">${item.reason}</div>
-      </div>
+  const quickThemes = data.quick.map(item => QUICK_THEMES[item.title]);
+  quickContainer.innerHTML = data.quick.map((item, idx) => {
+    const theme = quickThemes[idx];
+    return `
+    <div class="card-item" style="background-color: ${theme.background};">
+      <div class="quick-title" style="color: ${theme.flower};">${item.title}</div>
+      <div class="quick-headline" style="color: ${theme.flower};">${item.headline}</div>
+      <div class="quick-reason">${item.reason}</div>
+      <div class="quick-icon" style="background-color: ${theme.flower}; --quick-art: ${theme.art};"></div>
     </div>
-  `).join('');
+  `;
+  }).join('');
 
   // Render Action Cards with embedded SVG Header
   const actionContainer = document.getElementById('actions-container');
@@ -336,8 +319,8 @@ if (currentDateEl) {
   }).join('');
 
   const flowerNav = document.getElementById('flower-nav');
-  flowerNav.innerHTML = actionThemes.map((theme, idx) => `
-    <button type="button" class="flower-nav-item" style="background-color: ${theme.background}; --flower-ring: ${theme.flower}61;" aria-label="Action ${idx + 1}">
+  flowerNav.innerHTML = [...quickThemes, ...actionThemes].map((theme, idx) => `
+    <button type="button" class="flower-nav-item" style="background-color: ${theme.background}; --flower-ring: ${theme.flower}61;" aria-label="Card ${idx + 1}">
       <span class="flower-nav-icon" style="background-color: ${theme.flower}; --flower-art: ${theme.art};"></span>
     </button>
   `).join('');
@@ -418,9 +401,9 @@ async function rewriteAction(actionIndex, button) {
     button.textContent = 'Already rewritten';
   } catch (error) {
     alert('Unable to rewrite this action right now.');
+    button.disabled = false;
+    button.textContent = 'Make it fit me';
   }
-
-  button.textContent = 'Already rewritten';
 }
 
 // Helper to get local YYYY-MM-DD date string
