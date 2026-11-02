@@ -97,6 +97,15 @@ const FINDLOCAL_SUPPORTED_METROS = new Set([
 
 const FINDLOCAL_REQUEST_TIMEOUT = 5000;
 
+// A reserved row with an empty title older than this is treated as abandoned and can be retried
+const PENDING_REWRITE_TIMEOUT_MS = 2 * 60 * 1000;
+
+// Deletes a reserved row so the action can be retried after a failure
+async function releaseClaim(rowId) {
+  if (!rowId) return;
+  await supabase.from('rewritten_actions').delete().eq('id', rowId);
+}
+
 async function getNearbyEvents(city, date) {
   const apiKey = process.env.FINDLOCAL_API_KEY?.trim();
 
@@ -233,6 +242,8 @@ exports.handler = async (event) => {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
+  let claimedRowId = null;
+
   try {
     const authorization = event.headers.authorization || event.headers.Authorization || '';
     const accessToken = authorization.startsWith('Bearer ') ? authorization.slice(7) : '';
@@ -268,7 +279,7 @@ exports.handler = async (event) => {
 
     const { data: existingRewrite, error: existingRewriteError } = await supabase
       .from('rewritten_actions')
-      .select('rewritten_title, original_reason')
+      .select('id, rewritten_title, original_reason, created_at')
       .eq('user_id', user.id)
       .eq('date', date)
       .eq('pair_key', pairKey)
@@ -276,7 +287,7 @@ exports.handler = async (event) => {
       .maybeSingle();
 
     if (existingRewriteError) throw existingRewriteError;
-    if (existingRewrite) {
+    if (existingRewrite && existingRewrite.rewritten_title) {
       return {
         statusCode: 200,
         headers: { 'Content-Type': 'application/json' },
@@ -288,6 +299,15 @@ exports.handler = async (event) => {
       };
     }
 
+    if (existingRewrite) {
+      // Empty title means another request is still working on this action
+      const isStale = Date.now() - new Date(existingRewrite.created_at).getTime() > PENDING_REWRITE_TIMEOUT_MS;
+      if (!isStale) {
+        return { statusCode: 409, body: JSON.stringify({ error: 'This action is already being rewritten. Try again in a moment.' }) };
+      }
+      await releaseClaim(existingRewrite.id);
+    }
+
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('user_sign, partner_sign, relationship_type, distance, budget_preference, city, postal_code')
@@ -295,6 +315,29 @@ exports.handler = async (event) => {
       .single();
 
     if (profileError) throw profileError;
+
+    // Reserve this action before calling the AI so a concurrent request hits the unique constraint instead
+    const { data: claim, error: claimError } = await supabase
+      .from('rewritten_actions')
+      .insert({
+        user_id: user.id,
+        date,
+        pair_key: pairKey,
+        action_index: actionIndex,
+        original_title: actionTitle,
+        original_reason: actionReason,
+        rewritten_title: ''
+      })
+      .select('id')
+      .single();
+
+    if (claimError) {
+      if (claimError.code === '23505') {
+        return { statusCode: 409, body: JSON.stringify({ error: 'This action is already being rewritten. Try again in a moment.' }) };
+      }
+      throw claimError;
+    }
+    claimedRowId = claim.id;
 
     const findLocalLookup = await getNearbyEvents(profile.city, date);
 const nearbyEvents = findLocalLookup.events;
@@ -333,6 +376,7 @@ Rewrite this couple action to be more specific. Tell only the user exactly what 
     });
 
     if (!aiResponse.ok) {
+      await releaseClaim(claimedRowId);
       return { statusCode: 502, body: JSON.stringify({ error: 'Unable to rewrite the action right now.' }) };
     }
 
@@ -344,19 +388,12 @@ Rewrite this couple action to be more specific. Tell only the user exactly what 
       throw new Error('The AI returned an incomplete action.');
     }
 
-    const { error: insertError } = await supabase
+    const { error: updateError } = await supabase
       .from('rewritten_actions')
-      .insert({
-        user_id: user.id,
-        date,
-        pair_key: pairKey,
-        action_index: actionIndex,
-        original_title: actionTitle,
-        original_reason: actionReason,
-        rewritten_title: rewritten.title
-      });
+      .update({ rewritten_title: rewritten.title })
+      .eq('id', claimedRowId);
 
-    if (insertError) throw insertError;
+    if (updateError) throw updateError;
 
     return {
       statusCode: 200,
@@ -368,6 +405,7 @@ Rewrite this couple action to be more specific. Tell only the user exactly what 
 })
     };
   } catch (error) {
+    await releaseClaim(claimedRowId);
     return { statusCode: 500, body: JSON.stringify({ error: error.message }) };
   }
 };

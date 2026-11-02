@@ -362,7 +362,8 @@ async function loadRewrittenActionIndexes() {
     .select('action_index, rewritten_title, original_reason')
     .eq('user_id', user.id)
     .eq('date', getLocalDateString())
-    .eq('pair_key', `${currentUserSign.toLowerCase()}_${currentPartnerSign.toLowerCase()}`);
+    .eq('pair_key', `${currentUserSign.toLowerCase()}_${currentPartnerSign.toLowerCase()}`)
+    .neq('rewritten_title', '');
 
   (rewrites || []).forEach((rewrite) => rewrittenActionIndexes.set(rewrite.action_index, {
     title: rewrite.rewritten_title,
@@ -372,15 +373,18 @@ async function loadRewrittenActionIndexes() {
 
 async function rewriteAction(actionIndex, button) {
   const action = currentActions[actionIndex];
-  if (!action || !button) return;
+  if (!action || !button || button.disabled) return;
+
+  // Disable before any await so a quick second tap is ignored
+  button.disabled = true;
 
   const { data: { session } } = await supabaseClient.auth.getSession();
   if (!session) {
+    button.disabled = false;
     showView('view-login');
     return;
   }
 
-  button.disabled = true;
   button.textContent = 'Rewriting...';
 
   try {
@@ -402,6 +406,8 @@ async function rewriteAction(actionIndex, button) {
 
     if (!response.ok) {
       alert(result.error || 'Unable to rewrite this action.');
+      button.disabled = false;
+      button.textContent = 'Make it fit me';
       return;
     }
 
