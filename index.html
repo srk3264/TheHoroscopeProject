@@ -40,7 +40,7 @@
     .paywall-root button { width: 100%; padding: 14px; border: 1px solid #000; background: #000; color: #fff; font-weight: 600; font-size: 16px; cursor: pointer; }
 
     /* Figma Layout Styles */
-    .figma-root { width: 100%; height: 100dvh; position: relative; background: transparent; overflow: hidden; z-index: 1; }
+    .figma-root { width: 100%; height: 100dvh; position: relative; background: #FFF5EE; overflow: hidden; z-index: 1; }
     .content-wrapper { position: relative; height: 100%; padding: 0; display: block; }
     .horizontal-scroll { display: flex; gap: 16px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; }
     .horizontal-scroll::-webkit-scrollbar { display: none; }
@@ -57,8 +57,6 @@
     .action-reason { font-family: 'Cascadia Mono', monospace; font-size: 15px; line-height: 1.5; max-width: 320px; }
     @keyframes flower-bounce { 0% { transform: translateY(0); } 35% { transform: translateY(-14px); } 60% { transform: translateY(0); } 80% { transform: translateY(-4px); } 100% { transform: translateY(0); } }
     .flower-nav-item.active .flower-nav-icon { animation: flower-bounce 700ms ease-out; }
-    @keyframes flower-jitter { 0% { transform: translate(0, 0) rotate(0deg); } 25% { transform: translate(-1px, 1px) rotate(-0.4deg); } 50% { transform: translate(1px, -1px) rotate(0.4deg); } 75% { transform: translate(-1px, -1px) rotate(-0.2deg); } 100% { transform: translate(0, 0) rotate(0deg); } }
-    .action-card.is-active .action-flower, .card-item.is-active .quick-icon { animation: flower-jitter 0.5s steps(2, end) infinite; }
     .flower-nav { position: absolute; top: 72px; left: 0; right: 0; height: 96px; z-index: 3; display: flex; align-items: center; gap: 24px; overflow-x: auto; padding: 0 22px; scrollbar-width: none; }
     .flower-nav::-webkit-scrollbar { display: none; }
     .flower-nav-item { flex: 0 0 auto; width: 64px; height: 64px; border: none; border-radius: 50%; padding: 0; cursor: pointer; display: flex; align-items: flex-start; justify-content: center; overflow: hidden; }
@@ -71,20 +69,22 @@
     .bg-blue { background: linear-gradient(180deg, #1E87E8 0%, #1EE1E8 100%); }
     .bg-orange { background: linear-gradient(180deg, #F26522 0%, #D63D00 100%); }
     .pill-btn { padding: 12px; border-radius: 999px; border: 1px solid white; text-align: center; font-family: 'Inter', sans-serif; font-size: 13.3px; font-weight: 500; cursor: pointer; }
-    .settings-root { min-height: 100dvh; padding: 24px 22px 40px; background: #FFE0AC; color: #F26522; position: relative; overflow: hidden; font-family: 'Cascadia Mono', monospace; }
+    .settings-root { min-height: 100dvh; padding: 24px 22px 40px; background: #FFF5EE; color: #8A3A12; position: relative; overflow: hidden; font-family: 'Cascadia Mono', monospace; }
     .settings-root::before { content: ''; position: absolute; inset: 0; pointer-events: none; opacity: 0.28; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E"); mix-blend-mode: overlay; }
     .settings-content { position: relative; z-index: 1; }
     .settings-header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
-    .settings-header button { color: #F26522 !important; }
+    .settings-header button { color: #8A3A12 !important; }
     .settings-header h2 { font-family: 'Darumadrop One', cursive; font-size: 40px; font-weight: 400; line-height: 1.15; }
-    .settings-label { display: block; text-align: left; margin-top: 18px; color: #F26522; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
-    .settings-root select { width: 100%; margin: 8px 0 0; padding: 14px 16px; border: 1px solid #F26522; border-radius: 999px; background: transparent; color: #F26522; font-family: 'Cascadia Mono', monospace; font-size: 16px; }
+    .settings-label { display: block; text-align: left; margin-top: 18px; color: #8A3A12; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
+    .settings-root select, .settings-root input[type="text"] { width: 100%; margin: 8px 0 0; padding: 14px 16px; border: 1px solid #8A3A12; border-radius: 999px; background: transparent; color: #8A3A12; font-family: 'Cascadia Mono', monospace; font-size: 16px; }
+    .settings-root input[type="text"]::placeholder { color: rgba(138, 58, 18, 0.6); }
+    .settings-root select { appearance: none; -webkit-appearance: none; padding-right: 52px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%238A3A12' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; background-size: 24px 24px; }
     .settings-root .onboarding-options { gap: 8px; margin-top: 8px; }
-    .settings-root .onboarding-option { padding: 12px 14px; border: 1px solid #F26522; border-radius: 999px; background: transparent; color: #F26522; font-family: 'Cascadia Mono', monospace; }
-    .settings-root .onboarding-option:has(input:checked) { background: #F26522; color: #FFE0AC; border-color: #F26522; }
-    .settings-save { width: 100%; margin-top: 24px; padding: 14px; border: 1px solid #F26522; border-radius: 999px; background: #F26522 !important; color: #FFE0AC !important; font-family: 'Cascadia Mono', monospace; font-size: 16px; }
-    .settings-divider { margin: 28px 0 20px; border: none; border-top: 1px solid rgba(0, 0, 0, 0.3); }
-    .settings-logout { width: 100%; padding: 12px; border: 1px solid #F26522 !important; border-radius: 999px !important; background: transparent !important; color: #F26522 !important; font-family: 'Cascadia Mono', monospace; }
+    .settings-root .onboarding-option { padding: 12px 14px; border: 1px solid #8A3A12; border-radius: 999px; background: transparent; color: #8A3A12; font-family: 'Cascadia Mono', monospace; }
+    .settings-root .onboarding-option:has(input:checked) { background: #8A3A12; color: #FFF5EE; border-color: #8A3A12; }
+    .settings-save { width: 100%; margin-top: 24px; padding: 14px; border: 1px solid #8A3A12; border-radius: 999px; background: #8A3A12 !important; color: #FFF5EE !important; font-family: 'Cascadia Mono', monospace; font-size: 16px; }
+    .settings-divider { margin: 28px 0 20px; border: none; border-top: 1px solid rgba(138, 58, 18, 0.3); }
+    .settings-logout { width: 100%; padding: 12px; border: 1px solid #8A3A12 !important; border-radius: 999px !important; background: transparent !important; color: #8A3A12 !important; font-family: 'Cascadia Mono', monospace; }
   </style>
 </head>
 <body>
