@@ -475,6 +475,13 @@ function setupUnifiedTapCards(...containers) {
     navButtons.forEach((button, navIndex) => {
       button.classList.toggle('active', navOffset + navIndex === activeIndex);
     });
+
+    // Keep the selected flower circle centered in the nav row
+    const activeNav = navButtons[activeIndex - navOffset];
+    if (activeNav) {
+      const nav = activeNav.parentElement;
+      nav.scrollTo({ left: activeNav.offsetLeft - (nav.clientWidth - activeNav.offsetWidth) / 2, behavior: 'smooth' });
+    }
   };
 
   navButtons.forEach((button, navIndex) => {
