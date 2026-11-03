@@ -57,8 +57,64 @@ async function checkSubscription() {
     return true;
   }
 
+  refreshRecheckButton();
   showView('view-paywall');
   return false;
+}
+
+// Stripe returns to ?checkout=success before the webhook saves the subscription, so offer a recheck only then
+function refreshRecheckButton() {
+  const button = document.getElementById('recheck-subscription');
+  if (!button) return;
+  const checkoutStatus = new URLSearchParams(window.location.search).get('checkout');
+  button.hidden = checkoutStatus !== 'success';
+}
+
+async function recheckSubscription() {
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (!session) {
+    showView('view-login');
+    return;
+  }
+
+  const response = await fetch('/.netlify/functions/check-subscription', {
+    headers: { Authorization: `Bearer ${session.access_token}` }
+  });
+  const result = await response.json();
+
+  if (!(response.ok && result.active)) {
+    alert('No active subscription found yet. If you just paid, wait a moment and try again.');
+    return;
+  }
+
+  const { data: profile } = await supabaseClient
+    .from('profiles')
+    .select('user_sign, partner_sign, relationship_type, distance, budget_preference, city, postal_code')
+    .eq('id', session.user.id)
+    .single();
+
+  await routeAuthenticatedUser(profile);
+}
+
+async function openBillingPortal() {
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (!session) {
+    showView('view-login');
+    return;
+  }
+
+  const response = await fetch('/.netlify/functions/create-portal-session', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${session.access_token}` }
+  });
+  const result = await response.json();
+
+  if (!response.ok || !result.url) {
+    alert(result.error || 'Unable to open subscription settings.');
+    return;
+  }
+
+  window.location.href = result.url;
 }
 
 async function startCheckout() {

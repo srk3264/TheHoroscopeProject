@@ -20,10 +20,10 @@
     .auth-container { padding: 40px 22px; text-align: center; z-index: 1; position: relative; }
     .auth-container input, .auth-container select { width: 100%; padding: 12px; margin: 12px 0; border-radius: 8px; border: none; font-size: 16px; }
     .location-field { position: relative; }
-    .location-suggestions { position: absolute; top: calc(100% - 4px); left: 0; right: 0; z-index: 10; display: none; overflow: hidden; border: 1px solid rgba(0, 0, 0, 0.25); background: #fff; color: #000; text-align: left; }
-    .location-suggestion { width: 100%; padding: 12px; border: 0; border-bottom: 1px solid rgba(0, 0, 0, 0.12); background: #fff; color: #000; text-align: left; cursor: pointer; font-size: 14px; }
+    .location-suggestions { position: absolute; top: calc(100% - 4px); left: 0; right: 0; z-index: 10; display: none; overflow: hidden; border: 1px solid rgba(138, 58, 18, 0.2); border-radius: 16px; background: transparent; color: #8A3A12; text-align: left; }
+    .location-suggestion { width: 100%; padding: 12px 16px; border: 0; border-bottom: 1px solid rgba(138, 58, 18, 0.12); background: transparent; color: #8A3A12; font-family: 'Cascadia Mono', monospace; text-align: left; cursor: pointer; font-size: 14px; }
     .location-suggestion:last-child { border-bottom: 0; }
-    .location-suggestion:hover { background: #f1f1f1; }
+    .location-suggestion:hover { background: rgba(138, 58, 18, 0.06); }
     .location-attribution { margin-top: 6px; color: rgba(0, 0, 0, 0.48); font-size: 10px; text-align: left; }
     .location-attribution a { color: inherit; }
     .auth-container button { width: 100%; padding: 12px; border-radius: 999px; border: none; background: #1E87E8; color: white; font-weight: 600; font-size: 16px; cursor: pointer; }
@@ -54,10 +54,13 @@
     .onboarding-option input { position: absolute; opacity: 0; pointer-events: none; }
     .onboarding-option:has(input:checked) { background: #000; color: #fff; border-color: #000; }
     .onboarding-next { margin-top: 28px; }
-    .paywall-root { min-height: 100dvh; padding: 48px 22px; background: linear-gradient(180deg, #F8C99F 0%, #FF705A 54%, #FF2D12 100%); color: #000; text-align: center; }
-    .paywall-root h2 { font-family: 'Averia Serif Libre', serif; font-size: 34px; font-weight: 400; margin-bottom: 16px; }
+    #view-paywall { min-height: 100dvh; background: #FFF5EE; color: #8A3A12; font-family: 'Cascadia Mono', monospace; }
+    .paywall-root { min-height: 100dvh; padding: 120px 22px 48px; text-align: center; }
+    .paywall-title { font-family: 'Darumadrop One', cursive; font-size: 44px; font-weight: 400; line-height: 1.1; color: #F26522; margin-bottom: 16px; }
     .paywall-root p { font-size: 16px; line-height: 1.5; margin-bottom: 28px; }
-    .paywall-root button { width: 100%; padding: 14px; border: 1px solid #000; background: #000; color: #fff; font-weight: 600; font-size: 16px; cursor: pointer; }
+    .paywall-root button { width: 100%; margin-top: 12px; padding: 14px; border: 1px solid #8A3A12; border-radius: 999px; background: #8A3A12; color: #FFF5EE; font-family: 'Cascadia Mono', monospace; font-weight: 600; font-size: 16px; cursor: pointer; }
+    .paywall-root button.paywall-secondary { background: transparent; color: #8A3A12; }
+    .paywall-root button.paywall-link { background: transparent; border: none; color: #8A3A12; font-weight: 400; font-size: 14px; text-decoration: underline; }
 
     /* Figma Layout Styles */
     .figma-root { width: 100%; height: 100dvh; position: relative; background: #FFF5EE; overflow: hidden; z-index: 1; }
@@ -213,11 +216,11 @@
   <!-- 3. PAYWALL VIEW -->
   <div id="view-paywall" class="view">
     <div class="paywall-root">
-      <h2>Unlock Daily Insights</h2>
+      <h2 class="paywall-title">Unlock Daily Insights</h2>
       <p>Subscribe to unlock your daily relationship insights.</p>
       <button type="button" onclick="startCheckout()">Subscribe to continue</button>
-      <button type="button" onclick="checkSubscription()" style="margin-top: 12px; background: transparent; color: #000;">I already subscribed</button>
-      <button type="button" onclick="handleLogout()" style="margin-top: 24px; background: transparent; border: none; color: #000;">Log out</button>
+      <button type="button" id="recheck-subscription" class="paywall-secondary" onclick="recheckSubscription()" hidden>I already subscribed</button>
+      <button type="button" class="paywall-link" onclick="handleLogout()">Log out</button>
     </div>
   </div>
 
@@ -345,6 +348,10 @@
 
         <button class="settings-save" type="submit">Save Changes</button>
       </form>
+
+      <button type="button" class="settings-logout" onclick="openBillingPortal()" style="margin-top: 12px;">
+        Manage Subscription
+      </button>
 
       <hr class="settings-divider" />
 
