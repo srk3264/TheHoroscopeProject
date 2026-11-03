@@ -29,7 +29,7 @@
     .auth-container button { width: 100%; padding: 12px; border-radius: 999px; border: none; background: #1E87E8; color: white; font-weight: 600; font-size: 16px; cursor: pointer; }
     #view-login { min-height: 100dvh; background: #FFF5EE; color: #8A3A12; font-family: 'Cascadia Mono', monospace; }
     #view-login .auth-container { padding: 96px 22px 40px; }
-    .auth-title { font-family: 'Darumadrop One', cursive; font-size: 48px; font-weight: 400; line-height: 1.1; color: #F26522; margin-bottom: 12px; }
+    .auth-logo { display: block; width: 154px; height: auto; margin: 0 auto 16px; }
     .auth-subtitle { font-size: 14px; line-height: 1.5; margin-bottom: 24px; }
     #view-login input { width: 100%; margin: 0; padding: 14px 20px; border: 1px solid #8A3A12; border-radius: 999px; background: transparent; color: #8A3A12; font-family: 'Cascadia Mono', monospace; font-size: 16px; }
     #view-login input::placeholder { color: rgba(138, 58, 18, 0.6); }
@@ -37,6 +37,16 @@
     .loading-state { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 22px; text-align: center; color: #8A3A12; font-family: 'Cascadia Mono', monospace; font-size: 15px; }
     .loading-title { font-family: 'Darumadrop One', cursive; font-size: 32px; color: #F26522; }
     .loading-flower { width: 72px; height: 72px; background-color: #F26522; mask-image: url('assets/Flowers/Flower01.svg'); -webkit-mask-image: url('assets/Flowers/Flower01.svg'); mask-size: contain; -webkit-mask-size: contain; mask-repeat: no-repeat; -webkit-mask-repeat: no-repeat; mask-position: center; -webkit-mask-position: center; animation: flower-bounce 1.2s ease-in-out infinite; }
+    #view-onboarding { min-height: 100dvh; background: #FFF5EE; color: #8A3A12; font-family: 'Cascadia Mono', monospace; }
+    #view-onboarding .auth-container { padding: 72px 22px 40px; }
+    #view-onboarding .onboarding-title { font-family: 'Darumadrop One', cursive; font-size: 36px; font-weight: 400; line-height: 1.15; color: #F26522; margin-bottom: 8px; }
+    #view-onboarding p { font-size: 14px; line-height: 1.5; margin-bottom: 8px; }
+    #view-onboarding .onboarding-options { gap: 8px; margin-top: 16px; }
+    #view-onboarding .onboarding-option { padding: 12px 16px; border: 1px solid #8A3A12; border-radius: 999px; background: transparent; color: #8A3A12; font-family: 'Cascadia Mono', monospace; cursor: pointer; }
+    #view-onboarding .onboarding-option:has(input:checked) { background: #8A3A12; color: #FFF5EE; }
+    #view-onboarding input[type="text"] { width: 100%; margin: 12px 0 0; padding: 14px 20px; border: 1px solid #8A3A12; border-radius: 999px; background: transparent; color: #8A3A12; font-family: 'Cascadia Mono', monospace; font-size: 16px; }
+    #view-onboarding input[type="text"]::placeholder { color: rgba(138, 58, 18, 0.6); }
+    #view-onboarding button { width: 100%; margin-top: 24px; padding: 14px; border: 1px solid #8A3A12; border-radius: 999px; background: #8A3A12; color: #FFF5EE; font-family: 'Cascadia Mono', monospace; font-size: 16px; font-weight: 600; cursor: pointer; }
     .onboarding-screen { display: none; }
     .onboarding-screen.active { display: block; }
     .onboarding-options { display: grid; gap: 10px; margin-top: 24px; text-align: left; }
@@ -101,7 +111,7 @@
   <!-- 1. LOGIN VIEW -->
   <div id="view-login" class="view">
     <div class="auth-container">
-      <h2 class="auth-title">Astro Match</h2>
+      <img class="auth-logo" src="assets/textlogo.svg" alt="Astro Match" />
       <p class="auth-subtitle">Enter your email and we'll send you a magic link to sign in.</p>
       <input type="email" id="email-input" placeholder="Enter your email" />
       <button onclick="handleLogin()">Send Magic Link</button>
@@ -112,7 +122,7 @@
   <div id="view-onboarding" class="view">
     <div class="auth-container">
       <div id="onboarding-user-sign" class="onboarding-screen active">
-        <h2 style="font-family: 'Averia Serif Libre', serif; font-size: 28px; margin-bottom: 8px;">Your sign</h2>
+        <h2 class="onboarding-title">Your sign</h2>
         <p>Start with you.</p>
         <div class="onboarding-options">
           <label class="onboarding-option"><input type="radio" name="user-sign" value="aries">Aries ♈</label>
@@ -132,7 +142,7 @@
       </div>
 
       <div id="onboarding-partner-sign" class="onboarding-screen">
-        <h2 style="font-family: 'Averia Serif Libre', serif; font-size: 28px; margin-bottom: 8px;">Your partner's sign</h2>
+        <h2 class="onboarding-title">Your partner's sign</h2>
         <p>Now choose theirs.</p>
         <div class="onboarding-options">
           <label class="onboarding-option"><input type="radio" name="partner-sign" value="aries">Aries ♈</label>
@@ -152,7 +162,7 @@
       </div>
 
       <div id="onboarding-relationship" class="onboarding-screen">
-        <h2 style="font-family: 'Averia Serif Libre', serif; font-size: 28px; margin-bottom: 8px;">What are you two?</h2>
+        <h2 class="onboarding-title">What are you two?</h2>
         <div class="onboarding-options">
           <label class="onboarding-option"><input type="radio" name="relationship-type" value="dating">Dating</label>
           <label class="onboarding-option"><input type="radio" name="relationship-type" value="committed">Committed</label>
@@ -165,7 +175,7 @@
       </div>
 
       <div id="onboarding-distance" class="onboarding-screen">
-        <h2 style="font-family: 'Averia Serif Libre', serif; font-size: 28px; margin-bottom: 8px;">How far apart are you?</h2>
+        <h2 class="onboarding-title">How far apart are you?</h2>
         <div class="onboarding-options">
           <label class="onboarding-option"><input type="radio" name="distance" value="same-home">Same home</label>
           <label class="onboarding-option"><input type="radio" name="distance" value="nearby">Nearby</label>
@@ -175,7 +185,7 @@
       </div>
 
       <div id="onboarding-budget" class="onboarding-screen">
-        <h2 style="font-family: 'Averia Serif Libre', serif; font-size: 28px; margin-bottom: 8px;">What feels right for your budget?</h2>
+        <h2 class="onboarding-title">What feels right for your budget?</h2>
         <p>We will use this to shape practical suggestions.</p>
         <div class="onboarding-options">
           <label class="onboarding-option"><input type="radio" name="budget-preference" value="cheap">Keep it cheap</label>
@@ -187,7 +197,7 @@
       </div>
 
       <div id="onboarding-location" class="onboarding-screen">
-        <h2 style="font-family: 'Averia Serif Libre', serif; font-size: 28px; margin-bottom: 8px;">Where are you based?</h2>
+        <h2 class="onboarding-title">Where are you based?</h2>
         <p>We will use your location for nearby ideas.</p>
         <div class="location-field">
           <input type="text" id="onboarding-city" placeholder="Start typing your city" autocomplete="address-level2" required />
