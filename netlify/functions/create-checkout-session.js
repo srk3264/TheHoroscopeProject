@@ -38,11 +38,25 @@ exports.handler = async (event) => {
       'client_reference_id': user.id,
       'metadata[user_id]': user.id,
       'subscription_data[metadata][user_id]': user.id,
-      'customer_email': user.email || '',
       'success_url': `${APP_URL}?checkout=success`,
       'cancel_url': `${APP_URL}?checkout=cancelled`,
       'allow_promotion_codes': 'true'
     });
+
+    // Reuse the user's existing Stripe customer so re-subscribing doesn't create a duplicate
+    const { data: existingSubscription, error: subscriptionError } = await supabase
+      .from('subscriptions')
+      .select('stripe_customer_id')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (subscriptionError) throw subscriptionError;
+
+    if (existingSubscription?.stripe_customer_id) {
+      params.set('customer', existingSubscription.stripe_customer_id);
+    } else {
+      params.set('customer_email', user.email || '');
+    }
 
     const stripeResponse = await fetch('https://api.stripe.com/v1/checkout/sessions', {
       method: 'POST',

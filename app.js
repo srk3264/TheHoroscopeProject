@@ -719,19 +719,43 @@ const aiContent = await getPairInsights(userSign, partnerSign);
   renderDashboard(userSign, partnerSign, dashboardData);
 }
 
+// Only route once a profile has actually loaded, so a failed query can't fall through to onboarding
+const PROFILE_FIELDS = 'user_sign, partner_sign, relationship_type, distance, budget_preference, city, postal_code';
+let routingRun = 0;
+
+async function loadProfile(userId) {
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const { data, error } = await supabaseClient
+      .from('profiles')
+      .select(PROFILE_FIELDS)
+      .eq('id', userId)
+      .single();
+    if (!error && data) return data;
+  }
+  return null;
+}
+
+async function routeSignedInUser(userId) {
+  // A newer routing call (e.g. from the sign-in event) supersedes this one
+  const run = ++routingRun;
+  const profile = await loadProfile(userId);
+  if (run !== routingRun) return;
+
+  if (!profile) {
+    alert('Could not load your profile. Please refresh and try again.');
+    return;
+  }
+
+  await routeAuthenticatedUser(profile);
+}
+
 async function initApp() {
   const { data: { session } } = await supabaseClient.auth.getSession();
 
   if (!session) {
     showView('view-login');
   } else {
-    const { data: profile } = await supabaseClient
-      .from('profiles')
-      .select('user_sign, partner_sign, relationship_type, distance, budget_preference, city, postal_code')
-      .eq('id', session.user.id)
-      .single();
-
-    await routeAuthenticatedUser(profile);
+    await routeSignedInUser(session.user.id);
   }
 
   supabaseClient.auth.onAuthStateChange(async (event, session) => {
@@ -740,13 +764,7 @@ async function initApp() {
     }
 
     if (event === 'SIGNED_IN' && session) {
-      const { data: profile } = await supabaseClient
-        .from('profiles')
-        .select('user_sign, partner_sign, relationship_type, distance, budget_preference, city, postal_code')
-        .eq('id', session.user.id)
-        .single();
-
-      await routeAuthenticatedUser(profile);
+      await routeSignedInUser(session.user.id);
     } else if (event === 'SIGNED_OUT') {
       showView('view-login');
     }
