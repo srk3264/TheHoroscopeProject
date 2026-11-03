@@ -148,6 +148,26 @@ exports.handler = async function (event, context) {
       };
     }
 
+    // Only subscribers get insights, checked on the server so hiding UI can't bypass it
+    const { data: subscription, error: subscriptionError } = await supabase
+      .from('subscriptions')
+      .select('status, current_period_end')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (subscriptionError) throw subscriptionError;
+
+    const subscriptionIsActive = Boolean(subscription) &&
+      ['active', 'trialing'].includes(subscription.status) &&
+      (!subscription.current_period_end || new Date(subscription.current_period_end) > new Date());
+
+    if (!subscriptionIsActive) {
+      return {
+        statusCode: 402,
+        body: JSON.stringify({ error: 'An active subscription is required.' })
+      };
+    }
+
     // 1. Inline cache verification before hitting OpenRouter
     const { data: existing } = await supabase
       .from('daily_pair_insights')
