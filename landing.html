@@ -376,6 +376,13 @@
     }
 
     /* Footer */
+    .legal-section { max-width: 720px; margin: 0 auto; padding: var(--spacing-xl) var(--spacing-sm); text-align: left; color: var(--text); line-height: 1.6; }
+    .legal-section h2 { font-size: 32px; margin-bottom: 8px; }
+    .legal-section h3 { font-size: 18px; margin: 24px 0 8px; }
+    .legal-section ul { padding-left: 20px; }
+    .legal-date { color: var(--text-secondary); font-size: 14px; }
+    footer a { color: var(--text-secondary); margin: 0 8px; }
+
     footer {
       background: var(--secondary);
       color: var(--text-secondary);
@@ -970,7 +977,92 @@
   </section>
 
   <!-- Footer -->
+  <section id="terms" class="legal-section">
+    <h2>Terms of Service</h2>
+    <p class="legal-date">Last updated: November 4, 2026</p>
+    <p>These terms govern your use of Take Her Out ("the Service"), operated by Sanjay Reddy K ("we," "us"). By creating an account or subscribing, you agree to these terms.</p>
+
+    <h3>1. The Service</h3>
+    <p>Take Her Out provides a daily set of relationship insights and suggested activities for a couple, based on your zodiac signs and the preferences you provide, including nearby events when available.</p>
+
+    <h3>2. Accounts</h3>
+    <p>You sign in with a magic link sent to your email address. You're responsible for keeping access to your email and your account secure, and for the accuracy of the information you provide.</p>
+
+    <h3>3. Subscriptions and payments</h3>
+    <p>Access requires an active paid subscription at [price] per [interval]. Payments are processed by Stripe. Subscriptions renew automatically until canceled. You can cancel at any time in the app under Settings → Manage Subscription. Cancellation takes effect at the end of the current billing period, and you keep access until then.</p>
+    <p>All payments are non-refundable.</p>
+
+    <h3>4. Content is for entertainment</h3>
+    <p>Horoscopes, suggestions, and AI-generated text are for entertainment and general ideas only. They aren't professional, medical, legal, financial, or relationship advice. Event details come from third-party sources and may be out of date or inaccurate, so check times, venues, and prices before you go.</p>
+
+    <h3>5. Acceptable use</h3>
+    <p>Don't misuse the Service, try to access other users' data, scrape the Service, or share your account with others.</p>
+
+    <h3>6. Termination</h3>
+    <p>You can stop using the Service at any time. We may suspend or end accounts that break these terms.</p>
+
+    <h3>7. Disclaimers and liability</h3>
+    <p>The Service is provided "as is," without warranties. To the fullest extent the law allows, we aren't liable for indirect or consequential damages, and our total liability is limited to the amount you paid us in the 12 months before the claim.</p>
+
+    <h3>8. Changes</h3>
+    <p>We may update these terms. Continued use after an update means you accept the changes.</p>
+
+    <h3>9. Contact</h3>
+    <p>[contact email]</p>
+  </section>
+
+  <section id="privacy" class="legal-section">
+    <h2>Privacy Policy</h2>
+    <p class="legal-date">Last updated: November 4, 2026</p>
+    <p>This policy explains what Take Her Out collects, why, and who we share it with.</p>
+
+    <h3>Information we collect</h3>
+    <ul>
+      <li><strong>Account:</strong> your email address.</li>
+      <li><strong>Preferences:</strong> your sign, your partner's sign, relationship type, distance, budget preference, city, and ZIP or postal code.</li>
+      <li><strong>Activity:</strong> the actions you choose to rewrite, stored for a short time.</li>
+      <li><strong>Payments:</strong> Stripe handles payment details. We receive your subscription status and a Stripe customer ID. We don't store card numbers.</li>
+    </ul>
+
+    <h3>How we use it</h3>
+    <p>We use your information to sign you in, generate daily insights and suggestions, find nearby events based on your city, process subscriptions, and keep the Service secure.</p>
+
+    <h3>Who we share it with</h3>
+    <ul>
+      <li><strong>Supabase:</strong> database and sign-in.</li>
+      <li><strong>Stripe:</strong> payments and subscriptions.</li>
+      <li><strong>Netlify:</strong> hosting and app functions.</li>
+      <li><strong>OpenRouter (AI model provider):</strong> your signs, relationship details, city, and the action text are sent to generate suggestions.</li>
+      <li><strong>FindLocal:</strong> your city is used to look up events.</li>
+      <li><strong>Photon (Komoot) and OpenStreetMap:</strong> city search when you type your location.</li>
+      <li><strong>Google Fonts:</strong> loads fonts when you visit.</li>
+    </ul>
+    <p>We don't sell your personal information.</p>
+
+    <h3>Cookies and browser storage</h3>
+    <p>We use your browser's local storage to keep you signed in. We don't use advertising cookies.</p>
+
+    <h3>How long we keep it</h3>
+    <p>Rewritten actions are deleted automatically within about two days. Account and preference data is kept while your account is active, and we delete it when you ask us to.</p>
+
+    <h3>Your choices</h3>
+    <p>You can change your preferences in Settings and cancel your subscription at any time. To access, correct, or delete your data, email [contact email].</p>
+
+    <h3>Security</h3>
+    <p>We use access controls and encryption in transit. No service is perfectly secure.</p>
+
+    <h3>Children</h3>
+    <p>Take Her Out isn't intended for anyone under 18.</p>
+
+    <h3>Changes</h3>
+    <p>We'll update this page when our practices change and update the date above.</p>
+
+    <h3>Contact</h3>
+    <p>[contact email]</p>
+  </section>
+
   <footer>
+    <p><a href="#terms">Terms</a> · <a href="#privacy">Privacy</a></p>
     <p>&copy; 2026 Spark. All rights reserved.</p>
     <p>Be first to know when Spark launches.</p>
   </footer>
