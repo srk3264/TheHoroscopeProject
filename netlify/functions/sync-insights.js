@@ -250,10 +250,10 @@ Interpretation:
 Generate daily pair insights strictly in this JSON format:
 {
   "quick_insights": {
-    "wear": { "title": "Short outfit advice (max 6 words)", "reason": "Reason naming the horoscopes(max 10 words)" },
-    "binge": { "title": "Name Movie/show title (max 5 words)", "reason": "Reason naming the horoscopes (max 10 words)" },
-    "cook": { "title": "Name a Meal (max 5 words)", "reason": "Reason naming the horoscopes (max 10 words)" },
-    "vibe": { "title": "Name a song/artist (max 4 words)", "reason": "Reason naming the horoscopes (max 10 words)" }
+    "wear": { "title": "Short outfit advice (max 6 words)", "reason": "Explain the connection to both horoscopes, citing the zodiac signs(max 10 words)" },
+    "binge": { "title": "Name Movie/show title (max 5 words)", "reason": "Explain the connection to both horoscopes, citing the zodiac signs (max 10 words)" },
+    "cook": { "title": "Name a Meal (max 5 words)", "reason": "Explain the connection to both horoscopes, citing the zodiac signs (max 10 words)" },
+    "vibe": { "title": "Name a song/artist (max 4 words)", "reason": "Explain the connection to both horoscopes, citing the zodiac signs (max 10 words)" }
   },
   "actions": [
     
