@@ -156,6 +156,95 @@ async function routeAuthenticatedUser(profile) {
 }
 
 
+// Supported FindLocal metros. Must match FINDLOCAL_SUPPORTED_METROS in netlify/functions/rewrite-action.js
+const METRO_SLUGS = [
+  'ann-arbor', 'atlanta', 'austin', 'baltimore', 'bangor', 'bloomington', 'boise', 'boston', 'brattleboro',
+  'buffalo', 'burlington', 'cape-cod', 'charleston', 'charlotte', 'chicago', 'cincinnati', 'cleveland',
+  'columbia-mo', 'columbus', 'dallas', 'denver', 'des-moines', 'detroit', 'duluth', 'fort-collins',
+  'grand-rapids', 'green-bay', 'hanover', 'harrisburg', 'hartford', 'hilton-head', 'houston', 'hudson-valley',
+  'indianapolis', 'iowa-city', 'jersey-shore', 'kansas-city', 'lansing', 'las-vegas', 'lincoln', 'london',
+  'los-angeles', 'madison', 'manchester', 'miami', 'milwaukee', 'minneapolis', 'nashville', 'new-haven',
+  'new-orleans', 'new-york', 'northampton', 'oklahoma-city', 'orlando', 'philadelphia', 'phoenix', 'pittsburgh',
+  'pittsfield', 'portland', 'portland-me', 'portsmouth', 'providence', 'raleigh', 'rochester', 'rockland',
+  'rutland', 'sacramento', 'salt-lake-city', 'san-antonio', 'san-diego', 'san-francisco', 'santa-barbara',
+  'seattle', 'sonoma', 'spokane', 'st-louis', 'stamford', 'tampa', 'traverse-city', 'tucson', 'washington',
+  'wenatchee', 'wilmington-nc', 'worcester'
+];
+
+const METRO_LABEL_OVERRIDES = {
+  'st-louis': 'St. Louis',
+  'columbia-mo': 'Columbia, MO',
+  'portland': 'Portland, OR',
+  'portland-me': 'Portland, ME',
+  'wilmington-nc': 'Wilmington, NC'
+};
+
+// Same normalization as the server, so saved values like "Austin" or "austin" still match a metro
+function metroSlugFor(city) {
+  return (city || '')
+    .split(',')[0]
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+function metroLabel(slug) {
+  return METRO_LABEL_OVERRIDES[slug] ||
+    slug.split('-').map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+}
+
+// The visible input filters the metro list; the hidden input (prefix) holds the saved metro slug
+function setMetroValue(prefix, city) {
+  const slug = METRO_SLUGS.includes(metroSlugFor(city)) ? metroSlugFor(city) : '';
+  document.getElementById(prefix).value = slug;
+  document.getElementById(`${prefix}-search`).value = slug ? metroLabel(slug) : '';
+}
+
+function setupMetroAutosuggest(prefix) {
+  const search = document.getElementById(`${prefix}-search`);
+  const hidden = document.getElementById(prefix);
+  const suggestions = document.getElementById(`${prefix}-suggestions`);
+  if (!search || !hidden || !suggestions) return;
+
+  const pick = (slug) => {
+    hidden.value = slug;
+    search.value = metroLabel(slug);
+    suggestions.style.display = 'none';
+  };
+
+  search.addEventListener('input', () => {
+    const query = search.value.trim().toLowerCase();
+    hidden.value = '';
+
+    const exact = METRO_SLUGS.find((slug) => metroLabel(slug).toLowerCase() === query);
+    if (exact) {
+      pick(exact);
+      return;
+    }
+
+    const matches = query
+      ? METRO_SLUGS.filter((slug) => metroLabel(slug).toLowerCase().includes(query)).slice(0, 8)
+      : [];
+    suggestions.innerHTML = matches.map((slug) =>
+      `<button type="button" class="metro-suggestion" data-slug="${slug}">${metroLabel(slug)}</button>`
+    ).join('');
+    suggestions.style.display = matches.length ? 'block' : 'none';
+
+    suggestions.querySelectorAll('.metro-suggestion').forEach((button) => {
+      // mousedown fires before blur, so the pick isn't lost when the input loses focus
+      button.addEventListener('mousedown', (event) => {
+        event.preventDefault();
+        pick(button.dataset.slug);
+      });
+    });
+  });
+
+  search.addEventListener('blur', () => {
+    suggestions.style.display = 'none';
+  });
+}
+
 // 4. Onboarding Handler
 function getSelectedValue(name) {
   return document.querySelector(`input[name="${name}"]:checked`)?.value || '';
@@ -171,62 +260,6 @@ function nextOnboardingStep(currentId, nextId, fieldName) {
   document.getElementById(nextId).classList.add('active');
 }
 
-function setupLocationAutocomplete(cityInputId, postalCodeInputId, suggestionsId) {
-  const cityInput = document.getElementById(cityInputId);
-  const postalCodeInput = document.getElementById(postalCodeInputId);
-  const suggestions = document.getElementById(suggestionsId);
-  if (!cityInput || !postalCodeInput || !suggestions) return;
-
-  let debounceTimer;
-  cityInput.addEventListener('input', () => {
-    postalCodeInput.value = '';
-    clearTimeout(debounceTimer);
-    const query = cityInput.value.trim();
-    if (query.length < 2) {
-      suggestions.innerHTML = '';
-      suggestions.style.display = 'none';
-      return;
-    }
-
-    debounceTimer = setTimeout(async () => {
-      try {
-        const response = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=5&lang=en`);
-        if (!response.ok) return;
-        const result = await response.json();
-        const places = (result.features || []).filter(({ properties }) =>
-          properties?.city || properties?.town || properties?.village || properties?.municipality
-        );
-
-        suggestions.innerHTML = places.map((place, index) => {
-          const properties = place.properties;
-          const name = properties.city || properties.town || properties.village || properties.municipality || properties.name;
-          const region = [properties.state, properties.country].filter(Boolean).join(', ');
-          return `<button type="button" class="location-suggestion" data-place-index="${index}">${name}${region ? `, ${region}` : ''}</button>`;
-        }).join('');
-        suggestions.style.display = places.length ? 'block' : 'none';
-
-        suggestions.querySelectorAll('.location-suggestion').forEach((button) => {
-          button.addEventListener('click', () => {
-            const properties = places[Number(button.dataset.placeIndex)].properties;
-            cityInput.value = properties.city || properties.town || properties.village || properties.municipality || properties.name || '';
-            postalCodeInput.value = properties.postcode || '';
-            suggestions.innerHTML = '';
-            suggestions.style.display = 'none';
-          });
-        });
-      } catch (error) {
-        suggestions.innerHTML = '';
-        suggestions.style.display = 'none';
-      }
-    }, 300);
-  });
-
-  document.addEventListener('click', (event) => {
-    if (!event.target.closest(`#${cityInputId}`) && !event.target.closest(`#${suggestionsId}`)) {
-      suggestions.style.display = 'none';
-    }
-  });
-}
 
 async function savePreferences() {
   const userSign = getSelectedValue('user-sign');
@@ -778,8 +811,8 @@ window.addEventListener('pageshow', (event) => {
 });
 
 // Boot application
-setupLocationAutocomplete('onboarding-city', 'onboarding-postal-code', 'onboarding-city-suggestions');
-setupLocationAutocomplete('settings-city', 'settings-postal-code', 'settings-city-suggestions');
+setupMetroAutosuggest('onboarding-city');
+setupMetroAutosuggest('settings-city');
 initApp();
 
 // Tracks the last date the dashboard was updated
@@ -842,12 +875,11 @@ async function openSettingsView() {
   const relationshipInput = document.querySelector(`input[name="settings-relationship-type"][value="${currentRelationshipType}"]`);
   const distanceInput = document.querySelector(`input[name="settings-distance"][value="${currentDistance}"]`);
   const budgetInput = document.querySelector(`input[name="settings-budget-preference"][value="${currentBudgetPreference}"]`);
-  const cityInput = document.getElementById('settings-city');
   const postalCodeInput = document.getElementById('settings-postal-code');
   if (relationshipInput) relationshipInput.checked = true;
   if (distanceInput) distanceInput.checked = true;
   if (budgetInput) budgetInput.checked = true;
-  if (cityInput) cityInput.value = currentCity;
+  setMetroValue('settings-city', currentCity);
   if (postalCodeInput) postalCodeInput.value = currentPostalCode;
 
   showView('view-settings');
