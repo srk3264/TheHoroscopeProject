@@ -771,6 +771,12 @@ async function initApp() {
   });
 }
 
+// Going back from Stripe's portal can restore an old page state (such as Settings) from the browser cache,
+// so reload to re-run routing instead
+window.addEventListener('pageshow', (event) => {
+  if (event.persisted) window.location.reload();
+});
+
 // Boot application
 setupLocationAutocomplete('onboarding-city', 'onboarding-postal-code', 'onboarding-city-suggestions');
 setupLocationAutocomplete('settings-city', 'settings-postal-code', 'settings-city-suggestions');
