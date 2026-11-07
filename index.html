@@ -17,7 +17,8 @@
 
     /* On desktop, show the app as a phone-sized frame; on phones it stays full-screen */
     @media (min-width: 600px) {
-      body { display: block; width: 393px; height: 852px; margin: 40px auto; border-radius: 40px; overflow: hidden; position: relative; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25); }
+      html { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+      body { display: block; width: 393px; height: 852px; margin: 0; border-radius: 32px; overflow: hidden; position: relative; }
       body > .view { height: 100%; overflow-y: auto; }
       body > .view .figma-root,
       body > .view .paywall-root,
