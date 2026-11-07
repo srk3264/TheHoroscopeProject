@@ -139,7 +139,8 @@ async function startCheckout() {
 }
 
 async function routeAuthenticatedUser(profile) {
-  if (!profile?.user_sign || !profile?.partner_sign) {
+  // city is null only when the user has never answered; an empty string means they chose "Other"
+  if (!profile?.user_sign || !profile?.partner_sign || profile?.city === null) {
     showView('view-onboarding');
     return;
   }
@@ -194,11 +195,21 @@ function metroLabel(slug) {
     slug.split('-').map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 }
 
-// The visible input filters the metro list; the hidden input (prefix) holds the saved metro slug
+// Sentinel for a city outside the supported metros. It's saved as an empty city in profiles.
+const OTHER_CITY = 'other';
+const OTHER_LABEL = 'Other (not listed)';
+
+function suggestionLabel(choice) {
+  return choice === OTHER_CITY ? OTHER_LABEL : metroLabel(choice);
+}
+
+// The visible input filters the metro list; the hidden input (prefix) holds the metro slug, or OTHER_CITY
 function setMetroValue(prefix, city) {
   const slug = METRO_SLUGS.includes(metroSlugFor(city)) ? metroSlugFor(city) : '';
-  document.getElementById(prefix).value = slug;
-  document.getElementById(`${prefix}-search`).value = slug ? metroLabel(slug) : '';
+  // An empty saved city means the user previously chose "Other"
+  const choice = slug || (city === '' ? OTHER_CITY : '');
+  document.getElementById(prefix).value = choice;
+  document.getElementById(`${prefix}-search`).value = choice ? suggestionLabel(choice) : '';
 }
 
 function setupMetroAutosuggest(prefix) {
@@ -207,9 +218,9 @@ function setupMetroAutosuggest(prefix) {
   const suggestions = document.getElementById(`${prefix}-suggestions`);
   if (!search || !hidden || !suggestions) return;
 
-  const pick = (slug) => {
-    hidden.value = slug;
-    search.value = metroLabel(slug);
+  const pick = (choice) => {
+    hidden.value = choice;
+    search.value = suggestionLabel(choice);
     suggestions.style.display = 'none';
   };
 
@@ -222,12 +233,19 @@ function setupMetroAutosuggest(prefix) {
       pick(exact);
       return;
     }
+    if (query && query === OTHER_LABEL.toLowerCase()) {
+      pick(OTHER_CITY);
+      return;
+    }
 
     const matches = query
       ? METRO_SLUGS.filter((slug) => metroLabel(slug).toLowerCase().includes(query)).slice(0, 8)
       : [];
-    suggestions.innerHTML = matches.map((slug) =>
-      `<button type="button" class="metro-suggestion" data-slug="${slug}">${metroLabel(slug)}</button>`
+    // Always offer "Other" while typing, so cities outside the list can still be chosen
+    if (query) matches.push(OTHER_CITY);
+
+    suggestions.innerHTML = matches.map((choice) =>
+      `<button type="button" class="metro-suggestion" data-slug="${choice}">${suggestionLabel(choice)}</button>`
     ).join('');
     suggestions.style.display = matches.length ? 'block' : 'none';
 
@@ -267,10 +285,11 @@ async function savePreferences() {
   const relationshipType = getSelectedValue('relationship-type');
   const distance = getSelectedValue('distance');
   const budgetPreference = getSelectedValue('budget-preference');
-  const city = document.getElementById('onboarding-city')?.value.trim() || '';
+  const cityChoice = document.getElementById('onboarding-city')?.value.trim() || '';
+  const city = cityChoice === OTHER_CITY ? '' : cityChoice;
   const postalCode = document.getElementById('onboarding-postal-code')?.value.trim() || '';
 
-  if (!userSign || !partnerSign || !relationshipType || !distance || !budgetPreference || !city || !postalCode) {
+  if (!userSign || !partnerSign || !relationshipType || !distance || !budgetPreference || !cityChoice || !postalCode) {
     alert('Choose an option to continue.');
     return;
   }
@@ -896,10 +915,11 @@ async function handleUpdateSigns(event) {
   const newRelationshipType = getSelectedValue('settings-relationship-type');
   const newDistance = getSelectedValue('settings-distance');
   const newBudgetPreference = getSelectedValue('settings-budget-preference');
-  const newCity = document.getElementById('settings-city').value.trim();
+  const newCityChoice = document.getElementById('settings-city').value.trim();
+  const newCity = newCityChoice === OTHER_CITY ? '' : newCityChoice;
   const newPostalCode = document.getElementById('settings-postal-code').value.trim();
 
-  if (!newRelationshipType || !newDistance || !newBudgetPreference || !newCity || !newPostalCode) {
+  if (!newRelationshipType || !newDistance || !newBudgetPreference || !newCityChoice || !newPostalCode) {
     alert('Complete all relationship, budget, city, and postal code fields to continue.');
     return;
   }

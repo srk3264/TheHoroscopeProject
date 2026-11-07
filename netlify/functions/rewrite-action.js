@@ -354,7 +354,7 @@ Couple context:
 - Budget: ${profile.budget_preference || 'unspecified'}
 - City/metro: ${profile.city || 'unspecified'}
 - ZIP/postal code: ${profile.postal_code || 'unspecified'}
-- FindLocal events happening today: ${JSON.stringify(nearbyEvents)}
+- FindLocal events happening today: ${nearbyEvents.length ? JSON.stringify(nearbyEvents) : 'none available'}
 
 Rewrite this couple action to be more specific. Tell only the user exactly what to do. Keep it realistic for their distance, budget, and city. Use a FindLocal event only if it genuinely fits the budget and relationship context; use the exact name, time, venue. Avoid generic advice. Make it oddly specific using a concrete object, time, route, menu item, tiny ritual, or playful constraint when possible. Never write vague advice such as "spend quality time" or "communicate more". Return valid JSON only with this shape:
 {"title":"An oddly specific action, maximum 24 words"}`;
