@@ -41,6 +41,43 @@ async function handleLogout() {
   showView('view-login');
 }
 
+// Wording for the paywall headline, keyed by the saved onboarding values
+const PAYWALL_DISTANCE_PHRASES = {
+  'same-home': 'staying in the same home',
+  'nearby': 'living nearby',
+  'long-distance': 'long-distance'
+};
+
+const PAYWALL_BUDGET_PHRASES = {
+  'cheap': 'tight budget',
+  'reasonable': 'reasonable spend',
+  'expensive': 'generous budget',
+  'discounts': 'deal-hunting budget'
+};
+
+function capitalizeSign(sign) {
+  return sign ? sign.charAt(0).toUpperCase() + sign.slice(1) : '';
+}
+
+// Fills the paywall headline with the couple's saved choices
+function renderPaywallHeadline() {
+  const headline = document.getElementById('paywall-headline');
+  if (!headline) return;
+
+  const signs = [currentUserSign, currentPartnerSign].filter(Boolean).map(capitalizeSign);
+  const distance = PAYWALL_DISTANCE_PHRASES[currentDistance] || '';
+  const budget = PAYWALL_BUDGET_PHRASES[currentBudgetPreference] || '';
+  const city = currentCity ? metroLabel(metroSlugFor(currentCity)) : '';
+
+  let text = 'Horoscope based date ideas';
+  if (signs.length === 2) text += ` for ${signs[0]} & ${signs[1]}`;
+  if (distance) text += ` ${distance}`;
+  if (budget) text += ` on a ${budget}`;
+  if (city) text += ` in ${city}`;
+
+  headline.textContent = text;
+}
+
 async function checkSubscription() {
   const { data: { session } } = await supabaseClient.auth.getSession();
   if (!session) {
@@ -57,6 +94,7 @@ async function checkSubscription() {
     return true;
   }
 
+  renderPaywallHeadline();
   refreshRecheckButton();
   showView('view-paywall');
   return false;
@@ -145,6 +183,8 @@ async function routeAuthenticatedUser(profile) {
     return;
   }
 
+  currentUserSign = profile.user_sign || '';
+  currentPartnerSign = profile.partner_sign || '';
   currentRelationshipType = profile.relationship_type || '';
   currentDistance = profile.distance || '';
   currentBudgetPreference = profile.budget_preference || '';
@@ -317,6 +357,7 @@ async function savePreferences() {
     currentBudgetPreference = savedProfile.budget_preference;
     currentCity = savedProfile.city;
     currentPostalCode = savedProfile.postal_code;
+    renderPaywallHeadline();
     showView('view-paywall');
   }
 }
