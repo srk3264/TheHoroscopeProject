@@ -46,6 +46,22 @@
     #view-onboarding input[type="text"] { width: 100%; margin: 12px 0 0; padding: 14px 20px; border: 1px solid #8A3A12; border-radius: 999px; background: transparent; color: #8A3A12; font-family: 'Cascadia Mono', monospace; font-size: 16px; }
     #view-onboarding input[type="text"]::placeholder { color: rgba(138, 58, 18, 0.6); }
     #view-onboarding button { width: 100%; margin-top: 24px; padding: 14px; border: 1px solid #8A3A12; border-radius: 999px; background: #8A3A12; color: #FFF5EE; font-family: 'Cascadia Mono', monospace; font-size: 16px; font-weight: 600; cursor: pointer; }
+    #view-paywall { min-height: 100dvh; background: #FFF5EE; color: #8A3A12; font-family: 'Cascadia Mono', monospace; }
+    .paywall-root { position: relative; min-height: 100dvh; padding: 72px 22px 40px; display: flex; flex-direction: column; align-items: center; text-align: center; overflow: hidden; }
+    .paywall-deco { position: absolute; pointer-events: none; }
+    .paywall-deco-cloud-top { width: 170px; top: 120px; left: -40px; }
+    .paywall-deco-sun { width: 150px; top: -20px; right: -40px; }
+    .paywall-deco-cloud-bottom { width: 110px; bottom: 70px; left: -20px; }
+    .paywall-deco-cloud-right { width: 150px; bottom: 30px; right: -50px; }
+    .paywall-headline { position: relative; font-family: 'Darumadrop One', cursive; font-size: 30px; font-weight: 400; line-height: 1.3; color: #8A3A12; margin: 110px 0 32px; }
+    .paywall-root button.paywall-price { position: relative; width: 100%; max-width: 320px; padding: 16px; border: 0; border-radius: 999px; background: #8A3A12; color: #FFF5EE; font-family: 'Cascadia Mono', monospace; font-size: 18px; cursor: pointer; }
+    .paywall-root button.paywall-secondary { position: relative; margin-top: 12px; background: transparent; border: 1px solid #8A3A12; border-radius: 999px; padding: 12px; width: 100%; max-width: 320px; color: #8A3A12; font-family: 'Cascadia Mono', monospace; font-size: 14px; cursor: pointer; }
+    .paywall-hint { position: relative; margin: 48px 0 24px; color: rgba(138, 58, 18, 0.5); font-size: 16px; }
+    .paywall-spend { position: relative; display: flex; justify-content: space-between; gap: 12px; width: 100%; max-width: 340px; }
+    .paywall-spend-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 10px; font-size: 14px; line-height: 1.3; color: #8A3A12; }
+    .paywall-spend-circle { width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+    .paywall-spend-circle img { width: 40px; height: auto; }
+    .paywall-logout { position: relative; margin-top: auto; padding-top: 48px; background: none; border: 0; color: #8A3A12; font-family: 'Cascadia Mono', monospace; font-size: 16px; text-decoration: underline; cursor: pointer; }
     .onboarding-screen { display: none; }
     .onboarding-screen.active { display: block; }
     .onboarding-options { display: grid; gap: 10px; margin-top: 24px; text-align: left; }
@@ -53,13 +69,6 @@
     .onboarding-option input { position: absolute; opacity: 0; pointer-events: none; }
     .onboarding-option:has(input:checked) { background: #000; color: #fff; border-color: #000; }
     .onboarding-next { margin-top: 28px; }
-    #view-paywall { min-height: 100dvh; background: #FFF5EE; color: #8A3A12; font-family: 'Cascadia Mono', monospace; }
-    .paywall-root { min-height: 100dvh; padding: 120px 22px 48px; text-align: center; }
-    .paywall-title { font-family: 'Darumadrop One', cursive; font-size: 44px; font-weight: 400; line-height: 1.1; color: #F26522; margin-bottom: 16px; }
-    .paywall-root p { font-size: 16px; line-height: 1.5; margin-bottom: 28px; }
-    .paywall-root button { width: 100%; margin-top: 12px; padding: 14px; border: 1px solid #8A3A12; border-radius: 999px; background: #8A3A12; color: #FFF5EE; font-family: 'Cascadia Mono', monospace; font-weight: 600; font-size: 16px; cursor: pointer; }
-    .paywall-root button.paywall-secondary { background: transparent; color: #8A3A12; }
-    .paywall-root button.paywall-link { background: transparent; border: none; color: #8A3A12; font-weight: 400; font-size: 14px; text-decoration: underline; }
 
     /* Figma Layout Styles */
     .figma-root { width: 100%; height: 100dvh; position: relative; background: #FFF5EE; overflow: hidden; z-index: 1; }
@@ -215,11 +224,34 @@
   <!-- 3. PAYWALL VIEW -->
   <div id="view-paywall" class="view">
     <div class="paywall-root">
-      <h2 class="paywall-title">Unlock Daily Insights</h2>
-      <p>Subscribe to unlock your daily relationship insights.</p>
-      <button type="button" onclick="startCheckout()">Subscribe to continue</button>
+      <img class="paywall-deco paywall-deco-cloud-top" src="assets/paywall/Cloud.svg" alt="" />
+      <img class="paywall-deco paywall-deco-sun" src="assets/paywall/Sun.svg" alt="" />
+      <img class="paywall-deco paywall-deco-cloud-bottom" src="assets/paywall/Cloud.svg" alt="" />
+      <img class="paywall-deco paywall-deco-cloud-right" src="assets/paywall/Cloud.svg" alt="" />
+
+      <h2 class="paywall-headline">Horoscope based date ideas for you two, every day</h2>
+
+      <button type="button" class="paywall-price" onclick="startCheckout()">Subscribe at $4.99/mo</button>
       <button type="button" id="recheck-subscription" class="paywall-secondary" onclick="recheckSubscription()" hidden>I already subscribed</button>
-      <button type="button" class="paywall-link" onclick="handleLogout()">Log out</button>
+
+      <p class="paywall-hint">You've spent more on...</p>
+
+      <div class="paywall-spend">
+        <div class="paywall-spend-item">
+          <div class="paywall-spend-circle" style="background: #F3E3D6;"><img src="assets/paywall/Coffee.svg" alt="" /></div>
+          <span>Watered coffee</span>
+        </div>
+        <div class="paywall-spend-item">
+          <div class="paywall-spend-circle" style="background: #FFE0D0;"><img src="assets/paywall/Pizza.svg" alt="" /></div>
+          <span>Frozen pizza</span>
+        </div>
+        <div class="paywall-spend-item">
+          <div class="paywall-spend-circle" style="background: #DDEBD9;"><img src="assets/paywall/Condom.svg" alt="" /></div>
+          <span>Rubber that didn't fit</span>
+        </div>
+      </div>
+
+      <button type="button" class="paywall-logout" onclick="handleLogout()">Log out</button>
     </div>
   </div>
 
